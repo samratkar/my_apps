@@ -94,7 +94,7 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
             <div className="absolute inset-0 bg-current opacity-10 backdrop-blur-[2px]"></div>
             <h1 
                 className="relative leading-tight z-20 drop-shadow-sm" 
-                style={{ fontFamily: '"Playfair Display", serif', fontWeight: '700', fontSize: '20px' }}
+                style={{ fontFamily: '"Cinzel", serif', fontWeight: '700', fontSize: '20px' }}
             >
                 {title}
             </h1>
