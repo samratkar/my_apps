@@ -20,6 +20,7 @@ export interface Session {
   gradientId: string;
   authorName: string;
   personName: string;
+  imageBgColor: string;
   createdAt: string;
   updatedAt: string;
 }

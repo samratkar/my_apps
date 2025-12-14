@@ -11,9 +11,10 @@ interface PoemCardProps {
   place: string;
   timestamp: string;
   personName: string;
+  imageBgColor: string;
 }
 
-const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, images, gradient, author, place, timestamp, personName }, ref) => {
+const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, images, gradient, author, place, timestamp, personName, imageBgColor }, ref) => {
   
   // Grid calculation based on image count
   const getGridClass = (count: number) => {
@@ -108,6 +109,7 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
                 <div 
                   key={img.id} 
                   className={`relative overflow-hidden rounded-lg shadow-md group ${isFeatured ? 'col-span-2' : ''}`}
+                  style={{ backgroundColor: imageBgColor }}
                 >
                   <img 
                     src={img.url} 

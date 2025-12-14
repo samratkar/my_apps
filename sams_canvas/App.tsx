@@ -31,6 +31,7 @@ const App: React.FC = () => {
   const [personName, setPersonName] = useState('');
   const [place, setPlace] = useState('Locating...');
   const [now, setNow] = useState(new Date());
+  const [imageBgColor, setImageBgColor] = useState('#ffffff');
 
   // Session State
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
@@ -127,6 +128,7 @@ const App: React.FC = () => {
         gradientId: activeGradient.id,
         authorName,
         personName,
+        imageBgColor,
         createdAt: currentSessionId ? (sessions.find(s => s.id === sessionId)?.createdAt || now) : now,
         updatedAt: now,
       };
@@ -151,6 +153,7 @@ const App: React.FC = () => {
     setImages(session.images);
     setAuthorName(session.authorName);
     setPersonName(session.personName);
+    setImageBgColor(session.imageBgColor || '#ffffff');
     
     // Find and set gradient
     const gradient = GRADIENTS.find(g => g.id === session.gradientId);
@@ -186,6 +189,7 @@ const App: React.FC = () => {
     setImages([]);
     setPersonName('');
     setActiveGradient(GRADIENTS[1]);
+    setImageBgColor('#ffffff');
     
     if (editorRef.current) {
       editorRef.current.innerHTML = '<p style="text-align: left;">Write your beautiful masterpiece here...</p>';
@@ -491,7 +495,7 @@ const App: React.FC = () => {
             {/* Adjusted padding: pt-6 pushes it down, p-2 inside prevents ring clipping */}
             <div className="w-full pt-6 pb-4 px-4 bg-slate-900/80 backdrop-blur-md sticky top-0 z-10 border-b border-slate-800">
                 <div className="max-w-md mx-auto">
-                    <div className="flex gap-2 overflow-x-auto p-2 scrollbar-hide justify-center">
+                    <div className="flex gap-2 overflow-x-auto p-2 scrollbar-hide justify-center items-center">
                         {GRADIENTS.map(g => (
                             <button
                                 key={g.id}
@@ -500,8 +504,27 @@ const App: React.FC = () => {
                                 title={g.name}
                             />
                         ))}
+                        
+                        {/* Separator */}
+                        <div className="w-px h-6 bg-slate-600 mx-1 flex-shrink-0" />
+                        
+                        {/* Image Background Color Picker */}
+                        <div className="relative flex-shrink-0" title="Image Background Color">
+                            <input
+                                type="color"
+                                value={imageBgColor}
+                                onChange={(e) => setImageBgColor(e.target.value)}
+                                className="absolute inset-0 w-8 h-8 opacity-0 cursor-pointer"
+                            />
+                            <div 
+                                className="w-8 h-8 rounded-full ring-2 ring-offset-2 ring-offset-slate-900 transition-all ring-amber-500 flex items-center justify-center"
+                                style={{ backgroundColor: imageBgColor }}
+                            >
+                                <ImageIcon size={14} className="text-slate-600 opacity-60" />
+                            </div>
+                        </div>
                     </div>
-                    <p className="text-center text-xs text-slate-400 mt-2 font-medium">Select a Mood</p>
+                    <p className="text-center text-xs text-slate-400 mt-2 font-medium">Select a Mood • <span className="text-amber-400">Image BG</span></p>
                 </div>
             </div>
 
@@ -519,6 +542,7 @@ const App: React.FC = () => {
                         personName={personName}
                         place={place}
                         timestamp={formattedTimestamp}
+                        imageBgColor={imageBgColor}
                     />
                 </div>
             </div>
