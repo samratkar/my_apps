@@ -1,0 +1,7 @@
+{
+  "name": "Sam's Canvas",
+  "description": "A beautiful, distraction-free rich text editor for writing poems, creating visual collages, and exporting them as high-quality cards.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
