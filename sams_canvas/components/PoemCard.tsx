@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState, useEffect, useCallback } from 'react';
 import { GradientTheme, UploadedImage } from '../types';
 import { Quote } from 'lucide-react';
 
@@ -15,6 +15,7 @@ interface PoemCardProps {
 }
 
 const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, images, gradient, author, place, timestamp, personName, imageBgColor }, ref) => {
+  const [containerSize, setContainerSize] = useState({ width: 800, height: 800 });
   
   // Grid calculation based on image count
   const getGridClass = (count: number) => {
@@ -31,20 +32,60 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
     fontWeight: 'bold',
   };
 
-  // Generate watermark pattern
+  // Update container size using ResizeObserver
+  const measureRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    
+    const updateSize = () => {
+      setContainerSize({
+        width: node.offsetWidth || 800,
+        height: node.offsetHeight || 800
+      });
+    };
+    
+    // Initial measurement
+    updateSize();
+    
+    // Observe size changes
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(node);
+    
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  // Combine refs
+  const setRefs = useCallback((node: HTMLDivElement | null) => {
+    // Set the forwarded ref
+    if (typeof ref === 'function') {
+      ref(node);
+    } else if (ref) {
+      ref.current = node;
+    }
+    // Set measurement ref
+    measureRef(node);
+  }, [ref, measureRef]);
+
+  // Generate watermark pattern dynamically based on container size
   const generateWatermarks = () => {
     if (!personName) return null;
+    
     const watermarks = [];
-    // Create a dense grid of watermarks
-    for (let row = 0; row < 20; row++) {
-      for (let col = 0; col < 12; col++) {
+    const rowSpacing = 80;
+    const colSpacing = 150;
+    
+    // Calculate rows and columns based on actual container size
+    const rows = Math.ceil((containerSize.height + 100) / rowSpacing) + 2;
+    const cols = Math.ceil((containerSize.width + 200) / colSpacing) + 2;
+    
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
         watermarks.push(
           <div
             key={`${row}-${col}`}
             className="absolute whitespace-nowrap"
             style={{
-              top: `${row * 80 - 30}px`,
-              left: `${col * 150 - 100}px`,
+              top: `${row * rowSpacing - 30}px`,
+              left: `${col * colSpacing - 100}px`,
               transform: 'rotate(-35deg)',
               fontSize: '24px',
               fontWeight: '300',
@@ -67,7 +108,7 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
 
   return (
     <div 
-      ref={ref}
+      ref={setRefs}
       className={`relative w-full min-h-[800px] shadow-2xl overflow-hidden flex flex-col items-center transition-all duration-500 ${gradient.classes} ${gradient.textColor}`}
       style={useCustomBgColor ? { backgroundColor: imageBgColor } : undefined}
     >
