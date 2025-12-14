@@ -405,25 +405,29 @@ const App: React.FC = () => {
         img.onerror = reject;
       });
       
-      // Calculate scaling to fit within Instagram dimensions while maintaining aspect ratio
+      // Calculate scaling to FIT entire image within Instagram dimensions (no cropping)
       const imgAspect = img.width / img.height;
       const instaAspect = INSTA_WIDTH / INSTA_HEIGHT;
       
       let drawWidth, drawHeight, offsetX, offsetY;
       
       if (imgAspect > instaAspect) {
-        // Image is wider - fit to width
+        // Image is wider than Instagram frame - constrain by width
         drawWidth = INSTA_WIDTH;
         drawHeight = INSTA_WIDTH / imgAspect;
-        offsetX = 0;
-        offsetY = (INSTA_HEIGHT - drawHeight) / 2;
       } else {
-        // Image is taller - fit to height
+        // Image is taller than Instagram frame - constrain by height
         drawHeight = INSTA_HEIGHT;
         drawWidth = INSTA_HEIGHT * imgAspect;
-        offsetX = (INSTA_WIDTH - drawWidth) / 2;
-        offsetY = 0;
       }
+      
+      // Center the image on the canvas
+      offsetX = (INSTA_WIDTH - drawWidth) / 2;
+      offsetY = (INSTA_HEIGHT - drawHeight) / 2;
+      
+      // Fill background with the image's dominant color or white
+      ctx.fillStyle = imageBgColor || '#ffffff';
+      ctx.fillRect(0, 0, INSTA_WIDTH, INSTA_HEIGHT);
       
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
       
