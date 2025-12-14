@@ -245,7 +245,7 @@ const App: React.FC = () => {
                 // Changed prose-lg to prose-sm for smaller writing area font
                 className="outline-none min-h-[400px] prose prose-sm max-w-none prose-p:my-2 prose-headings:font-serif text-left prose-invert"
                 onInput={(e) => setContent(e.currentTarget.innerHTML)}
-                style={{ fontFamily: activeFont, textAlign: 'left' }}
+                style={{ fontFamily: 'Consolas, monospace', fontSize: '14px', textAlign: 'left' }}
               />
             </div>
 
