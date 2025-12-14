@@ -337,10 +337,13 @@ const App: React.FC = () => {
       // Small delay to ensure rendering is stable (especially for fonts)
       await new Promise(resolve => setTimeout(resolve, 100));
       
+      // Use the image background color if image-color theme is selected, otherwise white
+      const bgColor = activeGradient.id === 'image-color' && imageBgColor ? imageBgColor : '#fff';
+      
       const dataUrl = await toJpeg(cardRef.current, { 
         quality: 0.95,
         pixelRatio: 2, // High resolution
-        backgroundColor: '#fff' 
+        backgroundColor: bgColor 
       });
       
       // Generate filename from title, sanitizing for file system
