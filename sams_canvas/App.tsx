@@ -343,8 +343,13 @@ const App: React.FC = () => {
         backgroundColor: '#fff' 
       });
       
+      // Generate filename from title, sanitizing for file system
+      const sanitizedTitle = title
+        ? title.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '-').toLowerCase() || 'sams-canvas'
+        : 'sams-canvas';
+      
       const link = document.createElement('a');
-      link.download = 'sams-canvas.jpeg';
+      link.download = `${sanitizedTitle}.jpeg`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
