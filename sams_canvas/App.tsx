@@ -234,8 +234,8 @@ const App: React.FC = () => {
                 onChange={(e) => setTitle(e.target.value)}
                 onClick={(e) => e.stopPropagation()} 
                 placeholder="Title of your poem..."
-                className="w-full text-4xl font-bold text-slate-100 placeholder:text-slate-600 bg-transparent border-none focus:ring-0 outline-none mb-4 p-0"
-                style={{ fontFamily: '"Playfair Display", serif' }}
+                className="w-full font-bold text-slate-100 placeholder:text-slate-600 bg-transparent border-none focus:ring-0 outline-none mb-4 p-0"
+                style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px' }}
               />
               <div 
                 ref={editorRef}

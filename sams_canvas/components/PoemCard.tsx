@@ -50,8 +50,8 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
             {/* Banner Background: Uses current text color with low opacity for automatic theme matching */}
             <div className="absolute inset-0 bg-current opacity-10 backdrop-blur-[2px]"></div>
             <h1 
-                className="relative text-4xl md:text-6xl leading-tight z-20 drop-shadow-sm" 
-                style={{ fontFamily: '"Playfair Display", serif', fontWeight: '700' }}
+                className="relative leading-tight z-20 drop-shadow-sm" 
+                style={{ fontFamily: '"Playfair Display", serif', fontWeight: '700', fontSize: '20px' }}
             >
                 {title}
             </h1>
