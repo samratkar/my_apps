@@ -3,7 +3,7 @@ import { toJpeg } from 'html-to-image';
 import { 
   Download, Image as ImageIcon, Layout, Type, Sparkles, 
   Trash2, Monitor, AlertCircle, X, PenTool, MapPin, User,
-  Save, FolderOpen, Plus, Clock, FileText, Palette
+  Save, FolderOpen, Plus, Clock, FileText, Palette, Instagram
 } from 'lucide-react';
 
 import RichTextToolbar from './components/RichTextToolbar';
@@ -363,6 +363,89 @@ const App: React.FC = () => {
     }
   };
 
+  // Export for Instagram (1080x1350 - 4:5 portrait ratio, max allowed)
+  const downloadForInstagram = async () => {
+    if (!cardRef.current) return;
+    setIsExporting(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const bgColor = activeGradient.id === 'image-color' && imageBgColor ? imageBgColor : '#fff';
+      
+      // First capture at high resolution
+      const dataUrl = await toJpeg(cardRef.current, { 
+        quality: 0.95,
+        pixelRatio: 3,
+        backgroundColor: bgColor 
+      });
+      
+      // Instagram optimal dimensions (4:5 portrait - maximum height ratio)
+      const INSTA_WIDTH = 1080;
+      const INSTA_HEIGHT = 1350;
+      
+      // Create canvas for Instagram dimensions
+      const canvas = document.createElement('canvas');
+      canvas.width = INSTA_WIDTH;
+      canvas.height = INSTA_HEIGHT;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) throw new Error('Could not get canvas context');
+      
+      // Fill background
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, INSTA_WIDTH, INSTA_HEIGHT);
+      
+      // Load the captured image
+      const img = new Image();
+      img.src = dataUrl;
+      
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+      });
+      
+      // Calculate scaling to fit within Instagram dimensions while maintaining aspect ratio
+      const imgAspect = img.width / img.height;
+      const instaAspect = INSTA_WIDTH / INSTA_HEIGHT;
+      
+      let drawWidth, drawHeight, offsetX, offsetY;
+      
+      if (imgAspect > instaAspect) {
+        // Image is wider - fit to width
+        drawWidth = INSTA_WIDTH;
+        drawHeight = INSTA_WIDTH / imgAspect;
+        offsetX = 0;
+        offsetY = (INSTA_HEIGHT - drawHeight) / 2;
+      } else {
+        // Image is taller - fit to height
+        drawHeight = INSTA_HEIGHT;
+        drawWidth = INSTA_HEIGHT * imgAspect;
+        offsetX = (INSTA_WIDTH - drawWidth) / 2;
+        offsetY = 0;
+      }
+      
+      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      
+      // Export
+      const instaDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      
+      const sanitizedTitle = title
+        ? title.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '-').toLowerCase() || 'sams-canvas'
+        : 'sams-canvas';
+      
+      const link = document.createElement('a');
+      link.download = `${sanitizedTitle}-instagram.jpeg`;
+      link.href = instaDataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to export for Instagram', err);
+      alert('Could not export for Instagram. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // --- Sync editor initial content ---
   useEffect(() => {
     // Only load initial content once. 
@@ -458,6 +541,20 @@ const App: React.FC = () => {
                 <Download size={18} />
             )}
             <span>Export</span>
+          </button>
+          
+          <button 
+            onClick={downloadForInstagram}
+            disabled={isExporting}
+            className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white rounded-full text-sm font-medium transition-all shadow-lg shadow-pink-900/50 ${isExporting ? 'opacity-70 cursor-wait' : ''}`}
+            title="Export for Instagram (1080x1350)"
+          >
+            {isExporting ? (
+               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+                <Instagram size={18} />
+            )}
+            <span className="hidden lg:inline">Insta</span>
           </button>
         </div>
       </header>
