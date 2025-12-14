@@ -3,7 +3,7 @@ import { toJpeg } from 'html-to-image';
 import { 
   Download, Image as ImageIcon, Layout, Type, Sparkles, 
   Trash2, Monitor, AlertCircle, X, PenTool, MapPin, User,
-  Save, FolderOpen, Plus, Clock, FileText
+  Save, FolderOpen, Plus, Clock, FileText, Palette
 } from 'lucide-react';
 
 import RichTextToolbar from './components/RichTextToolbar';
@@ -11,6 +11,57 @@ import PoemCard from './components/PoemCard';
 import { GRADIENTS } from './constants';
 import { GradientTheme, UploadedImage, FontFamily, Session } from './types';
 import { initDB, saveSession, getAllSessions, deleteSession, generateSessionId } from './db';
+
+// Helper function to extract dominant color from an image
+const extractDominantColor = (imageUrl: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve('#ffffff');
+        return;
+      }
+      
+      // Sample a smaller version for performance
+      const sampleSize = 50;
+      canvas.width = sampleSize;
+      canvas.height = sampleSize;
+      ctx.drawImage(img, 0, 0, sampleSize, sampleSize);
+      
+      const imageData = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
+      let r = 0, g = 0, b = 0, count = 0;
+      
+      // Average all pixels
+      for (let i = 0; i < imageData.length; i += 4) {
+        r += imageData[i];
+        g += imageData[i + 1];
+        b += imageData[i + 2];
+        count++;
+      }
+      
+      r = Math.round(r / count);
+      g = Math.round(g / count);
+      b = Math.round(b / count);
+      
+      const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      resolve(hex);
+    };
+    img.onerror = () => resolve('#ffffff');
+    img.src = imageUrl;
+  });
+};
+
+// Helper to determine if a color is light or dark
+const isLightColor = (hex: string): boolean => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5;
+};
 
 const App: React.FC = () => {
   // --- State ---
@@ -31,6 +82,7 @@ const App: React.FC = () => {
   const [personName, setPersonName] = useState('');
   const [place, setPlace] = useState('Locating...');
   const [now, setNow] = useState(new Date());
+  const [imageDominantColor, setImageDominantColor] = useState<string | null>(null);
   const [imageBgColor, setImageBgColor] = useState('#ffffff');
 
   // Session State
@@ -146,7 +198,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLoadSession = (session: Session) => {
+  const handleLoadSession = async (session: Session) => {
     setCurrentSessionId(session.id);
     setTitle(session.title);
     setContent(session.content);
@@ -154,6 +206,14 @@ const App: React.FC = () => {
     setAuthorName(session.authorName);
     setPersonName(session.personName);
     setImageBgColor(session.imageBgColor || '#ffffff');
+    
+    // Extract dominant color from first image if exists
+    if (session.images.length > 0) {
+      const dominantColor = await extractDominantColor(session.images[0].url);
+      setImageDominantColor(dominantColor);
+    } else {
+      setImageDominantColor(null);
+    }
     
     // Find and set gradient
     const gradient = GRADIENTS.find(g => g.id === session.gradientId);
@@ -190,6 +250,7 @@ const App: React.FC = () => {
     setPersonName('');
     setActiveGradient(GRADIENTS[1]);
     setImageBgColor('#ffffff');
+    setImageDominantColor(null);
     
     if (editorRef.current) {
       editorRef.current.innerHTML = '<p style="text-align: left;">Write your beautiful masterpiece here...</p>';
@@ -213,14 +274,21 @@ const App: React.FC = () => {
     const files = e.target.files;
     if (!files) return;
 
-    const newImages: UploadedImage[] = [];
     Array.from(files).forEach(file => {
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         if (event.target?.result) {
+          const imageUrl = event.target!.result as string;
+          
+          // Extract dominant color from the first image
+          if (images.length === 0) {
+            const dominantColor = await extractDominantColor(imageUrl);
+            setImageDominantColor(dominantColor);
+          }
+          
           setImages(prev => [...prev, {
             id: Math.random().toString(36).substr(2, 9),
-            url: event.target!.result as string
+            url: imageUrl
           }]);
         }
       };
@@ -231,7 +299,34 @@ const App: React.FC = () => {
   };
 
   const removeImage = (id: string) => {
-    setImages(prev => prev.filter(img => img.id !== id));
+    const newImages = images.filter(img => img.id !== id);
+    setImages(newImages);
+    
+    // If all images removed, reset dominant color
+    if (newImages.length === 0) {
+      setImageDominantColor(null);
+    } else {
+      // Recalculate from first remaining image
+      extractDominantColor(newImages[0].url).then(setImageDominantColor);
+    }
+  };
+
+  // Apply image dominant color to card background
+  const applyImageColorToBackground = () => {
+    if (!imageDominantColor) return;
+    
+    const textColor = isLightColor(imageDominantColor) ? 'text-slate-900' : 'text-slate-100';
+    
+    // Create a custom gradient theme from the dominant color
+    const customGradient: GradientTheme = {
+      id: 'image-color',
+      name: 'Image Color',
+      classes: '', // Will use inline style instead
+      textColor: textColor,
+    };
+    
+    setActiveGradient(customGradient);
+    setImageBgColor(imageDominantColor);
   };
 
   const downloadCard = async () => {
@@ -508,23 +603,22 @@ const App: React.FC = () => {
                         {/* Separator */}
                         <div className="w-px h-6 bg-slate-600 mx-1 flex-shrink-0" />
                         
-                        {/* Image Background Color Picker */}
-                        <div className="relative flex-shrink-0" title="Image Background Color">
-                            <input
-                                type="color"
-                                value={imageBgColor}
-                                onChange={(e) => setImageBgColor(e.target.value)}
-                                className="absolute inset-0 w-8 h-8 opacity-0 cursor-pointer"
-                            />
-                            <div 
-                                className="w-8 h-8 rounded-full ring-2 ring-offset-2 ring-offset-slate-900 transition-all ring-amber-500 flex items-center justify-center"
-                                style={{ backgroundColor: imageBgColor }}
-                            >
-                                <ImageIcon size={14} className="text-slate-600 opacity-60" />
-                            </div>
-                        </div>
+                        {/* Image Dominant Color - Apply to Card Background */}
+                        <button
+                            onClick={applyImageColorToBackground}
+                            disabled={!imageDominantColor}
+                            className={`flex-shrink-0 w-8 h-8 rounded-full ring-2 ring-offset-2 ring-offset-slate-900 transition-all flex items-center justify-center ${
+                              imageDominantColor 
+                                ? `${activeGradient.id === 'image-color' ? 'ring-amber-500 scale-110' : 'ring-transparent hover:scale-105 hover:ring-amber-500/50'} cursor-pointer` 
+                                : 'ring-transparent opacity-40 cursor-not-allowed'
+                            }`}
+                            style={{ backgroundColor: imageDominantColor || '#374151' }}
+                            title={imageDominantColor ? 'Apply image color to card background' : 'Add an image to use its color'}
+                        >
+                            <Palette size={14} className={imageDominantColor && !isLightColor(imageDominantColor) ? 'text-white/60' : 'text-slate-600/60'} />
+                        </button>
                     </div>
-                    <p className="text-center text-xs text-slate-400 mt-2 font-medium">Select a Mood • <span className="text-amber-400">Image BG</span></p>
+                    <p className="text-center text-xs text-slate-400 mt-2 font-medium">Select a Mood {imageDominantColor && <span>• <span className="text-amber-400">Image Color</span></span>}</p>
                 </div>
             </div>
 

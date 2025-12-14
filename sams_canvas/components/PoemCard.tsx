@@ -62,10 +62,14 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
     return watermarks;
   };
 
+  // Check if using custom image color (no gradient classes)
+  const useCustomBgColor = gradient.id === 'image-color' && imageBgColor;
+
   return (
     <div 
       ref={ref}
       className={`relative w-full min-h-[800px] shadow-2xl overflow-hidden flex flex-col items-center transition-all duration-500 ${gradient.classes} ${gradient.textColor}`}
+      style={useCustomBgColor ? { backgroundColor: imageBgColor } : undefined}
     >
       {/* Golden Watermark Layer - Behind content, not over images */}
       {personName && (
