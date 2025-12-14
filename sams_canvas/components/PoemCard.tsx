@@ -34,20 +34,20 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
   const generateWatermarks = () => {
     if (!personName) return null;
     const watermarks = [];
-    // Create a grid of watermarks
-    for (let row = 0; row < 12; row++) {
-      for (let col = 0; col < 6; col++) {
+    // Create a dense grid of watermarks
+    for (let row = 0; row < 20; row++) {
+      for (let col = 0; col < 12; col++) {
         watermarks.push(
           <div
             key={`${row}-${col}`}
             className="absolute whitespace-nowrap"
             style={{
-              top: `${row * 120 - 30}px`,
-              left: `${col * 250 - 100}px`,
+              top: `${row * 80 - 30}px`,
+              left: `${col * 150 - 100}px`,
               transform: 'rotate(-35deg)',
-              fontSize: '28px',
+              fontSize: '24px',
               fontWeight: '300',
-              color: 'rgba(218, 165, 32, 0.15)', // Golden color with low opacity
+              color: 'rgba(218, 165, 32, 0.12)', // Golden color with low opacity
               fontFamily: '"Georgia", serif',
               pointerEvents: 'none',
               userSelect: 'none',
@@ -84,7 +84,7 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
       {/* Title Banner - Full Width, Top Row */}
       {/* We render this conditionally but it occupies the top flow */}
       {title && (
-        <div className="w-full relative py-12 px-8 mb-8 flex justify-center items-center z-10 text-center shadow-sm">
+        <div className="w-full relative py-4 px-8 mb-4 flex justify-center items-center z-10 text-center shadow-sm">
             {/* Banner Background: Uses current text color with low opacity for automatic theme matching */}
             <div className="absolute inset-0 bg-current opacity-10 backdrop-blur-[2px]"></div>
             <h1 
