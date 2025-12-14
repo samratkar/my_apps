@@ -30,16 +30,54 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
     fontWeight: 'bold',
   };
 
+  // Generate watermark pattern
+  const generateWatermarks = () => {
+    if (!personName) return null;
+    const watermarks = [];
+    // Create a grid of watermarks
+    for (let row = 0; row < 12; row++) {
+      for (let col = 0; col < 6; col++) {
+        watermarks.push(
+          <div
+            key={`${row}-${col}`}
+            className="absolute whitespace-nowrap"
+            style={{
+              top: `${row * 120 - 30}px`,
+              left: `${col * 250 - 100}px`,
+              transform: 'rotate(-35deg)',
+              fontSize: '28px',
+              fontWeight: '300',
+              color: 'rgba(218, 165, 32, 0.15)', // Golden color with low opacity
+              fontFamily: '"Georgia", serif',
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}
+          >
+            {personName}
+          </div>
+        );
+      }
+    }
+    return watermarks;
+  };
+
   return (
     <div 
       ref={ref}
       className={`relative w-full min-h-[800px] shadow-2xl overflow-hidden flex flex-col items-center transition-all duration-500 ${gradient.classes} ${gradient.textColor}`}
     >
+      {/* Golden Watermark Layer - Behind content, not over images */}
+      {personName && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
+          {generateWatermarks()}
+        </div>
+      )}
+
       {/* Decorative Elements */}
-      <div className="absolute top-4 left-4 opacity-20 pointer-events-none">
+      <div className="absolute top-4 left-4 opacity-20 pointer-events-none z-[2]">
         <Quote size={48} className="rotate-180" />
       </div>
-      <div className="absolute bottom-4 right-4 opacity-20 pointer-events-none">
+      <div className="absolute bottom-4 right-4 opacity-20 pointer-events-none z-[2]">
         <Quote size={48} />
       </div>
 
@@ -59,11 +97,11 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
       )}
 
       {/* Main Content Wrapper (Images + Poem + Footer) */}
-      <div className={`w-full flex-1 flex flex-col items-center px-12 pb-12 z-10 ${!title ? 'pt-12' : ''}`}>
+      <div className={`w-full flex-1 flex flex-col items-center px-12 pb-12 z-[5] ${!title ? 'pt-12' : ''}`}>
 
-        {/* Image Collage Section */}
+        {/* Image Collage Section - Higher z-index to be above watermark */}
         {images.length > 0 && (
-          <div className={`w-full max-w-4xl grid gap-4 mb-12 ${getGridClass(images.length)} items-start`}>
+          <div className={`relative z-[10] w-full max-w-4xl grid gap-4 mb-12 ${getGridClass(images.length)} items-start`}>
             {images.map((img, index) => {
               const isFeatured = images.length === 3 && index === 0;
               return (
