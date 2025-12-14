@@ -12,6 +12,18 @@ export interface UploadedImage {
 
 export type FontFamily = 'Segoe UI' | 'Inter' | 'Playfair Display' | 'Merriweather' | 'Dancing Script' | 'Space Mono' | 'Cinzel' | 'Crimson Text' | 'Libre Baskerville' | 'EB Garamond';
 
+export interface Session {
+  id: string;
+  title: string;
+  content: string;
+  images: UploadedImage[];
+  gradientId: string;
+  authorName: string;
+  personName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface EditorState {
   bold: boolean;
   italic: boolean;

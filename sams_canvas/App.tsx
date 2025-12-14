@@ -2,13 +2,15 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { toJpeg } from 'html-to-image';
 import { 
   Download, Image as ImageIcon, Layout, Type, Sparkles, 
-  Trash2, Monitor, AlertCircle, X, PenTool, MapPin, User
+  Trash2, Monitor, AlertCircle, X, PenTool, MapPin, User,
+  Save, FolderOpen, Plus, Clock, FileText
 } from 'lucide-react';
 
 import RichTextToolbar from './components/RichTextToolbar';
 import PoemCard from './components/PoemCard';
 import { GRADIENTS } from './constants';
-import { GradientTheme, UploadedImage, FontFamily } from './types';
+import { GradientTheme, UploadedImage, FontFamily, Session } from './types';
+import { initDB, saveSession, getAllSessions, deleteSession, generateSessionId } from './db';
 
 const App: React.FC = () => {
   // --- State ---
@@ -30,12 +32,28 @@ const App: React.FC = () => {
   const [place, setPlace] = useState('Locating...');
   const [now, setNow] = useState(new Date());
 
+  // Session State
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [showSessionPanel, setShowSessionPanel] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   // --- Refs ---
   const cardRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // --- Effects ---
+
+  // Initialize DB and load sessions
+  useEffect(() => {
+    const init = async () => {
+      await initDB();
+      const loadedSessions = await getAllSessions();
+      setSessions(loadedSessions);
+    };
+    init();
+  }, []);
   
   // Update time every minute
   useEffect(() => {
@@ -93,6 +111,88 @@ const App: React.FC = () => {
 
 
   // --- Handlers ---
+
+  // Session Handlers
+  const handleSaveSession = async () => {
+    setIsSaving(true);
+    try {
+      const sessionId = currentSessionId || generateSessionId();
+      const now = new Date().toISOString();
+      
+      const session: Session = {
+        id: sessionId,
+        title: title || 'Untitled',
+        content: editorRef.current?.innerHTML || content,
+        images,
+        gradientId: activeGradient.id,
+        authorName,
+        personName,
+        createdAt: currentSessionId ? (sessions.find(s => s.id === sessionId)?.createdAt || now) : now,
+        updatedAt: now,
+      };
+      
+      await saveSession(session);
+      setCurrentSessionId(sessionId);
+      
+      // Refresh sessions list
+      const loadedSessions = await getAllSessions();
+      setSessions(loadedSessions);
+    } catch (error) {
+      console.error('Failed to save session:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLoadSession = (session: Session) => {
+    setCurrentSessionId(session.id);
+    setTitle(session.title);
+    setContent(session.content);
+    setImages(session.images);
+    setAuthorName(session.authorName);
+    setPersonName(session.personName);
+    
+    // Find and set gradient
+    const gradient = GRADIENTS.find(g => g.id === session.gradientId);
+    if (gradient) setActiveGradient(gradient);
+    
+    // Update editor content
+    if (editorRef.current) {
+      editorRef.current.innerHTML = session.content;
+    }
+    
+    setShowSessionPanel(false);
+  };
+
+  const handleDeleteSession = async (sessionId: string) => {
+    try {
+      await deleteSession(sessionId);
+      const loadedSessions = await getAllSessions();
+      setSessions(loadedSessions);
+      
+      // If deleting current session, clear it
+      if (currentSessionId === sessionId) {
+        handleNewSession();
+      }
+    } catch (error) {
+      console.error('Failed to delete session:', error);
+    }
+  };
+
+  const handleNewSession = () => {
+    setCurrentSessionId(null);
+    setTitle('');
+    setContent('<p style="text-align: left;">Write your beautiful masterpiece here...</p>');
+    setImages([]);
+    setPersonName('');
+    setActiveGradient(GRADIENTS[1]);
+    
+    if (editorRef.current) {
+      editorRef.current.innerHTML = '<p style="text-align: left;">Write your beautiful masterpiece here...</p>';
+    }
+    
+    setShowSessionPanel(false);
+  };
 
   const handleCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value);
@@ -179,6 +279,44 @@ const App: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-3">
+          {/* Session Management Buttons */}
+          <button
+            onClick={handleNewSession}
+            className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-full text-sm font-medium transition-colors"
+            title="New Session"
+          >
+            <Plus size={18} />
+            <span className="hidden lg:inline">New</span>
+          </button>
+          
+          <button
+            onClick={handleSaveSession}
+            disabled={isSaving}
+            className={`flex items-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-medium transition-colors ${isSaving ? 'opacity-70 cursor-wait' : ''}`}
+            title="Save Session"
+          >
+            {isSaving ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Save size={18} />
+            )}
+            <span className="hidden lg:inline">Save</span>
+          </button>
+          
+          <button
+            onClick={() => setShowSessionPanel(!showSessionPanel)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors ${showSessionPanel ? 'bg-amber-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-200'}`}
+            title="Open Sessions"
+          >
+            <FolderOpen size={18} />
+            <span className="hidden lg:inline">Sessions</span>
+            {sessions.length > 0 && (
+              <span className="bg-slate-700 text-slate-300 text-xs px-1.5 py-0.5 rounded-full">{sessions.length}</span>
+            )}
+          </button>
+
+          <div className="w-px h-6 bg-slate-700 hidden sm:block" />
+
           <button 
             onClick={() => setViewMode(viewMode === 'editor' ? 'preview' : 'editor')}
             className="md:hidden p-2 text-slate-400 hover:bg-slate-800 rounded-full"
@@ -216,6 +354,60 @@ const App: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* Sessions Panel - Slide out */}
+      {showSessionPanel && (
+        <div className="absolute top-16 left-0 right-0 bg-slate-900 border-b border-slate-700 z-30 shadow-xl max-h-80 overflow-y-auto">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                <Clock size={18} />
+                Saved Sessions
+              </h2>
+              <button 
+                onClick={() => setShowSessionPanel(false)}
+                className="p-1 hover:bg-slate-800 rounded"
+              >
+                <X size={18} className="text-slate-400" />
+              </button>
+            </div>
+            
+            {sessions.length === 0 ? (
+              <p className="text-slate-500 text-sm text-center py-8">No saved sessions yet. Click "Save" to save your current work.</p>
+            ) : (
+              <div className="grid gap-2">
+                {sessions.map(session => (
+                  <div 
+                    key={session.id}
+                    className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${currentSessionId === session.id ? 'bg-indigo-600/20 border border-indigo-500' : 'bg-slate-800 hover:bg-slate-750 border border-transparent'}`}
+                    onClick={() => handleLoadSession(session)}
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <FileText size={16} className="text-slate-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-slate-100 font-medium truncate">{session.title}</p>
+                        <p className="text-slate-500 text-xs">
+                          {new Date(session.updatedAt).toLocaleDateString()} • {new Date(session.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSession(session.id);
+                      }}
+                      className="p-2 hover:bg-red-600/20 rounded text-slate-500 hover:text-red-400 transition-colors flex-shrink-0"
+                      title="Delete session"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area - Split View */}
       <div className="flex-1 flex overflow-hidden relative">
