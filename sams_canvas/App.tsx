@@ -91,6 +91,10 @@ const App: React.FC = () => {
   const [showSessionPanel, setShowSessionPanel] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Closing Stanza Toggle
+  const [includeClosingStanza, setIncludeClosingStanza] = useState(false);
+  const closingStanza = `<p style="text-align: left;"><br></p><p style="text-align: left;">Here I stand in love's refrain</p><p style="text-align: left;">Through joy and loss, through peace and pain</p><p style="text-align: left;">I had loved you; I love you still.</p><p style="text-align: left;">And loved you, love you, always will.</p>`;
+
   // --- Refs ---
   const cardRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -650,27 +654,44 @@ const App: React.FC = () => {
             </div>
 
             {/* Signature Settings */}
-            <div className="border-t border-slate-800 bg-slate-900 p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 flex-shrink-0">
-                <div className="relative">
-                    <PenTool size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input 
-                        type="text" 
-                        value={authorName}
-                        onChange={(e) => setAuthorName(e.target.value)}
-                        placeholder="Author Name"
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
-                    />
+            <div className="border-t border-slate-800 bg-slate-900 p-4 flex flex-col gap-4 flex-shrink-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="relative">
+                        <PenTool size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                        <input 
+                            type="text" 
+                            value={authorName}
+                            onChange={(e) => setAuthorName(e.target.value)}
+                            placeholder="Author Name"
+                            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                        />
+                    </div>
+                    <div className="relative">
+                        <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                        <input 
+                            type="text" 
+                            value={personName}
+                            onChange={(e) => setPersonName(e.target.value)}
+                            placeholder="Dedicate to..."
+                            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                        />
+                    </div>
                 </div>
-                <div className="relative">
-                    <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input 
-                        type="text" 
-                        value={personName}
-                        onChange={(e) => setPersonName(e.target.value)}
-                        placeholder="Dedicate to..."
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
-                    />
-                </div>
+                {/* Closing Stanza Toggle */}
+                <button
+                    onClick={() => setIncludeClosingStanza(!includeClosingStanza)}
+                    className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-all w-full justify-center ${
+                        includeClosingStanza 
+                            ? 'bg-pink-600/20 border border-pink-500 text-pink-300' 
+                            : 'bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-750 hover:text-slate-300'
+                    }`}
+                >
+                    <span className="text-lg">♥</span>
+                    <span className="italic text-xs">"I had loved you; I love you still..."</span>
+                    <span className={`ml-auto text-xs px-2 py-0.5 rounded ${includeClosingStanza ? 'bg-pink-500/30 text-pink-200' : 'bg-slate-700 text-slate-500'}`}>
+                        {includeClosingStanza ? 'ON' : 'OFF'}
+                    </span>
+                </button>
             </div>
 
             {/* Image Manager (Mini) */}
@@ -738,7 +759,7 @@ const App: React.FC = () => {
                     <PoemCard 
                         ref={cardRef}
                         title={title}
-                        content={content} 
+                        content={includeClosingStanza ? content + closingStanza : content} 
                         images={images} 
                         gradient={activeGradient}
                         author={authorName}
