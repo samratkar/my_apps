@@ -158,6 +158,18 @@ const App: React.FC = () => {
     );
   }, []);
 
+  // Keyboard shortcut: Ctrl+Shift+P to toggle closing stanza
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        setIncludeClosingStanza(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Format timestamp: time - day - date
   const formattedTimestamp = useMemo(() => {
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -654,44 +666,27 @@ const App: React.FC = () => {
             </div>
 
             {/* Signature Settings */}
-            <div className="border-t border-slate-800 bg-slate-900 p-4 flex flex-col gap-4 flex-shrink-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="relative">
-                        <PenTool size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                        <input 
-                            type="text" 
-                            value={authorName}
-                            onChange={(e) => setAuthorName(e.target.value)}
-                            placeholder="Author Name"
-                            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
-                        />
-                    </div>
-                    <div className="relative">
-                        <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                        <input 
-                            type="text" 
-                            value={personName}
-                            onChange={(e) => setPersonName(e.target.value)}
-                            placeholder="Dedicate to..."
-                            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
-                        />
-                    </div>
+            <div className="border-t border-slate-800 bg-slate-900 p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 flex-shrink-0">
+                <div className="relative">
+                    <PenTool size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input 
+                        type="text" 
+                        value={authorName}
+                        onChange={(e) => setAuthorName(e.target.value)}
+                        placeholder="Author Name"
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                    />
                 </div>
-                {/* Closing Stanza Toggle */}
-                <button
-                    onClick={() => setIncludeClosingStanza(!includeClosingStanza)}
-                    className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-all w-full justify-center ${
-                        includeClosingStanza 
-                            ? 'bg-pink-600/20 border border-pink-500 text-pink-300' 
-                            : 'bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-750 hover:text-slate-300'
-                    }`}
-                >
-                    <span className="text-lg">♥</span>
-                    <span className="italic text-xs">"I had loved you; I love you still..."</span>
-                    <span className={`ml-auto text-xs px-2 py-0.5 rounded ${includeClosingStanza ? 'bg-pink-500/30 text-pink-200' : 'bg-slate-700 text-slate-500'}`}>
-                        {includeClosingStanza ? 'ON' : 'OFF'}
-                    </span>
-                </button>
+                <div className="relative">
+                    <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input 
+                        type="text" 
+                        value={personName}
+                        onChange={(e) => setPersonName(e.target.value)}
+                        placeholder="Dedicate to..."
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                    />
+                </div>
             </div>
 
             {/* Image Manager (Mini) */}
