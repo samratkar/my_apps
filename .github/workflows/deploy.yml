@@ -26,12 +26,22 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      # Build sams_canvas
+      - name: Install dependencies (sams_canvas)
         working-directory: ./sams_canvas
         run: npm install
 
-      - name: Build
+      - name: Build (sams_canvas)
         working-directory: ./sams_canvas
+        run: npm run build
+
+      # Build journal-scout
+      - name: Install dependencies (journal-scout)
+        working-directory: ./journal-scout
+        run: npm install
+
+      - name: Build (journal-scout)
+        working-directory: ./journal-scout
         run: npm run build
 
       - name: Setup Pages
@@ -40,7 +50,9 @@ jobs:
       - name: Create output structure
         run: |
           mkdir -p _site/sams_canvas
+          mkdir -p _site/journal-scout
           cp -r sams_canvas/dist/* _site/sams_canvas/
+          cp -r journal-scout/dist/* _site/journal-scout/
           cp index.html _site/
 
       - name: Upload artifact

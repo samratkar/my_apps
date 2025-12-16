@@ -1,0 +1,5 @@
+{
+  "name": "Journal Scout",
+  "description": "An intelligent research assistant that identifies high-impact Q1 and Q2 academic journals for specific research areas and exports curated lists.",
+  "requestFramePermissions": []
+}
