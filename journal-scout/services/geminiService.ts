@@ -1,7 +1,14 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { Paper, ResearchResponse } from "../types";
 
-const genAI = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Lazy initialization to avoid crash on module load when API key is missing
+const getGenAI = () => {
+  const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || '';
+  if (!apiKey) {
+    throw new Error('API key is not configured. Please set GEMINI_API_KEY environment variable.');
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 const researchSchema: Schema = {
   type: Type.OBJECT,
@@ -29,6 +36,7 @@ const researchSchema: Schema = {
 
 export const fetchPapersByArea = async (area: string): Promise<ResearchResponse> => {
   try {
+    const genAI = getGenAI();
     const model = "gemini-2.5-flash";
     const prompt = `
       Act as an expert academic researcher.
