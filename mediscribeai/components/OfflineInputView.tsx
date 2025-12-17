@@ -91,7 +91,7 @@ const OfflineInputView: React.FC<OfflineInputViewProps> = ({ onSubmit, onCancel,
               className="flex-1"
             >
               <Send className="mr-2" size={18} />
-              Analyze with Vector DB
+              Analyze
             </Button>
             <Button 
               onClick={onCancel}
@@ -103,13 +103,15 @@ const OfflineInputView: React.FC<OfflineInputViewProps> = ({ onSubmit, onCancel,
           </div>
         </div>
 
-        <div className="mt-8 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-          <p className="text-sm text-indigo-900">
-            <strong>Offline Mode:</strong> Analysis is performed using only the local medical research database. 
-            No audio transcription or external API calls are made. Results are based on similarity matching 
-            with research papers about sleep disorders, anxiety, and other conditions in the database.
-          </p>
-        </div>
+        {mode === AnalysisMode.OFFLINE && (
+          <div className="mt-8 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+            <p className="text-sm text-indigo-900">
+              <strong>Offline Mode:</strong> Analysis is performed using only the local medical research database. 
+              No audio transcription or external API calls are made. Results are based on similarity matching 
+              with research papers about sleep disorders, anxiety, and other conditions in the database.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

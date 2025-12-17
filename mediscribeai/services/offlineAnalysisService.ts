@@ -136,15 +136,11 @@ export const analyzeOfflineText = async (symptoms: string): Promise<AIAnalysisRe
 
     console.log('[OfflineAnalysis] Analysis complete, returning results');
     return {
-      summary: `Offline Analysis based on symptoms: "${symptoms}"\n\nAnalysis performed using local medical research database. Found ${searchResults.length} relevant research papers. See detailed insights below.`,
+      summary: `Offline Analysis based on input: "${symptoms}"\n\nAnalysis performed using local medical research database. Found ${searchResults.length} relevant research papers. See detailed insights below.`,
       transcript: [
         {
-          speaker: 'Patient Input',
+          speaker: 'Input',
           text: symptoms
-        },
-        {
-          speaker: 'System',
-          text: 'Offline mode: Analysis based on vector database search of medical research papers. No external API calls made.'
         }
     ],
     prescriptions: [],

@@ -48,7 +48,16 @@ function App() {
 
   const handleDetailsSubmit = (doctorName: string, patientName: string) => {
     setSessionDetails({ doctorName, patientName });
-    setAppState(AppState.RECORDING);
+    setAppState(AppState.INPUT_MODE_SELECTION);
+  };
+
+  const handleInputModeSelect = (mode: 'audio' | 'text') => {
+    setInputMode(mode);
+    if (mode === 'audio') {
+      setAppState(AppState.RECORDING);
+    } else {
+      setAppState(AppState.RECORDING); // Will show text input instead
+    }
   };
 
   const handleTextSubmit = async (text: string) => {
@@ -95,8 +104,47 @@ function App() {
       setAppState(AppState.VIEWING);
     } catch (err) {
       console.error('[App] Text analysis error:', err);
-      setAppState(AppState.ERROR);
       
+      // Check if it's an API error that should fallback to offline mode
+      const errorMessage = err instanceof Error ? err.message.toLowerCase() : '';
+      const errorString = JSON.stringify(err).toLowerCase();
+      
+      const isApiKeyError = errorMessage.includes('api') || errorMessage.includes('key') || 
+                           errorMessage.includes('auth') || errorMessage.includes('unauthorized') ||
+                           errorMessage.includes('forbidden') || errorMessage.includes('invalid');
+      
+      const isModelOverload = errorMessage.includes('overload') || errorMessage.includes('unavailable') ||
+                             errorString.includes('503') || errorString.includes('overload') ||
+                             errorString.includes('unavailable');
+      
+      if ((isApiKeyError || isModelOverload) && analysisMode !== AnalysisMode.OFFLINE) {
+        console.warn('[App] API error detected, falling back to offline mode');
+        try {
+          // Automatically switch to offline mode and retry
+          setAnalysisMode(AnalysisMode.OFFLINE);
+          const offlineAnalysis = await analyzeOfflineText(text);
+          
+          const finalReport: ConsultationReport = {
+            ...offlineAnalysis,
+            doctorName: sessionDetails.doctorName,
+            patientName: sessionDetails.patientName,
+            consultationDate: new Date().toLocaleDateString(),
+            analysisMode: AnalysisMode.OFFLINE,
+          };
+          
+          console.log('[App] Offline fallback successful');
+          setReport(finalReport);
+          setAppState(AppState.VIEWING);
+          return;
+        } catch (offlineErr) {
+          console.error('[App] Offline fallback also failed:', offlineErr);
+          setAppState(AppState.ERROR);
+          setErrorMsg(`API key error. Attempted offline fallback but it also failed: ${offlineErr instanceof Error ? offlineErr.message : 'Unknown error'}`);
+          return;
+        }
+      }
+      
+      setAppState(AppState.ERROR);
       if (analysisMode === AnalysisMode.OFFLINE) {
         setErrorMsg(`Offline text analysis failed: ${err instanceof Error ? err.message : 'Unknown error'}. Please try again.`);
       } else {
@@ -157,10 +205,48 @@ function App() {
       setReport(finalReport);
       setAppState(AppState.VIEWING);
     } catch (err) {
-      console.error('Analysis error:', err);
-      setAppState(AppState.ERROR);
+      console.error('[App] Audio analysis error:', err);
       
-      // Different error messages based on mode
+      // Check if it's an API error that should fallback to offline mode
+      const errorMessage = err instanceof Error ? err.message.toLowerCase() : '';
+      const errorString = JSON.stringify(err).toLowerCase();
+      
+      const isApiKeyError = errorMessage.includes('api') || errorMessage.includes('key') || 
+                           errorMessage.includes('auth') || errorMessage.includes('unauthorized') ||
+                           errorMessage.includes('forbidden') || errorMessage.includes('invalid');
+      
+      const isModelOverload = errorMessage.includes('overload') || errorMessage.includes('unavailable') ||
+                             errorString.includes('503') || errorString.includes('overload') ||
+                             errorString.includes('unavailable');
+      
+      if ((isApiKeyError || isModelOverload) && analysisMode !== AnalysisMode.OFFLINE) {
+        console.warn('[App] API error detected, falling back to offline mode');
+        try {
+          // Automatically switch to offline mode and retry
+          setAnalysisMode(AnalysisMode.OFFLINE);
+          const offlineAnalysis = await analyzeOfflineAudio(audioBlob);
+          
+          const finalReport: ConsultationReport = {
+            ...offlineAnalysis,
+            doctorName: sessionDetails.doctorName,
+            patientName: sessionDetails.patientName,
+            consultationDate: new Date().toLocaleDateString(),
+            analysisMode: AnalysisMode.OFFLINE,
+          };
+          
+          console.log('[App] Offline fallback successful');
+          setReport(finalReport);
+          setAppState(AppState.VIEWING);
+          return;
+        } catch (offlineErr) {
+          console.error('[App] Offline fallback also failed:', offlineErr);
+          setAppState(AppState.ERROR);
+          setErrorMsg(`API key error. Attempted offline fallback but it also failed: ${offlineErr instanceof Error ? offlineErr.message : 'Unknown error'}`);
+          return;
+        }
+      }
+      
+      setAppState(AppState.ERROR);
       if (analysisMode === AnalysisMode.OFFLINE) {
         setErrorMsg("Offline analysis failed. Please check console for details or try again.");
       } else {
@@ -304,38 +390,52 @@ function App() {
               />
             )}
 
-            {appState === AppState.RECORDING && (
-              <div className="w-full max-w-3xl mx-auto">
-                {/* Input Mode Toggle */}
-                <div className="mb-6 flex gap-2 justify-center">
+            {appState === AppState.INPUT_MODE_SELECTION && (
+              <div className="max-w-2xl mx-auto py-12 px-4">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-2">Choose Input Method</h2>
+                  <p className="text-slate-600">How would you like to provide consultation data?</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <button
-                    onClick={() => setInputMode('audio')}
-                    className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                      inputMode === 'audio'
-                        ? 'bg-teal-600 text-white shadow-md'
-                        : 'bg-white text-slate-600 border border-slate-200 hover:border-teal-300'
-                    }`}
+                    onClick={() => handleInputModeSelect('audio')}
+                    className="group bg-white border-2 border-slate-200 rounded-xl p-8 hover:border-teal-500 hover:shadow-lg transition-all"
                   >
-                    <div className="flex items-center gap-2">
-                      <Mic size={18} />
-                      <span>Audio Recording</span>
+                    <div className="flex flex-col items-center text-center space-y-4">
+                      <div className="bg-teal-50 p-6 rounded-full group-hover:bg-teal-100 transition-colors">
+                        <Mic size={40} className="text-teal-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">Audio Recording</h3>
+                        <p className="text-sm text-slate-600">Record consultation audio with start/stop controls</p>
+                      </div>
                     </div>
                   </button>
                   <button
-                    onClick={() => setInputMode('text')}
-                    className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                      inputMode === 'text'
-                        ? 'bg-teal-600 text-white shadow-md'
-                        : 'bg-white text-slate-600 border border-slate-200 hover:border-teal-300'
-                    }`}
+                    onClick={() => handleInputModeSelect('text')}
+                    className="group bg-white border-2 border-slate-200 rounded-xl p-8 hover:border-teal-500 hover:shadow-lg transition-all"
                   >
-                    <div className="flex items-center gap-2">
-                      <Activity size={18} />
-                      <span>Text Input</span>
+                    <div className="flex flex-col items-center text-center space-y-4">
+                      <div className="bg-indigo-50 p-6 rounded-full group-hover:bg-indigo-100 transition-colors">
+                        <Activity size={40} className="text-indigo-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">Text Input</h3>
+                        <p className="text-sm text-slate-600">Type or paste consultation notes directly</p>
+                      </div>
                     </div>
                   </button>
                 </div>
+                <div className="mt-8 text-center">
+                  <Button variant="secondary" onClick={handleReset}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
 
+            {appState === AppState.RECORDING && (
+              <div className="w-full max-w-3xl mx-auto">
                 {inputMode === 'audio' ? (
                   <RecorderView 
                     onRecordingComplete={handleRecordingComplete} 
@@ -362,11 +462,15 @@ function App() {
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-slate-900">Analyzing Consultation</h3>
                   <p className="text-slate-500 mt-2">
-                    {analysisMode === AnalysisMode.OFFLINE 
-                      ? 'Transcribing audio with local Whisper model and searching medical database...'
-                      : 'Transcribing audio and extracting clinical data...'}
+                    {inputMode === 'text' 
+                      ? (analysisMode === AnalysisMode.OFFLINE 
+                          ? 'Searching medical database...'
+                          : 'Analyzing with AI...')
+                      : (analysisMode === AnalysisMode.OFFLINE 
+                          ? 'Transcribing audio with local Whisper model and searching medical database...'
+                          : 'Transcribing audio and extracting clinical data...')}
                   </p>
-                  {analysisMode === AnalysisMode.OFFLINE && (
+                  {analysisMode === AnalysisMode.OFFLINE && inputMode === 'audio' && (
                     <p className="text-xs text-indigo-600 mt-2">First run: Downloading Whisper model (~150MB, cached for future use)</p>
                   )}
                 </div>

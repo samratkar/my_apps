@@ -42,6 +42,7 @@ export interface ConsultationReport extends AIAnalysisResult {
 export enum AppState {
   IDLE = 'IDLE',
   DETAILS_INPUT = 'DETAILS_INPUT',
+  INPUT_MODE_SELECTION = 'INPUT_MODE_SELECTION',
   RECORDING = 'RECORDING',
   PROCESSING = 'PROCESSING',
   VIEWING = 'VIEWING',

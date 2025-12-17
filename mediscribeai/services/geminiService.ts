@@ -85,6 +85,8 @@ export const analyzeConsultationAudio = async (
   apiKey: string | null,
   mode: AnalysisMode = AnalysisMode.HYBRID
 ): Promise<AIAnalysisResult> => {
+  console.log(`[GeminiService] Starting audio analysis in ${mode} mode`);
+  
   // Offline mode should NOT call this function - it's handled separately
   if (mode === AnalysisMode.OFFLINE) {
     throw new Error('Offline mode should use analyzeOfflineAudio directly, not geminiService');
@@ -98,14 +100,21 @@ export const analyzeConsultationAudio = async (
     
     const genAI = new GoogleGenAI({ apiKey });
     
-    // Load vector DB only for hybrid mode
+    // Load vector DB only for hybrid mode (NOT for Gemini mode)
     if (mode === AnalysisMode.HYBRID && !vectorDB) {
-      console.log('Loading medical papers vector database for hybrid mode...');
+      console.log('[GeminiService] Loading medical papers vector database for hybrid mode...');
       // Use relative path that works with Vite's base configuration
       const dbPath = `${import.meta.env.BASE_URL || '/'}vectordb/vectordb.json`;
-      console.log('Vector DB path:', dbPath);
-      vectorDB = await loadVectorDatabase(dbPath);
-      console.log(`Loaded ${vectorDB.documents.length} medical papers`);
+      console.log('[GeminiService] Vector DB path:', dbPath);
+      try {
+        vectorDB = await loadVectorDatabase(dbPath);
+        console.log(`[GeminiService] Loaded ${vectorDB.documents.length} medical papers`);
+      } catch (dbError) {
+        console.error('[GeminiService] Failed to load vector database:', dbError);
+        console.warn('[GeminiService] Continuing without vector DB in hybrid mode');
+      }
+    } else if (mode === AnalysisMode.HYBRID && vectorDB) {
+      console.log('[GeminiService] Using cached vector DB with', vectorDB.documents.length, 'papers');
     }
 
     // First, do a preliminary transcription to extract symptoms for vector search
@@ -200,17 +209,20 @@ export const analyzeConsultationAudio = async (
 
     const data = JSON.parse(text);
 
-    // Add vector DB insights to the result
-    const vectorDBInsights = vectorDBResults.map(result => ({
-      title: result.document.metadata.title || result.document.fileName,
-      relevance: result.score,
-      excerpt: result.document.content.slice(0, 500) // First 500 chars
-    }));
+    // Add vector DB insights to the result only in HYBRID mode
+    if (mode === AnalysisMode.HYBRID && vectorDBResults.length > 0) {
+      const vectorDBInsights = vectorDBResults.map(result => ({
+        title: result.document.metadata.title || result.document.fileName,
+        relevance: result.score,
+        excerpt: result.document.content.slice(0, 500) // First 500 chars
+      }));
+      return {
+        ...data,
+        vectorDBInsights
+      } as AIAnalysisResult;
+    }
 
-    return {
-      ...data,
-      vectorDBInsights: vectorDBInsights.length > 0 ? vectorDBInsights : undefined
-    } as AIAnalysisResult;
+    return data as AIAnalysisResult;
   } catch (error) {
     console.error("Error analyzing consultation:", error);
     throw error;
@@ -268,10 +280,10 @@ export const analyzeConsultationText = async (
 
     // Construct prompt with optional medical context
     const systemPrompt = mode === AnalysisMode.HYBRID && medicalContext
-      ? `You are a medical AI assistant. Analyze the consultation notes below.${medicalContext ? `\n\nRELEVANT MEDICAL RESEARCH:\n${medicalContext}\n\nUse this research to inform your analysis, especially for prevention, treatment recommendations, and lifestyle changes.` : ''}`
-      : 'You are a medical AI assistant. Analyze the consultation notes and provide comprehensive medical insights.';
+      ? `You are a medical AI assistant. MODE: Hybrid Analysis - Using Gemini AI + Medical Research Database.\n\nAnalyze the consultation notes below.\n\nRELEVANT MEDICAL RESEARCH:\n${medicalContext}\n\nIMPORTANT: Incorporate insights from this research to enhance your analysis, especially for prevention, treatment recommendations, and lifestyle changes.`
+      : `You are a medical AI assistant. MODE: Pure Gemini AI Analysis.\n\nAnalyze the consultation notes and provide comprehensive medical insights based on your medical knowledge.`;
 
-    const prompt = `${systemPrompt}\n\nConsultation Notes:\n${consultationText}\n\nProvide:\n1. Professional summary\n2. Detailed transcript (format as dialogue if possible)\n3. Prescriptions (if any medications mentioned)\n4. Medical insights including diagnosis, prevention, treatment, medicines, and lifestyle changes.`;
+    const prompt = `${systemPrompt}\n\nConsultation Notes:\n${consultationText}\n\nProvide:\n1. Professional summary\n2. For transcript field, return the consultation notes exactly as provided (single entry with speaker 'Input' and the full text)\n3. Prescriptions (if any medications mentioned)\n4. Medical insights including diagnosis, prevention, treatment, medicines, and lifestyle changes.`;
 
     console.log('[GeminiService] Sending request to Gemini API...');
     const response = await genAI.models.generateContent({
