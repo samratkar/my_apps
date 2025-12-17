@@ -25,7 +25,7 @@ const researchSchema: Schema = {
   required: ["area", "papers"],
 };
 
-export const fetchPapersByArea = async (area: string, apiKey: string): Promise<ResearchResponse> => {
+export const fetchPapersByArea = async (area: string, apiKey: string, paperCount: number = 20): Promise<ResearchResponse> => {
   if (!apiKey) {
     throw new Error('API key is required');
   }
@@ -36,14 +36,14 @@ export const fetchPapersByArea = async (area: string, apiKey: string): Promise<R
     const prompt = `
       Act as an expert academic researcher.
       
-      I need a comprehensive list of exactly 50 important academic papers in the research area of: "${area}".
+      I need a comprehensive list of exactly ${paperCount} important academic papers in the research area of: "${area}".
       
       Criteria:
-      1. Select 50 papers that define the field (a mix of seminal "classic" papers and high-impact recent breakthroughs).
+      1. Select ${paperCount} papers that define the field (a mix of seminal "classic" papers and high-impact recent breakthroughs).
       2. Ensure they are from reputable Q1/Q2 journals or top-tier conferences.
       3. For each paper, provide the title, authors, journal, year, citation count estimate, a summary (abstract), and the key finding.
       
-      Output strictly in JSON format matching the schema. Ensure the list contains 50 items.
+      Output strictly in JSON format matching the schema. Ensure the list contains ${paperCount} items.
     `;
 
     const response = await genAI.models.generateContent({
