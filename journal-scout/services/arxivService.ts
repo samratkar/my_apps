@@ -25,6 +25,13 @@ export interface ArxivSearchResult {
   query: string;
 }
 
+// List of CORS proxies to try (in order)
+const CORS_PROXIES = [
+  'https://api.allorigins.win/raw?url=',
+  'https://corsproxy.org/?',
+  'https://proxy.cors.sh/',
+];
+
 /**
  * Search arXiv for papers matching a query
  */
@@ -36,21 +43,41 @@ export const searchArxiv = async (
   // Build the arXiv API URL
   const baseUrl = 'https://export.arxiv.org/api/query';
   const params = new URLSearchParams({
-    search_query: `all:${encodeURIComponent(query)}`,
+    search_query: `all:${query}`,
     start: start.toString(),
     max_results: maxResults.toString(),
     sortBy: 'relevance',
     sortOrder: 'descending',
   });
 
-  const response = await fetch(`${baseUrl}?${params}`);
+  const arxivUrl = `${baseUrl}?${params}`;
   
-  if (!response.ok) {
-    throw new Error(`arXiv API error: ${response.status} ${response.statusText}`);
+  // Try each CORS proxy until one works
+  let lastError: Error | null = null;
+  
+  for (const proxy of CORS_PROXIES) {
+    try {
+      const proxyUrl = `${proxy}${encodeURIComponent(arxivUrl)}`;
+      const response = await fetch(proxyUrl);
+      
+      if (response.ok) {
+        const xmlText = await response.text();
+        return parseArxivResponse(xmlText, query);
+      }
+    } catch (err) {
+      lastError = err as Error;
+      continue;
+    }
   }
-
-  const xmlText = await response.text();
   
+  // If all proxies fail, throw the last error
+  throw lastError || new Error('All CORS proxies failed');
+};
+
+/**
+ * Parse arXiv XML response
+ */
+const parseArxivResponse = (xmlText: string, query: string): ArxivSearchResult => {
   // Parse the XML response
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
