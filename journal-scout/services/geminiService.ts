@@ -32,7 +32,7 @@ export const fetchPapersByArea = async (area: string, apiKey: string): Promise<R
   
   try {
     const genAI = new GoogleGenAI({ apiKey });
-    const model = "gemini-2.5-flash";
+    const model = "gemini-2.0-flash";
     const prompt = `
       Act as an expert academic researcher.
       
@@ -62,8 +62,12 @@ export const fetchPapersByArea = async (area: string, apiKey: string): Promise<R
 
     const data = JSON.parse(response.text) as ResearchResponse;
     return data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching papers:", error);
+    // Re-throw with more specific message
+    if (error.message?.includes('API_KEY_INVALID') || error.message?.includes('invalid')) {
+      throw new Error('API key invalid');
+    }
     throw error;
   }
 };

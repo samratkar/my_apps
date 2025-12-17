@@ -55,10 +55,13 @@ const App: React.FC = () => {
       const result = await fetchPapersByArea(query, apiKey);
       setData(result);
     } catch (err: any) {
-      if (err.message?.includes('API key')) {
+      console.error("Search error:", err);
+      if (err.message?.includes('API key') || err.message?.includes('invalid') || err.message?.includes('API_KEY')) {
         setError("Invalid API key. Please check your Gemini API key and try again.");
+      } else if (err.message?.includes('quota') || err.message?.includes('rate')) {
+        setError("API quota exceeded. Please wait a moment and try again.");
       } else {
-        setError("Failed to fetch papers. Please try again later.");
+        setError(`Failed to fetch papers: ${err.message || 'Unknown error'}. Please try again.`);
       }
     } finally {
       setLoading(false);
