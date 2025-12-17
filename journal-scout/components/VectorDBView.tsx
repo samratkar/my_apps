@@ -62,7 +62,7 @@ export const VectorDBView: React.FC<VectorDBViewProps> = () => {
       try {
         // @ts-ignore
         const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
-        const files: { name: string; content: string }[] = [];
+        const files: { name: string; content: string; fileObj?: File }[] = [];
         const supportedFiles: File[] = [];
 
         // First pass: collect all supported files
@@ -83,10 +83,9 @@ export const VectorDBView: React.FC<VectorDBViewProps> = () => {
         for (let i = 0; i < supportedFiles.length; i++) {
           const file = supportedFiles[i];
           setProgress({ current: i + 1, total: supportedFiles.length, fileName: `Reading: ${file.name}` });
-          
           try {
             const content = await readFileContent(file);
-            files.push({ name: file.name, content });
+            files.push({ name: file.name, content, fileObj: file });
           } catch (err: any) {
             console.warn(`Failed to read ${file.name}:`, err.message);
           }
@@ -139,14 +138,14 @@ export const VectorDBView: React.FC<VectorDBViewProps> = () => {
         return;
       }
       
-      const files: { name: string; content: string }[] = [];
+      const files: { name: string; content: string; fileObj?: File }[] = [];
       for (let i = 0; i < supportedFiles.length; i++) {
         const file = supportedFiles[i];
         setProgress({ current: i + 1, total: supportedFiles.length, fileName: `Reading: ${file.name}` });
         
         try {
           const content = await readFileContent(file);
-          files.push({ name: file.name, content });
+          files.push({ name: file.name, content, fileObj: file });
         } catch (err: any) {
           console.warn(`Failed to read ${file.name}:`, err.message);
         }
@@ -186,8 +185,10 @@ export const VectorDBView: React.FC<VectorDBViewProps> = () => {
     setModelStatus('Loading embedding model...');
 
     try {
+      // Pass fileObj in metadata for PDF reference
+      const filesWithMeta = inputFiles.map(f => ({ ...f, fileObj: f.fileObj }));
       const db = await createVectorDB({
-        files: inputFiles,
+        files: filesWithMeta,
         dbName: dbName.trim(),
         format: vectorDBFormat,
         onProgress: (current, total, fileName) => {
@@ -202,7 +203,10 @@ export const VectorDBView: React.FC<VectorDBViewProps> = () => {
           }
         },
       });
-      
+      // Attach fileObj to each document for PDF access
+      db.documents.forEach((doc, i) => {
+        doc.fileObj = inputFiles[i]?.fileObj;
+      });
       setCreatedVectorDB(db);
       setSuccess(`Vector database created with ${db.documents.length} documents! Choose format and click "Save to Folder" to export.`);
     } catch (err: any) {
@@ -627,6 +631,20 @@ export const VectorDBView: React.FC<VectorDBViewProps> = () => {
                       <p className="text-sm text-slate-600 line-clamp-2">
                         {result.document.content.substring(0, 200)}...
                       </p>
+                      {result.document.fileObj && result.document.fileName.toLowerCase().endsWith('.pdf') && (
+                        <p className="text-xs text-blue-600 mt-2">
+                          <button
+                            className="underline hover:text-blue-800"
+                            onClick={e => {
+                              e.stopPropagation();
+                              const url = URL.createObjectURL(result.document.fileObj);
+                              window.open(url, '_blank');
+                            }}
+                          >
+                            View PDF
+                          </button>
+                        </p>
+                      )}
                       <p className="text-xs text-purple-500 mt-2">Click to view full document</p>
                     </div>
                     <div className="flex-shrink-0 text-right">
