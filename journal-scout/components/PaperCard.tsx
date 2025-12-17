@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper } from '../types';
-import { FileText, Users, Calendar, Quote, Lightbulb } from 'lucide-react';
+import { FileText, Users, Calendar, Quote, Lightbulb, ExternalLink, Download } from 'lucide-react';
 
 interface PaperCardProps {
   paper: Paper;
@@ -19,6 +19,11 @@ export const PaperCard: React.FC<PaperCardProps> = ({ paper, index }) => {
             <span className="text-xs text-academic-600 font-medium bg-academic-50 px-2 py-0.5 rounded-full">
               {paper.year}
             </span>
+            {paper.arxivId && (
+              <span className="text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full">
+                arXiv
+              </span>
+            )}
           </div>
           <h3 className="text-md font-bold text-slate-800 leading-tight mb-1">
             {paper.title}
@@ -44,10 +49,38 @@ export const PaperCard: React.FC<PaperCardProps> = ({ paper, index }) => {
       </div>
 
       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-        <span className="font-mono text-academic-700">{paper.journal}</span>
-        <div className="flex items-center" title="Citations">
-           <Quote size={12} className="mr-1 text-slate-400" />
-           <span>{paper.citations}</span>
+        <span className="font-mono text-academic-700 truncate max-w-[180px]">{paper.journal}</span>
+        <div className="flex items-center gap-3">
+          {paper.pdfUrl && (
+            <a
+              href={paper.pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-red-600 hover:text-red-700 font-medium transition-colors"
+              title="Download PDF"
+            >
+              <Download size={14} />
+              PDF
+            </a>
+          )}
+          {paper.arxivUrl && (
+            <a
+              href={paper.arxivUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-green-600 hover:text-green-700 font-medium transition-colors"
+              title="View on arXiv"
+            >
+              <ExternalLink size={14} />
+              arXiv
+            </a>
+          )}
+          {!paper.pdfUrl && !paper.arxivUrl && (
+            <div className="flex items-center" title="Citations">
+              <Quote size={12} className="mr-1 text-slate-400" />
+              <span>{paper.citations}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -6,6 +6,11 @@ export interface Paper {
   citations: string;
   abstract: string;
   keyFindings: string;
+  // New fields for real paper access
+  pdfUrl?: string;
+  arxivUrl?: string;
+  arxivId?: string;
+  doi?: string;
 }
 
 export interface Journal {
