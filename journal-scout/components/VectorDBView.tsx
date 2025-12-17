@@ -23,7 +23,7 @@ interface VectorDBViewProps {
 
 export const VectorDBView: React.FC<VectorDBViewProps> = () => {
   // Create section state
-  const [inputFiles, setInputFiles] = useState<{ name: string; content: string }[]>([]);
+  const [inputFiles, setInputFiles] = useState<{ name: string; content: string; fileObj?: File }[]>([]);
   const [folderName, setFolderName] = useState('');
   const [dbName, setDbName] = useState('');
   const [vectorDBFormat, setVectorDBFormat] = useState<VectorDBFormat>('chromadb');
@@ -87,12 +87,21 @@ export const VectorDBView: React.FC<VectorDBViewProps> = () => {
             const content = await readFileContent(file);
             files.push({ name: file.name, content, fileObj: file });
           } catch (err: any) {
-            console.warn(`Failed to read ${file.name}:`, err.message);
+            console.error(`Failed to read ${file.name}:`, err);
           }
         }
 
         if (files.length === 0) {
-          setError('Could not read any files from the selected folder.');
+          let errorMsg = 'Could not read any files from the selected folder.';
+          if (supportedFiles.length > 0) {
+            errorMsg += '\nFiles found but could not be read:';
+            supportedFiles.forEach(f => {
+              errorMsg += `\n- ${f.name}`;
+            });
+          } else {
+            errorMsg += '\nNo supported files detected.';
+          }
+          setError(errorMsg);
           setLoadingFiles(false);
           return;
         }
@@ -185,10 +194,10 @@ export const VectorDBView: React.FC<VectorDBViewProps> = () => {
     setModelStatus('Loading embedding model...');
 
     try {
-      // Pass fileObj in metadata for PDF reference
-      const filesWithMeta = inputFiles.map(f => ({ ...f, fileObj: f.fileObj }));
+      // Only pass name/content to embedding, but keep fileObj for later
+      const filesForEmbedding = inputFiles.map(f => ({ name: f.name, content: f.content }));
       const db = await createVectorDB({
-        files: filesWithMeta,
+        files: filesForEmbedding,
         dbName: dbName.trim(),
         format: vectorDBFormat,
         onProgress: (current, total, fileName) => {
@@ -203,9 +212,10 @@ export const VectorDBView: React.FC<VectorDBViewProps> = () => {
           }
         },
       });
-      // Attach fileObj to each document for PDF access
-      db.documents.forEach((doc, i) => {
-        doc.fileObj = inputFiles[i]?.fileObj;
+      // Attach fileObj to each document for PDF access (match by name)
+      db.documents.forEach((doc) => {
+        const match = inputFiles.find(f => f.name === doc.fileName);
+        if (match && match.fileObj) doc.fileObj = match.fileObj;
       });
       setCreatedVectorDB(db);
       setSuccess(`Vector database created with ${db.documents.length} documents! Choose format and click "Save to Folder" to export.`);
