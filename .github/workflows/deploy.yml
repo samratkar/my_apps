@@ -44,6 +44,15 @@ jobs:
         working-directory: ./journal-scout
         run: npm run build
 
+      # Build mediscribeai
+      - name: Install dependencies (mediscribeai)
+        working-directory: ./mediscribeai
+        run: npm install
+
+      - name: Build (mediscribeai)
+        working-directory: ./mediscribeai
+        run: npm run build
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
@@ -51,8 +60,10 @@ jobs:
         run: |
           mkdir -p _site/sams_canvas
           mkdir -p _site/journal-scout
+          mkdir -p _site/mediscribeai
           cp -r sams_canvas/dist/* _site/sams_canvas/
           cp -r journal-scout/dist/* _site/journal-scout/
+          cp -r mediscribeai/dist/* _site/mediscribeai/
           cp index.html _site/
 
       - name: Upload artifact
