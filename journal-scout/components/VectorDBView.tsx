@@ -692,9 +692,30 @@ export const VectorDBView: React.FC<VectorDBViewProps> = () => {
             
             {/* Modal Body */}
             <div className="flex-1 overflow-auto p-6">
-              <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 leading-relaxed">
-                {selectedDocument.content}
-              </pre>
+              {/* If PDF, show a View PDF button at the top */}
+              {selectedDocument.fileObj && selectedDocument.fileName.toLowerCase().endsWith('.pdf') && (
+                <div className="mb-4">
+                  <button
+                    className="text-blue-600 underline hover:text-blue-800 text-sm"
+                    onClick={() => {
+                      const url = URL.createObjectURL(selectedDocument.fileObj);
+                      window.open(url, '_blank');
+                    }}
+                  >
+                    View PDF
+                  </button>
+                </div>
+              )}
+              {/* Render content with clickable links */}
+              <div className="whitespace-pre-wrap font-sans text-sm text-slate-700 leading-relaxed">
+                {selectedDocument.content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+                  /^https?:\/\//.test(part) ? (
+                    <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">{part}</a>
+                  ) : (
+                    part
+                  )
+                )}
+              </div>
             </div>
             
             {/* Modal Footer */}
