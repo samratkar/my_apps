@@ -1,0 +1,7 @@
+{
+  "name": "MediScribe AI",
+  "description": "A serverless medical scribe application that records doctor-patient consultations and generates intelligent summaries, transcripts, and prescriptions using Gemini AI.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
