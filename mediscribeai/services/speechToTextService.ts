@@ -45,16 +45,36 @@ export const getWhisperPipeline = async (
 
   console.log('Loading Whisper model for offline speech recognition...');
   
-  // Using whisper-tiny for faster performance and smaller size
-  pipelineLoading = pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en', {
-    progress_callback: onProgress,
-  });
+  try {
+    // Using whisper-tiny for faster performance and smaller size
+    pipelineLoading = pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en', {
+      progress_callback: onProgress,
+    });
 
-  whisperPipeline = await pipelineLoading;
-  pipelineLoading = null;
-  
-  console.log('Whisper model loaded successfully');
-  return whisperPipeline;
+    whisperPipeline = await pipelineLoading;
+    pipelineLoading = null;
+    
+    console.log('Whisper model loaded successfully');
+    return whisperPipeline;
+  } catch (error: any) {
+    pipelineLoading = null;
+    // If cache error, try again with cache disabled
+    if (error.message?.includes('cache') || error.message?.includes('Cache')) {
+      console.warn('Cache error detected, retrying Whisper with cache disabled...');
+      const { env } = await import('@xenova/transformers');
+      env.useBrowserCache = false;
+      
+      pipelineLoading = pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en', {
+        progress_callback: onProgress,
+      });
+      
+      whisperPipeline = await pipelineLoading;
+      pipelineLoading = null;
+      console.log('Whisper model loaded successfully (without cache)');
+      return whisperPipeline;
+    }
+    throw error;
+  }
 };
 
 /**

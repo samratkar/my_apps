@@ -6,9 +6,14 @@
 
 import { pipeline, env } from '@xenova/transformers';
 
-// Configure Transformers.js to use browser cache
-env.allowLocalModels = false;
-env.useBrowserCache = true;
+// Configure Transformers.js to use browser cache if available
+try {
+  env.allowLocalModels = false;
+  env.useBrowserCache = true;
+} catch (e) {
+  console.warn('Browser cache not available, models will be re-downloaded on each session');
+  env.useBrowserCache = false;
+}
 
 // Singleton pipeline instance
 let embeddingPipeline: any = null;
@@ -29,13 +34,29 @@ export const getEmbeddingPipeline = async (
     return pipelineLoading;
   }
 
-  pipelineLoading = pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
-    progress_callback: onProgress,
-  });
+  try {
+    pipelineLoading = pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
+      progress_callback: onProgress,
+    });
 
-  embeddingPipeline = await pipelineLoading;
-  pipelineLoading = null;
-  return embeddingPipeline;
+    embeddingPipeline = await pipelineLoading;
+    pipelineLoading = null;
+    return embeddingPipeline;
+  } catch (error: any) {
+    pipelineLoading = null;
+    // If cache error, try again with cache disabled
+    if (error.message?.includes('cache') || error.message?.includes('Cache')) {
+      console.warn('Cache error detected, retrying with cache disabled...');
+      env.useBrowserCache = false;
+      pipelineLoading = pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
+        progress_callback: onProgress,
+      });
+      embeddingPipeline = await pipelineLoading;
+      pipelineLoading = null;
+      return embeddingPipeline;
+    }
+    throw error;
+  }
 };
 
 /**
