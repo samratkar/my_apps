@@ -192,6 +192,53 @@ export const generatePDF = (report: ConsultationReport) => {
   printColoredSection("Recommended Medicines (AI)", report.medicalInsights.recommendedMedicines, colors.rose);
   printColoredSection("Lifestyle Changes", report.medicalInsights.lifestyleChanges, colors.amber);
 
+  // ==================== INSIGHTS FROM OFFLINE RESEARCH ====================
+  if (report.vectorDBInsights && report.vectorDBInsights.length > 0) {
+    checkPageBreak(30);
+    yPos += 5;
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    setColor(colors.indigo);
+    doc.text("Insights from offline research", margin, yPos);
+    yPos += 10;
+
+    report.vectorDBInsights.forEach((insight, index) => {
+      checkPageBreak(30);
+      
+      // Paper title
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      setColor(colors.slateDark);
+      const titleLines = doc.splitTextToSize(insight.title, contentWidth - 30);
+      titleLines.forEach((line: string) => {
+        checkPageBreak(6);
+        doc.text(line, margin + 5, yPos);
+        yPos += 5;
+      });
+      
+      // Relevance score
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      setColor(colors.indigo);
+      doc.text(`Relevance: ${(insight.relevance * 100).toFixed(0)}%`, margin + 5, yPos);
+      yPos += 7;
+      
+      // Excerpt
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      setColor(colors.slate);
+      const excerptLines = doc.splitTextToSize(insight.excerpt + '...', contentWidth - 10);
+      excerptLines.forEach((line: string) => {
+        checkPageBreak(5);
+        doc.text(line, margin + 5, yPos);
+        yPos += 4;
+      });
+      yPos += 8;
+    });
+    yPos += 5;
+  }
+
   // ==================== PRESCRIPTIONS ====================
   if (report.prescriptions.length > 0) {
     checkPageBreak(30);

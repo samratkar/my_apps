@@ -1,7 +1,11 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AIAnalysisResult } from "../types";
+import { AIAnalysisResult, AnalysisMode } from "../types";
+import { loadVectorDatabase, searchVectorDatabase, extractRelevantContext, VectorDatabase } from './vectorDBService';
 
 const modelName = "gemini-2.5-flash";
+
+// Cache for loaded vector database (only for hybrid mode)
+let vectorDB: VectorDatabase | null = null;
 
 const responseSchema: Schema = {
   type: Type.OBJECT,
@@ -78,11 +82,79 @@ export const analyzeConsultationAudio = async (
   mimeType: string,
   doctorName: string,
   patientName: string,
-  apiKey: string
+  apiKey: string | null,
+  mode: AnalysisMode = AnalysisMode.HYBRID
 ): Promise<AIAnalysisResult> => {
-  try {
-    const genAI = new GoogleGenAI({ apiKey });
+  // Offline mode should NOT call this function - it's handled separately
+  if (mode === AnalysisMode.OFFLINE) {
+    throw new Error('Offline mode should use analyzeOfflineAudio directly, not geminiService');
+  }
 
+  try {
+    // Gemini API or Hybrid mode - require API key
+    if (!apiKey) {
+      throw new Error('API key required for Gemini and Hybrid modes');
+    }
+    
+    const genAI = new GoogleGenAI({ apiKey });
+    
+    // Load vector DB only for hybrid mode
+    if (mode === AnalysisMode.HYBRID && !vectorDB) {
+      console.log('Loading medical papers vector database for hybrid mode...');
+      // Use relative path that works with Vite's base configuration
+      const dbPath = `${import.meta.env.BASE_URL || '/'}vectordb/vectordb.json`;
+      console.log('Vector DB path:', dbPath);
+      vectorDB = await loadVectorDatabase(dbPath);
+      console.log(`Loaded ${vectorDB.documents.length} medical papers`);
+    }
+
+    // First, do a preliminary transcription to extract symptoms for vector search
+    let medicalContext = '';
+    let vectorDBResults: any[] = [];
+    try {
+      // For hybrid mode, search vector DB
+      if (mode === AnalysisMode.HYBRID && vectorDB) {
+        // Get preliminary transcript to extract symptoms
+        const prelimResponse = await genAI.models.generateContent({
+          model: modelName,
+          contents: {
+            parts: [
+              {
+                inlineData: {
+                  mimeType: mimeType,
+                  data: base64Audio,
+                },
+              },
+              {
+                text: `Extract the main medical symptoms, conditions, or health concerns mentioned in this consultation. 
+                Provide a brief comma-separated list of key medical terms only.`,
+              },
+            ],
+          },
+          config: {
+            temperature: 0.1,
+          },
+        });
+
+        const symptomsText = prelimResponse.text || '';
+        console.log('Extracted symptoms for vector search:', symptomsText);
+
+        // Search vector database for relevant medical papers
+        if (symptomsText.trim()) {
+          const searchResults = await searchVectorDatabase(symptomsText, vectorDB, 3);
+          console.log(`Found ${searchResults.length} relevant medical papers`);
+          
+          vectorDBResults = searchResults;
+          medicalContext = extractRelevantContext(searchResults);
+          console.log('Medical context extracted from papers');
+        }
+      }
+    } catch (vectorError) {
+      console.warn('Vector DB search failed, continuing without medical papers:', vectorError);
+      // Continue without vector context if it fails
+    }
+
+    // Now do the full analysis with augmented context
     const response = await genAI.models.generateContent({
       model: modelName,
       contents: {
@@ -97,6 +169,8 @@ export const analyzeConsultationAudio = async (
             text: `You are an expert medical scribe and AI medical consultant. 
             Analyze the attached audio recording of a consultation between Doctor ${doctorName} and Patient ${patientName}.
             
+            ${medicalContext ? `The following relevant medical research has been identified:\n${medicalContext}\n\nUse this research to enhance your analysis where appropriate, but rely primarily on general medical knowledge and the consultation content.` : ''}
+            
             1. Generate a concise but comprehensive clinical summary.
             2. Transcribe the conversation accurately. Automatically identify speakers based on context (Doctor vs Patient).
             3. Extract any prescriptions actually given by the doctor in the audio.
@@ -106,6 +180,7 @@ export const analyzeConsultationAudio = async (
                - Cure / Treatment options
                - Common Medicines for this condition (general recommendation, separate from what the doctor prescribed)
                - Lifestyle Changes
+            ${medicalContext ? '\n5. When relevant, cite insights from the provided medical research to support your analysis.' : ''}
             
             Return the output strictly in JSON format matching the schema.`,
           },
@@ -125,9 +200,105 @@ export const analyzeConsultationAudio = async (
 
     const data = JSON.parse(text);
 
-    return data as AIAnalysisResult;
+    // Add vector DB insights to the result
+    const vectorDBInsights = vectorDBResults.map(result => ({
+      title: result.document.metadata.title || result.document.fileName,
+      relevance: result.score,
+      excerpt: result.document.content.slice(0, 500) // First 500 chars
+    }));
+
+    return {
+      ...data,
+      vectorDBInsights: vectorDBInsights.length > 0 ? vectorDBInsights : undefined
+    } as AIAnalysisResult;
   } catch (error) {
     console.error("Error analyzing consultation:", error);
+    throw error;
+  }
+};
+
+/**
+ * Analyze consultation text (instead of audio) using Gemini API
+ * Supports Gemini and Hybrid modes
+ */
+export const analyzeConsultationText = async (
+  consultationText: string,
+  doctorName: string,
+  patientName: string,
+  apiKey: string,
+  mode: AnalysisMode = AnalysisMode.HYBRID
+): Promise<AIAnalysisResult> => {
+  console.log(`[GeminiService] Starting text analysis in ${mode} mode`);
+  
+  try {
+    const genAI = new GoogleGenAI({ apiKey });
+    
+    // Load vector DB only for hybrid mode
+    if (mode === AnalysisMode.HYBRID && !vectorDB) {
+      console.log('[GeminiService] Loading medical papers vector database for hybrid mode...');
+      const dbPath = `${import.meta.env.BASE_URL || '/'}vectordb/vectordb.json`;
+      console.log('[GeminiService] Vector DB path:', dbPath);
+      try {
+        vectorDB = await loadVectorDatabase(dbPath);
+        console.log(`[GeminiService] Successfully loaded ${vectorDB.documents.length} medical papers`);
+      } catch (dbError) {
+        console.error('[GeminiService] Failed to load vector database:', dbError);
+        console.warn('[GeminiService] Continuing without vector DB in hybrid mode');
+      }
+    } else if (mode === AnalysisMode.HYBRID && vectorDB) {
+      console.log('[GeminiService] Using cached vector DB with', vectorDB.documents.length, 'papers');
+    }
+
+    // For hybrid mode, search vector DB with consultation text
+    let medicalContext = '';
+    let vectorDBResults: any[] = [];
+    if (mode === AnalysisMode.HYBRID && vectorDB) {
+      try {
+        console.log('[GeminiService] Searching vector DB for relevant medical research...');
+        vectorDBResults = await searchVectorDatabase(consultationText, vectorDB, 5);
+        console.log(`[GeminiService] Found ${vectorDBResults.length} relevant papers`);
+        
+        if (vectorDBResults.length > 0) {
+          medicalContext = extractRelevantContext(vectorDBResults);
+        }
+      } catch (searchError) {
+        console.warn('[GeminiService] Vector DB search failed, continuing with Gemini only:', searchError);
+      }
+    }
+
+    // Construct prompt with optional medical context
+    const systemPrompt = mode === AnalysisMode.HYBRID && medicalContext
+      ? `You are a medical AI assistant. Analyze the consultation notes below.${medicalContext ? `\n\nRELEVANT MEDICAL RESEARCH:\n${medicalContext}\n\nUse this research to inform your analysis, especially for prevention, treatment recommendations, and lifestyle changes.` : ''}`
+      : 'You are a medical AI assistant. Analyze the consultation notes and provide comprehensive medical insights.';
+
+    const prompt = `${systemPrompt}\n\nConsultation Notes:\n${consultationText}\n\nProvide:\n1. Professional summary\n2. Detailed transcript (format as dialogue if possible)\n3. Prescriptions (if any medications mentioned)\n4. Medical insights including diagnosis, prevention, treatment, medicines, and lifestyle changes.`;
+
+    console.log('[GeminiService] Sending request to Gemini API...');
+    const response = await genAI.models.generateContent({
+      model: modelName,
+      contents: { parts: [{ text: prompt }] },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: responseSchema,
+      },
+    });
+
+    console.log('[GeminiService] Received response from Gemini API');
+    const result = JSON.parse(response.text);
+    
+    // Add vector DB insights if in hybrid mode
+    if (mode === AnalysisMode.HYBRID && vectorDBResults.length > 0) {
+      result.vectorDBInsights = vectorDBResults.map(r => ({
+        title: r.document.metadata.title || r.document.fileName,
+        relevance: r.score,
+        excerpt: r.document.content.slice(0, 500)
+      }));
+    }
+
+    console.log('[GeminiService] Text analysis complete');
+    return result;
+  } catch (error) {
+    console.error('[GeminiService] Error in text analysis:', error);
     throw error;
   }
 };

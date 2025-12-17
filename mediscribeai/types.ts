@@ -18,17 +18,25 @@ export interface MedicalInsights {
   lifestyleChanges: string[];
 }
 
+export interface VectorDBInsight {
+  title: string;
+  relevance: number;
+  excerpt: string;
+}
+
 export interface AIAnalysisResult {
   summary: string;
   transcript: TranscriptLine[];
   prescriptions: PrescriptionItem[];
   medicalInsights: MedicalInsights;
+  vectorDBInsights?: VectorDBInsight[];
 }
 
 export interface ConsultationReport extends AIAnalysisResult {
   doctorName: string;
   patientName: string;
   consultationDate: string;
+  analysisMode: AnalysisMode;
 }
 
 export enum AppState {
@@ -38,6 +46,12 @@ export enum AppState {
   PROCESSING = 'PROCESSING',
   VIEWING = 'VIEWING',
   ERROR = 'ERROR'
+}
+
+export enum AnalysisMode {
+  GEMINI = 'gemini',
+  OFFLINE = 'offline',
+  HYBRID = 'hybrid'
 }
 
 export interface AudioRecording {
