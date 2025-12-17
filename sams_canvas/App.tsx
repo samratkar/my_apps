@@ -93,7 +93,7 @@ const App: React.FC = () => {
 
   // Closing Stanza Toggle
   const [includeClosingStanza, setIncludeClosingStanza] = useState(false);
-  const closingStanza = `<p style="text-align: left;"><br></p><p style="text-align: left;">Here I stand in love's refrain</p><p style="text-align: left;">Through joy and loss, through peace and pain</p><p style="text-align: left;">I had loved you; I love you still.</p><p style="text-align: left;">And loved you, love you, always will.</p>`;
+  const closingStanza = `<p style="text-align: center;"><br></p><p style="text-align: center;">Here I stand in love's refrain</p><p style="text-align: center;">Through joy and loss, through peace and pain</p><p style="text-align: center;">I had loved you; I love you still.</p><p style="text-align: center;">And loved you, love you, always will.</p>`;
 
   // --- Refs ---
   const cardRef = useRef<HTMLDivElement>(null);
