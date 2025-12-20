@@ -134,7 +134,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
                     </svg>
-                    Backup
+                    Export JSON
                 </button>
                 <button onclick="syncWithFolders()" class="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-1 whitespace-nowrap text-sm flex-shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,6 +297,30 @@
         let filteredEntries = [];
         let headerImageBase64 = null;
         let headerBannerColor = { r: 30, g: 64, b: 175 }; // Default blue
+        let hasUnsavedChanges = false;
+
+        function normalizeStr(value) {
+            return String(value || '').trim();
+        }
+
+        function makeSyncKey(entry) {
+            const date = normalizeStr(entry?.date);
+            const edition = normalizeStr(entry?.edition).toLowerCase();
+            return `${date}__${edition}`;
+        }
+
+        function formatSrNo(n) {
+            const width = n < 100 ? 2 : 3;
+            return String(n).padStart(width, '0');
+        }
+
+        function getNextSrNo() {
+            const nums = allEntries
+                .map(e => parseInt(e.sr_no, 10))
+                .filter(n => Number.isFinite(n));
+            const next = (nums.length ? Math.max(...nums) : 0) + 1;
+            return formatSrNo(next);
+        }
 
         // Setup event listeners
         document.addEventListener('DOMContentLoaded', () => {
@@ -312,7 +336,7 @@
         
         function reloadFromJSON() {
             if (allEntries.length === 0) {
-                alert('Please load a JSON file first using the "Load JSON" button.');
+                console.warn('Please load a JSON file first using the "Load JSON" button.');
                 return;
             }
             // Reset filters and refresh display
@@ -321,44 +345,40 @@
             document.getElementById('monthFilter').value = '';
             filteredEntries = [...allEntries];
             initializeApp();
-            alert('UI synced with loaded JSON data!');
+            console.log('UI synced with loaded JSON data!');
+        }
+
+        function downloadCurrentJSON(filename) {
+            const dataStr = JSON.stringify(allEntries, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
         
         function backupJSON() {
             if (allEntries.length === 0) {
-                alert('Please load a JSON file first using the "Load JSON" button.');
+                console.warn('Please load a JSON file first using the "Load JSON" button.');
                 return;
             }
             
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            const dataStr = JSON.stringify(allEntries, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `enamor-index-backup-${timestamp}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            alert(`Backup created successfully!\n\nFile: enamor-index-backup-${timestamp}.json`);
+            downloadCurrentJSON(`enamor-index-backup-${timestamp}.json`);
+
+            console.log(`Exported JSON: enamor-index-backup-${timestamp}.json`);
         }
         
         function saveUpdatedJSON() {
-            const dataStr = JSON.stringify(allEntries, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'enamor-index.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            downloadCurrentJSON('enamor-index.json');
+            hasUnsavedChanges = false;
             
             closeSyncUpdateModal();
-            alert('✅ Updated JSON downloaded!\n\nReplace your old enamor-index.json file with this new one, then reload the page and load the new JSON.');
+            console.log('Updated JSON downloaded: enamor-index.json');
         }
         
         function handleFileLoad(e) {
@@ -412,11 +432,11 @@
                         initializeApp();
                     } catch (error) {
                         console.error('JSON parsing error:', error);
-                        alert(`Error loading JSON file:\n${error.message}\n\nPlease make sure you selected a valid enamor-index.json file.`);
+                        console.error(`Error loading JSON file: ${error.message}`);
                     }
                 };
                 reader.onerror = () => {
-                    alert('Error reading file. Please try again.');
+                    console.error('Error reading file. Please try again.');
                 };
                 reader.readAsText(file);
             }
@@ -443,7 +463,7 @@
                 if (error.name === 'AbortError') {
                     return; // User cancelled
                 }
-                alert('Error accessing folder: ' + error.message);
+                console.error('Error accessing folder: ' + error.message);
             }
         }
         
@@ -477,8 +497,8 @@
                             editionStr = `Enamor ${majorVersion}.${minorPadded}`;
                         }
                         
-                        // Normalize sr_no: convert to number then to 2-digit string to match JSON format
-                        const normalizedSrNo = String(parseInt(match[1])).padStart(2, '0');
+                        // Normalize sr_no to match JSON formatting (2-digit for <100, else 3+)
+                        const normalizedSrNo = formatSrNo(parseInt(match[1]));
                         
                         files.push({
                             name: entry.name,
@@ -501,19 +521,55 @@
         }
         
         function compareWithJSON(foundFiles) {
-            const jsonSrNos = new Set(allEntries.map(e => e.sr_no));
-            const fileSrNos = new Set(foundFiles.map(f => f.sr_no));
-            
-            const missingInJSON = foundFiles.filter(f => !jsonSrNos.has(f.sr_no));
-            const missingFiles = allEntries.filter(e => !fileSrNos.has(e.sr_no));
-            const matched = foundFiles.filter(f => jsonSrNos.has(f.sr_no));
+            // Match files to JSON by (date + edition) so renumbering sr_no doesn't break sync.
+            const jsonByKey = new Map();
+            allEntries.forEach(e => {
+                const key = makeSyncKey(e);
+                if (!jsonByKey.has(key)) {
+                    jsonByKey.set(key, e);
+                }
+            });
+
+            const fileByKey = new Map();
+            foundFiles.forEach(f => {
+                const key = makeSyncKey(f);
+                if (!fileByKey.has(key)) {
+                    fileByKey.set(key, f);
+                }
+            });
+
+            const jsonKeys = new Set(jsonByKey.keys());
+            const fileKeys = new Set(fileByKey.keys());
+
+            const missingInJSON = foundFiles.filter(f => !jsonKeys.has(makeSyncKey(f)));
+            const missingFiles = allEntries.filter(e => !fileKeys.has(makeSyncKey(e)));
+            const matched = foundFiles.filter(f => jsonKeys.has(makeSyncKey(f)));
+
+            const serialMismatches = matched
+                .map(f => {
+                    const key = makeSyncKey(f);
+                    const e = jsonByKey.get(key);
+                    if (!e) return null;
+                    const fileSr = normalizeStr(f.sr_no);
+                    const jsonSr = normalizeStr(e.sr_no);
+                    if (!fileSr || !jsonSr || fileSr === jsonSr) return null;
+                    return {
+                        fileSrNo: fileSr,
+                        jsonSrNo: jsonSr,
+                        name: f.name,
+                        date: f.date,
+                        edition: f.edition
+                    };
+                })
+                .filter(Boolean);
             
             return {
                 totalFiles: foundFiles.length,
                 totalJSON: allEntries.length,
                 matched: matched.length,
                 missingInJSON: missingInJSON,
-                missingFiles: missingFiles
+                missingFiles: missingFiles,
+                serialMismatches: serialMismatches
             };
         }
         
@@ -526,6 +582,7 @@
                     <p class="text-sm text-blue-700">Files found: ${report.totalFiles}</p>
                     <p class="text-sm text-blue-700">JSON entries: ${report.totalJSON}</p>
                     <p class="text-sm text-blue-700">Matched: ${report.matched}</p>
+                    <p class="text-xs text-blue-700 mt-2">Matching rule: date + edition (sr_no differences are ignored)</p>
                 </div>
             `;
             
@@ -549,6 +606,20 @@
                         <div class="max-h-48 overflow-y-auto">
                             <ul class="text-sm text-red-700 list-disc list-inside space-y-1">
                                 ${report.missingFiles.map(e => `<li>#${e.sr_no} - ${e.title}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (report.serialMismatches && report.serialMismatches.length > 0) {
+                html += `
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-purple-900 mb-2">🔢 Serial Mismatches (${report.serialMismatches.length})</h3>
+                        <p class="text-xs text-purple-700 mb-2">These files match by date+edition, but the filename serial differs from JSON sr_no.</p>
+                        <div class="max-h-48 overflow-y-auto">
+                            <ul class="text-sm text-purple-800 list-disc list-inside space-y-1">
+                                ${report.serialMismatches.map(m => `<li>File #${m.fileSrNo} → JSON #${m.jsonSrNo} — ${m.edition} ${m.date} (${m.name})</li>`).join('')}
                             </ul>
                         </div>
                     </div>
@@ -786,9 +857,11 @@
                 
                 // Month header row
                 tableHTML += `
-                    <tr class="bg-gradient-to-r from-blue-500 to-purple-500">
-                        <td colspan="7" class="px-4 py-3 text-white font-bold text-lg">
-                            Month ${monthIndex + 1} - ${month} <span class="text-sm font-normal">(${monthEntries.length} entries)</span>
+                    <tr class="bg-blue-50">
+                        <td colspan="7" class="px-4 py-2 font-semibold text-sm">
+                            <span class="text-gray-700">Month ${monthIndex + 1} -</span>
+                            <span class="text-gray-700"> ${month}</span>
+                            <span class="text-xs font-normal text-gray-600"> (${monthEntries.length} entries)</span>
                         </td>
                     </tr>
                 `;
@@ -869,11 +942,12 @@
             document.getElementById('editModal').classList.remove('active');
         }
 
-        function saveEntry(e) {
-            e.preventDefault();
-            
-            const index = parseInt(document.getElementById('edit_index').value);
-            
+        function applyEditFormToEntry() {
+            const index = parseInt(document.getElementById('edit_index').value, 10);
+            if (!Number.isFinite(index) || index < 0 || index >= allEntries.length) {
+                throw new Error('Invalid entry index. Please reload the JSON and try again.');
+            }
+
             allEntries[index] = {
                 sr_no: document.getElementById('edit_sr_no').value,
                 edition: document.getElementById('edit_edition').value,
@@ -883,10 +957,20 @@
                 link: document.getElementById('edit_link').value,
                 summary: document.getElementById('edit_summary').value
             };
-            
-            closeEditModal();
-            filterEntries();
-            alert('Entry updated! Don\'t forget to save the JSON file.');
+
+            hasUnsavedChanges = true;
+        }
+
+        function saveEntry(e) {
+            e.preventDefault();
+            try {
+                applyEditFormToEntry();
+                closeEditModal();
+                filterEntries();
+                console.log('Entry updated. Use Export JSON to download when ready.');
+            } catch (err) {
+                console.error(err.message || String(err));
+            }
         }
         
         function handleHeaderLoad(e) {
@@ -904,7 +988,7 @@
                     img.src = headerImageBase64;
                 };
                 reader.onerror = () => {
-                    alert('Error reading image file. Please try again.');
+                    console.error('Error reading image file. Please try again.');
                 };
                 reader.readAsDataURL(file);
             }
@@ -961,17 +1045,22 @@
                 const foundFiles = await scanDirectory(dirHandle);
                 if (foundFiles.length === 0) return;
                 
-                const existingMap = new Map(allEntries.map(e => [e.sr_no, e]));
+                const existingMap = new Map();
+                allEntries.forEach(e => {
+                    const key = makeSyncKey(e);
+                    if (!existingMap.has(key)) {
+                        existingMap.set(key, e);
+                    }
+                });
                 
                 foundFiles.forEach(file => {
-                    const existing = existingMap.get(file.sr_no);
+                    const existing = existingMap.get(makeSyncKey(file));
                     
                     if (existing) {
-                        const normalize = (str) => String(str || '').trim();
-                        const existingEdition = normalize(existing.edition);
-                        const existingDate = normalize(existing.date);
-                        const fileEdition = normalize(file.edition);
-                        const fileDate = normalize(file.date);
+                        const existingEdition = normalizeStr(existing.edition);
+                        const existingDate = normalizeStr(existing.date);
+                        const fileEdition = normalizeStr(file.edition);
+                        const fileDate = normalizeStr(file.date);
                         
                         const hasChanges = existingEdition !== fileEdition || existingDate !== fileDate;
                         
@@ -984,7 +1073,7 @@
                         }
                     } else {
                         const newEntry = {
-                            sr_no: file.sr_no,
+                            sr_no: getNextSrNo(),
                             edition: file.edition,
                             month: file.month || '',
                             date: file.date,
@@ -993,6 +1082,7 @@
                             summary: ''
                         };
                         allEntries.push(newEntry);
+                        existingMap.set(makeSyncKey(newEntry), newEntry);
                     }
                 });
                 
@@ -1008,7 +1098,7 @@
 
         async function syncWithFolders() {
             if (allEntries.length === 0) {
-                alert('Please load a JSON file first using the "Load JSON" button.');
+                console.warn('Please load a JSON file first using the "Load JSON" button.');
                 return;
             }
             
@@ -1027,13 +1117,19 @@
                 const foundFiles = await scanDirectory(dirHandle);
                 
                 if (foundFiles.length === 0) {
-                    alert('No enamor .md files found in the selected folder.');
+                    console.warn('No enamor .md files found in the selected folder.');
                     renderEntries();
                     return;
                 }
                 
-                // Create a map of existing entries by sr_no
-                const existingMap = new Map(allEntries.map(e => [e.sr_no, e]));
+                // Create a map of existing entries by (date + edition) so sr_no renumbering doesn't break sync
+                const existingMap = new Map();
+                allEntries.forEach(e => {
+                    const key = makeSyncKey(e);
+                    if (!existingMap.has(key)) {
+                        existingMap.set(key, e);
+                    }
+                });
                 
                 // Update or add entries from found files
                 let addedCount = 0;
@@ -1042,17 +1138,13 @@
                 const updatedEntries = [];
                 
                 foundFiles.forEach(file => {
-                    const existing = existingMap.get(file.sr_no);
+                    const existing = existingMap.get(makeSyncKey(file));
                     
                     if (existing) {
-                        // Normalize and trim values for comparison
-                        const normalize = (str) => String(str || '').trim();
-                        
-                        const existingEdition = normalize(existing.edition);
-                        const existingDate = normalize(existing.date);
-                        
-                        const fileEdition = normalize(file.edition);
-                        const fileDate = normalize(file.date);
+                        const existingEdition = normalizeStr(existing.edition);
+                        const existingDate = normalizeStr(existing.date);
+                        const fileEdition = normalizeStr(file.edition);
+                        const fileDate = normalizeStr(file.date);
                         
                         // Check if there are actual changes (only compare edition and date, NOT title)
                         const hasChanges = existingEdition !== fileEdition || 
@@ -1067,12 +1159,12 @@
                                 existing.month = file.month;
                             }
                             updatedCount++;
-                            updatedEntries.push(file.sr_no);
+                            updatedEntries.push(existing.sr_no);
                         }
                     } else {
                         // Add new entry (title will be empty, user needs to fill it)
                         const newEntry = {
-                            sr_no: file.sr_no,
+                            sr_no: getNextSrNo(),
                             edition: file.edition,
                             month: file.month || '',
                             date: file.date,
@@ -1081,8 +1173,9 @@
                             summary: ''
                         };
                         allEntries.push(newEntry);
+                        existingMap.set(makeSyncKey(newEntry), newEntry);
                         addedCount++;
-                        newEntries.push(file.sr_no);
+                        newEntries.push(newEntry.sr_no);
                     }
                 });
                 
@@ -1101,7 +1194,7 @@
                     renderEntries();
                     return; // User cancelled
                 }
-                alert('Error syncing folders: ' + error.message);
+                console.error('Error syncing folders: ' + error.message);
                 renderEntries();
             }
         }
@@ -1258,17 +1351,36 @@
             const totalWidth = pageWidth - (2 * margin);
             const colWidths = [15, 25, 22, 22, 55, 138]; // Total = 277mm
             const startX = margin;
-            const rowHeight = 7;
+            const baseRowHeight = 7;
+            const lineHeight = 3.2;
             
             // Helper function to draw table row
-            function drawTableRow(entry, yPos, isHeader = false) {
+            function forceBreakLongTokens(text, chunkSize = 26) {
+                const raw = String(text || '').replace(/\s+/g, ' ').trim();
+                if (!raw) return '';
+                return raw
+                    .split(' ')
+                    .map(token => {
+                        if (token.length <= chunkSize) return token;
+                        const parts = [];
+                        for (let i = 0; i < token.length; i += chunkSize) {
+                            parts.push(token.slice(i, i + chunkSize));
+                        }
+                        return parts.join(' ');
+                    })
+                    .join(' ');
+            }
+
+            function drawTableRow(entry, yPos, isHeader = false, stripeIndex = 0) {
                 let xPos = startX;
+                const rowTop = yPos - 5;
                 
                 if (isHeader) {
+                    // Table header row: use extracted banner color
                     doc.setFillColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
-                    doc.rect(startX, yPos - 5, pageWidth - (2 * margin), rowHeight, 'F');
-                    const textColor = getTextColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
-                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+                    doc.rect(startX, rowTop, pageWidth - (2 * margin), baseRowHeight, 'F');
+                    const headerTextColor = getTextColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
+                    doc.setTextColor(headerTextColor[0], headerTextColor[1], headerTextColor[2]);
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(9);
                     
@@ -1277,18 +1389,14 @@
                     headers.forEach((text, i) => {
                         doc.text(text, xPos + (colWidths[i] / 2), yPos, { align: 'center' });
                         doc.setDrawColor(200, 200, 200);
-                        doc.rect(xPos, yPos - 5, colWidths[i], rowHeight);
+                        doc.rect(xPos, rowTop, colWidths[i], baseRowHeight);
                         xPos += colWidths[i];
                     });
+                    return baseRowHeight;
                 } else {
                     doc.setTextColor(0, 0, 0);
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(8);
-                    // Alternating row colors
-                    if (Math.floor((yPos - y) / rowHeight) % 2 === 0) {
-                        doc.setFillColor(248, 248, 248);
-                        doc.rect(startX, yPos - 5, pageWidth - (2 * margin), rowHeight, 'F');
-                    }
                     
                     // Draw cells
                     const data = [
@@ -1297,27 +1405,65 @@
                         entry.month,
                         entry.date,
                         entry.title,
-                        entry.summary.substring(0, 150) + (entry.summary.length > 150 ? '...' : '')
+                        entry.summary
                     ];
+
+                    const wrappedByCol = data.map((text, i) => {
+                        const normalized = forceBreakLongTokens(text);
+                        return doc.splitTextToSize(normalized, colWidths[i] - 2);
+                    });
+                    const maxLines = Math.max(1, ...wrappedByCol.map(lines => (lines?.length || 1)));
+                    const rowHeight = baseRowHeight + (maxLines - 1) * lineHeight;
+
+                    // Alternating row colors
+                    if (stripeIndex % 2 === 0) {
+                        doc.setFillColor(248, 248, 248);
+                        doc.rect(startX, rowTop, pageWidth - (2 * margin), rowHeight, 'F');
+                    }
                     
-                    data.forEach((text, i) => {
-                        const cellText = doc.splitTextToSize(String(text || ''), colWidths[i] - 2);
-                        
-                        // If this is the title column (index 4) and has a link, make it blue and underlined
-                        if (i === 4 && entry.link) {
-                            doc.setTextColor(30, 64, 175); // Blue color
-                            doc.textWithLink(cellText[0], xPos + 1, yPos, { url: entry.link });
-                            doc.setTextColor(0, 0, 0); // Reset to black
-                        } else {
-                            doc.text(cellText[0], xPos + 1, yPos);
+                    wrappedByCol.forEach((lines, i) => {
+                        const safeLines = Array.isArray(lines) ? lines : [String(lines || '')];
+
+                        // Draw wrapped text lines within the cell
+                        for (let li = 0; li < safeLines.length; li++) {
+                            const lineText = safeLines[li];
+                            const lineY = yPos + (li * lineHeight);
+
+                            const isSummaryCol = i === 5;
+                            const cellCenterX = xPos + (colWidths[i] / 2);
+
+                            // Center all columns except Summary
+                            if (!isSummaryCol) {
+                                // Title column: blue + clickable link (first line)
+                                if (i === 4 && entry.link) {
+                                    doc.setTextColor(30, 64, 175); // Blue color
+                                    doc.text(lineText, cellCenterX, lineY, { align: 'center' });
+
+                                    // Make first line clickable while keeping centered layout
+                                    if (li === 0) {
+                                        const textWidth = doc.getTextWidth(lineText);
+                                        const linkX = cellCenterX - (textWidth / 2);
+                                        // Roughly cover the text line height
+                                        doc.link(linkX, lineY - 2.8, textWidth, 3.6, { url: entry.link });
+                                    }
+                                    doc.setTextColor(0, 0, 0); // Reset to black
+                                } else {
+                                    doc.text(lineText, cellCenterX, lineY, { align: 'center' });
+                                }
+                            } else {
+                                // Summary stays left-aligned
+                                doc.text(lineText, xPos + 1, lineY);
+                            }
                         }
-                        
+
                         // Draw cell border
                         doc.setDrawColor(200, 200, 200);
-                        doc.rect(xPos, yPos - 5, colWidths[i], rowHeight);
-                        
+                        doc.rect(xPos, rowTop, colWidths[i], rowHeight);
+
                         xPos += colWidths[i];
                     });
+
+                    return rowHeight;
                 }
             }
             
@@ -1356,8 +1502,7 @@
             });
             
             // Draw header
-            drawTableRow(null, y, true);
-            y += rowHeight;
+            y += drawTableRow(null, y, true);
             
             // Draw data rows grouped by month
             sortedMonths.forEach((month, monthIndex) => {
@@ -1367,37 +1512,36 @@
                 if (y > pageHeight - 20) {
                     doc.addPage();
                     y = 15;
-                    drawTableRow(null, y, true);
-                    y += rowHeight;
+                    y += drawTableRow(null, y, true);
                 }
                 
-                // Month header row
-                const monthBgR = Math.min(255, headerBannerColor.r + 30);
-                const monthBgG = Math.min(255, headerBannerColor.g + 30);
-                const monthBgB = Math.min(255, headerBannerColor.b + 30);
+                // Month header row (group heading): derived from extracted banner color
+                const monthBgR = Math.min(255, headerBannerColor.r + 20);
+                const monthBgG = Math.min(255, headerBannerColor.g + 20);
+                const monthBgB = Math.min(255, headerBannerColor.b + 20);
                 doc.setFillColor(monthBgR, monthBgG, monthBgB);
-                doc.rect(startX, y - 5, pageWidth - (2 * margin), rowHeight, 'F');
-                doc.setFontSize(10);
+                doc.rect(startX, y - 5, pageWidth - (2 * margin), baseRowHeight, 'F');
+                doc.setFontSize(9);
                 doc.setFont('helvetica', 'bold');
                 const monthTextColor = getTextColor(monthBgR, monthBgG, monthBgB);
                 doc.setTextColor(monthTextColor[0], monthTextColor[1], monthTextColor[2]);
                 doc.text(`Month ${monthIndex + 1} - ${month} (${monthEntries.length} entries)`, startX + 2, y);
-                y += rowHeight;
+                y += baseRowHeight;
                 
                 // Draw entries for this month
-                monthEntries.forEach((entry, index) => {
-                    // Check if we need a new page
+                let stripeIndex = 0;
+                monthEntries.forEach((entry) => {
+                    // Check if we need a new page (conservative)
                     if (y > pageHeight - 20) {
                         doc.addPage();
                         y = 15;
                         // Redraw header on new page
-                        drawTableRow(null, y, true);
-                        y += rowHeight;
+                        y += drawTableRow(null, y, true);
                     }
                     
-                    drawTableRow(entry, y);
-                    
-                    y += rowHeight;
+                    const usedHeight = drawTableRow(entry, y, false, stripeIndex);
+                    stripeIndex++;
+                    y += usedHeight;
                 });
             });
             
