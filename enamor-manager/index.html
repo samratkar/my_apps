@@ -88,25 +88,27 @@
     <div class="container mx-auto px-4 py-8">
         <!-- Action Bar -->
         <div id="actionBar" class="glass-effect rounded-lg shadow-md p-4 mb-6">
-            <div class="flex flex-nowrap gap-2 items-center overflow-x-auto">
-                <!-- Search -->
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    placeholder="Search by title or summary..." 
-                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64 flex-shrink-0"
-                >
-                
-                <!-- Filter by Year and Month -->
-                <select id="yearFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 flex-shrink-0">
-                    <option value="">All Years</option>
-                </select>
-                <select id="monthFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 flex-shrink-0">
-                    <option value="">All Months</option>
-                </select>
-                
-                <!-- Action Buttons -->
-                <label class="cursor-pointer flex-shrink-0">
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <!-- Left: Search + Filters -->
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search by title or summary..." 
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-80"
+                    >
+                    
+                    <select id="yearFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full sm:w-40">
+                        <option value="">All Years</option>
+                    </select>
+                    <select id="monthFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full sm:w-48">
+                        <option value="">All Months</option>
+                    </select>
+                </div>
+
+                <!-- Right: Actions -->
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap md:justify-end">
+                    <label class="cursor-pointer">
                     <div class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -115,7 +117,7 @@
                     </div>
                     <input type="file" id="loadJsonInput" accept=".json" class="hidden" onchange="handleFileLoad(event)">
                 </label>
-                <label class="cursor-pointer flex-shrink-0">
+                <label class="cursor-pointer">
                     <div class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -124,62 +126,51 @@
                     </div>
                     <input type="file" id="loadHeaderInput" accept="image/*" class="hidden" onchange="handleHeaderLoad(event)">
                 </label>
-                <button onclick="reloadFromJSON()" class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-1 whitespace-nowrap text-sm flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Sync UI
-                </button>
-                <button onclick="backupJSON()" class="px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition flex items-center gap-1 whitespace-nowrap text-sm flex-shrink-0">
+                <button onclick="backupJSON()" class="px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
                     </svg>
                     Export JSON
                 </button>
-                <button onclick="syncWithFolders()" class="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-1 whitespace-nowrap text-sm flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Sync Folders
-                </button>
-                <button onclick="exportToPDF()" class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-1 whitespace-nowrap text-sm flex-shrink-0">
+                <button onclick="exportToPDF()" class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     Export PDF
                 </button>
+                </div>
             </div>
         </div>
 
         <!-- Stats Cards -->
         <div id="statsSection" class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
             <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-500 text-xs mb-1">Latest Entry</p>
+                <p class="text-gray-500 text-xs mb-1 font-semibold">Latest Entry</p>
                 <p class="text-xl font-bold text-blue-600" id="latestEntry">-</p>
             </div>
             
             <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-500 text-xs mb-1">Current Month</p>
+                <p class="text-gray-500 text-xs mb-1 font-semibold">Current Month</p>
                 <p class="text-xl font-bold text-purple-600" id="currentMonth">-</p>
             </div>
             
             <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-500 text-xs mb-1">Filtered Count</p>
+                <p class="text-gray-500 text-xs mb-1 font-semibold">Filtered Count</p>
                 <p class="text-xl font-bold text-green-600" id="filteredCount">0</p>
             </div>
             
             <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-500 text-xs mb-1">Total Months</p>
+                <p class="text-gray-500 text-xs mb-1 font-semibold">Total Months</p>
                 <p class="text-xl font-bold text-orange-600" id="totalMonths">0</p>
             </div>
             
             <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-500 text-xs mb-1">Avg/Month</p>
+                <p class="text-gray-500 text-xs mb-1 font-semibold">Avg/Month</p>
                 <p class="text-xl font-bold text-pink-600" id="avgPerMonth">0</p>
             </div>
             
             <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-500 text-xs mb-1">This Month</p>
+                <p class="text-gray-500 text-xs mb-1 font-semibold">This Month</p>
                 <p class="text-xl font-bold text-indigo-600" id="thisMonthCount">0</p>
             </div>
         </div>
@@ -254,44 +245,6 @@
         </div>
     </div>
 
-    <!-- Sync Report Modal -->
-    <div id="syncModal" class="modal">
-        <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="gradient-bg text-white p-6 rounded-t-lg">
-                <h2 class="text-2xl font-bold">Folder Sync Report</h2>
-            </div>
-            <div class="p-6">
-                <div id="syncContent" class="space-y-4">
-                    <!-- Sync report will be displayed here -->
-                </div>
-                <div class="flex gap-3 justify-end pt-4 border-t mt-4">
-                    <button type="button" onclick="closeSyncModal()" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Sync Update Report Modal -->
-    <div id="syncUpdateModal" class="modal">
-        <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="gradient-bg text-white p-6 rounded-t-lg">
-                <h2 class="text-2xl font-bold">Sync Update Report</h2>
-            </div>
-            <div class="p-6">
-                <div id="syncUpdateContent" class="space-y-4">
-                    <!-- Sync update report will be displayed here -->
-                </div>
-                <div class="flex gap-3 justify-end pt-4 border-t mt-4">
-                    <button type="button" onclick="closeSyncUpdateModal()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         let allEntries = [];
         let filteredEntries = [];
@@ -299,19 +252,20 @@
         let headerBannerColor = { r: 30, g: 64, b: 175 }; // Default blue
         let hasUnsavedChanges = false;
 
-        function normalizeStr(value) {
-            return String(value || '').trim();
-        }
-
-        function makeSyncKey(entry) {
-            const date = normalizeStr(entry?.date);
-            const edition = normalizeStr(entry?.edition).toLowerCase();
-            return `${date}__${edition}`;
-        }
-
         function formatSrNo(n) {
             const width = n < 100 ? 2 : 3;
             return String(n).padStart(width, '0');
+        }
+
+        function getMaxSrNo(entries) {
+            let max = 0;
+            for (const e of entries || []) {
+                const n = parseInt(e?.sr_no, 10);
+                if (Number.isFinite(n) && n > max) {
+                    max = n;
+                }
+            }
+            return max;
         }
 
         function getNextSrNo() {
@@ -334,19 +288,7 @@
             document.getElementById('editForm').addEventListener('submit', saveEntry);
         }
         
-        function reloadFromJSON() {
-            if (allEntries.length === 0) {
-                console.warn('Please load a JSON file first using the "Load JSON" button.');
-                return;
-            }
-            // Reset filters and refresh display
-            document.getElementById('searchInput').value = '';
-            document.getElementById('yearFilter').value = '';
-            document.getElementById('monthFilter').value = '';
-            filteredEntries = [...allEntries];
-            initializeApp();
-            console.log('UI synced with loaded JSON data!');
-        }
+        
 
         function downloadCurrentJSON(filename) {
             const dataStr = JSON.stringify(allEntries, null, 2);
@@ -371,14 +313,6 @@
             downloadCurrentJSON(`enamor-index-backup-${timestamp}.json`);
 
             console.log(`Exported JSON: enamor-index-backup-${timestamp}.json`);
-        }
-        
-        function saveUpdatedJSON() {
-            downloadCurrentJSON('enamor-index.json');
-            hasUnsavedChanges = false;
-            
-            closeSyncUpdateModal();
-            console.log('Updated JSON downloaded: enamor-index.json');
         }
         
         function handleFileLoad(e) {
@@ -440,262 +374,6 @@
                 };
                 reader.readAsText(file);
             }
-        }
-
-        async function syncWithFolders() {
-            try {
-                // Request directory access
-                const dirHandle = await window.showDirectoryPicker({
-                    mode: 'read',
-                    startIn: 'documents'
-                });
-                
-                // Scan for .md files
-                const foundFiles = await scanDirectory(dirHandle);
-                
-                // Parse filenames and compare with JSON
-                const syncReport = compareWithJSON(foundFiles);
-                
-                // Show sync report
-                displaySyncReport(syncReport);
-                
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    return; // User cancelled
-                }
-                console.error('Error accessing folder: ' + error.message);
-            }
-        }
-        
-        async function scanDirectory(dirHandle, path = '') {
-            const files = [];
-            
-            for await (const entry of dirHandle.values()) {
-                const fullPath = path ? `${path}/${entry.name}` : entry.name;
-                
-                if (entry.kind === 'file' && entry.name.endsWith('.md')) {
-                    // Parse filename: XXX-YYYY-MM-DD-eX.XX-title.md
-                    const match = entry.name.match(/(\d+)-(\d{4})-(\d{2})-(\d{2})-e(\d+)\.(\d+)-(.*?)\.md/);
-                    if (match) {
-                        const year = match[2];
-                        const monthNum = match[3];
-                        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                                          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        const monthAbbr = monthNames[parseInt(monthNum) - 1];
-                        
-                        // Parse edition to match JSON format
-                        // Editions 0-6 with minor version 1 → "Enamor X" (no decimal)
-                        // All others → "Enamor X.XX" (with zero-padded minor version)
-                        const majorVersion = parseInt(match[5]);
-                        const minorVersion = parseInt(match[6]);
-                        let editionStr;
-                        
-                        if (majorVersion <= 6 && minorVersion === 1) {
-                            editionStr = `Enamor ${majorVersion}`;
-                        } else {
-                            const minorPadded = String(minorVersion).padStart(2, '0');
-                            editionStr = `Enamor ${majorVersion}.${minorPadded}`;
-                        }
-                        
-                        // Normalize sr_no to match JSON formatting (2-digit for <100, else 3+)
-                        const normalizedSrNo = formatSrNo(parseInt(match[1]));
-                        
-                        files.push({
-                            name: entry.name,
-                            path: fullPath,
-                            sr_no: normalizedSrNo,
-                            date: `${match[3]}-${match[4]}-${match[2]}`,
-                            edition: editionStr,
-                            title: match[7].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-                            month: `${monthAbbr} ${year}`
-                        });
-                    }
-                } else if (entry.kind === 'directory' && entry.name.startsWith('enamor')) {
-                    // Recursively scan enamor folders
-                    const subFiles = await scanDirectory(entry, fullPath);
-                    files.push(...subFiles);
-                }
-            }
-            
-            return files;
-        }
-        
-        function compareWithJSON(foundFiles) {
-            // Match files to JSON by (date + edition) so renumbering sr_no doesn't break sync.
-            const jsonByKey = new Map();
-            allEntries.forEach(e => {
-                const key = makeSyncKey(e);
-                if (!jsonByKey.has(key)) {
-                    jsonByKey.set(key, e);
-                }
-            });
-
-            const fileByKey = new Map();
-            foundFiles.forEach(f => {
-                const key = makeSyncKey(f);
-                if (!fileByKey.has(key)) {
-                    fileByKey.set(key, f);
-                }
-            });
-
-            const jsonKeys = new Set(jsonByKey.keys());
-            const fileKeys = new Set(fileByKey.keys());
-
-            const missingInJSON = foundFiles.filter(f => !jsonKeys.has(makeSyncKey(f)));
-            const missingFiles = allEntries.filter(e => !fileKeys.has(makeSyncKey(e)));
-            const matched = foundFiles.filter(f => jsonKeys.has(makeSyncKey(f)));
-
-            const serialMismatches = matched
-                .map(f => {
-                    const key = makeSyncKey(f);
-                    const e = jsonByKey.get(key);
-                    if (!e) return null;
-                    const fileSr = normalizeStr(f.sr_no);
-                    const jsonSr = normalizeStr(e.sr_no);
-                    if (!fileSr || !jsonSr || fileSr === jsonSr) return null;
-                    return {
-                        fileSrNo: fileSr,
-                        jsonSrNo: jsonSr,
-                        name: f.name,
-                        date: f.date,
-                        edition: f.edition
-                    };
-                })
-                .filter(Boolean);
-            
-            return {
-                totalFiles: foundFiles.length,
-                totalJSON: allEntries.length,
-                matched: matched.length,
-                missingInJSON: missingInJSON,
-                missingFiles: missingFiles,
-                serialMismatches: serialMismatches
-            };
-        }
-        
-        function displaySyncReport(report) {
-            const content = document.getElementById('syncContent');
-            
-            let html = `
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-blue-900 mb-2">📊 Scan Summary</h3>
-                    <p class="text-sm text-blue-700">Files found: ${report.totalFiles}</p>
-                    <p class="text-sm text-blue-700">JSON entries: ${report.totalJSON}</p>
-                    <p class="text-sm text-blue-700">Matched: ${report.matched}</p>
-                    <p class="text-xs text-blue-700 mt-2">Matching rule: date + edition (sr_no differences are ignored)</p>
-                </div>
-            `;
-            
-            if (report.missingInJSON.length > 0) {
-                html += `
-                    <div class="bg-yellow-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-yellow-900 mb-2">⚠️ Files Not in JSON (${report.missingInJSON.length})</h3>
-                        <div class="max-h-48 overflow-y-auto">
-                            <ul class="text-sm text-yellow-700 list-disc list-inside space-y-1">
-                                ${report.missingInJSON.map(f => `<li>#${f.sr_no} - ${f.name}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (report.missingFiles.length > 0) {
-                html += `
-                    <div class="bg-red-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-red-900 mb-2">❌ JSON Entries Without Files (${report.missingFiles.length})</h3>
-                        <div class="max-h-48 overflow-y-auto">
-                            <ul class="text-sm text-red-700 list-disc list-inside space-y-1">
-                                ${report.missingFiles.map(e => `<li>#${e.sr_no} - ${e.title}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (report.serialMismatches && report.serialMismatches.length > 0) {
-                html += `
-                    <div class="bg-purple-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-purple-900 mb-2">🔢 Serial Mismatches (${report.serialMismatches.length})</h3>
-                        <p class="text-xs text-purple-700 mb-2">These files match by date+edition, but the filename serial differs from JSON sr_no.</p>
-                        <div class="max-h-48 overflow-y-auto">
-                            <ul class="text-sm text-purple-800 list-disc list-inside space-y-1">
-                                ${report.serialMismatches.map(m => `<li>File #${m.fileSrNo} → JSON #${m.jsonSrNo} — ${m.edition} ${m.date} (${m.name})</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (report.missingInJSON.length === 0 && report.missingFiles.length === 0) {
-                html += `
-                    <div class="bg-green-50 p-4 rounded-lg text-center">
-                        <svg class="w-12 h-12 text-green-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <p class="text-green-900 font-semibold">✅ Everything is in sync!</p>
-                        <p class="text-sm text-green-700 mt-2">All files match JSON entries perfectly.</p>
-                    </div>
-                `;
-            }
-            
-            content.innerHTML = html;
-            document.getElementById('syncModal').classList.add('active');
-        }
-        
-        function closeSyncModal() {
-            document.getElementById('syncModal').classList.remove('active');
-        }
-        
-        function showSyncUpdateReport(filesScanned, addedCount, updatedCount, newEntries, updatedEntries) {
-            const content = document.getElementById('syncUpdateContent');
-            
-            let html = `
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-blue-900 mb-2">📊 Scan Summary</h3>
-                    <p class="text-sm text-blue-700">Files scanned: ${filesScanned}</p>
-                </div>
-            `;
-            
-            if (addedCount > 0) {
-                html += `
-                    <div class="bg-green-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-green-900 mb-2">✅ New Entries Added: ${addedCount}</h3>
-                        <div class="max-h-48 overflow-y-auto">
-                            <p class="text-sm text-green-700">#${newEntries.join(', #')}</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (updatedCount > 0) {
-                html += `
-                    <div class="bg-yellow-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-yellow-900 mb-2">🔄 Entries Updated: ${updatedCount}</h3>
-                        <div class="max-h-48 overflow-y-auto">
-                            <p class="text-sm text-yellow-700">#${updatedEntries.join(', #')}</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (addedCount === 0 && updatedCount === 0) {
-                html += `
-                    <div class="bg-green-50 p-4 rounded-lg text-center">
-                        <svg class="w-12 h-12 text-green-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <p class="text-green-900 font-semibold">✅ Everything is up to date!</p>
-                        <p class="text-sm text-green-700 mt-2">No changes detected. All entries match the files.</p>
-                    </div>
-                `;
-            }
-            
-            content.innerHTML = html;
-            document.getElementById('syncUpdateModal').classList.add('active');
-        }
-        
-        function closeSyncUpdateModal() {
-            document.getElementById('syncUpdateModal').classList.remove('active');
         }
 
         function initializeApp() {
@@ -779,14 +457,15 @@
         }
 
         function updateStats() {
-            document.getElementById('totalCount').textContent = allEntries.length;
+            const maxSrNo = getMaxSrNo(allEntries);
+            document.getElementById('totalCount').textContent = maxSrNo;
             document.getElementById('filteredCount').textContent = filteredEntries.length;
             
             if (allEntries.length > 0) {
                 // Latest entry
-                const latest = allEntries[allEntries.length - 1];
-                document.getElementById('latestEntry').textContent = `#${latest.sr_no}`;
-                document.getElementById('currentMonth').textContent = latest.month;
+                const latest = allEntries.find(e => parseInt(e?.sr_no, 10) === maxSrNo) || allEntries[allEntries.length - 1];
+                document.getElementById('latestEntry').textContent = `#${maxSrNo}`;
+                document.getElementById('currentMonth').textContent = latest?.month || '-';
                 
                 // Month statistics
                 const monthCounts = {};
@@ -803,8 +482,14 @@
                 document.getElementById('avgPerMonth').textContent = avgPerMonth;
                 
                 // This month's count (based on latest entry month)
-                const thisMonthCount = monthCounts[latest.month] || 0;
+                const thisMonthCount = latest?.month ? (monthCounts[latest.month] || 0) : 0;
                 document.getElementById('thisMonthCount').textContent = thisMonthCount;
+            } else {
+                document.getElementById('latestEntry').textContent = '-';
+                document.getElementById('currentMonth').textContent = '-';
+                document.getElementById('totalMonths').textContent = 0;
+                document.getElementById('avgPerMonth').textContent = 0;
+                document.getElementById('thisMonthCount').textContent = 0;
             }
         }
 
@@ -858,7 +543,7 @@
                 // Month header row
                 tableHTML += `
                     <tr class="bg-blue-50">
-                        <td colspan="7" class="px-4 py-2 font-semibold text-sm">
+                        <td colspan="7" class="px-4 py-2 font-semibold text-xs">
                             <span class="text-gray-700">Month ${monthIndex + 1} -</span>
                             <span class="text-gray-700"> ${month}</span>
                             <span class="text-xs font-normal text-gray-600"> (${monthEntries.length} entries)</span>
@@ -870,19 +555,19 @@
                 monthEntries.forEach((entry, index) => {
                     tableHTML += `
                         <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${entry.sr_no}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700">${entry.edition}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700">${entry.month}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700">${entry.date}</td>
-                            <td class="px-4 py-3 text-sm font-semibold text-gray-900">
+                            <td class="px-4 py-3 text-xs font-medium text-gray-900">${entry.sr_no}</td>
+                            <td class="px-4 py-3 text-xs text-gray-700">${entry.edition}</td>
+                            <td class="px-4 py-3 text-xs text-gray-700">${entry.month}</td>
+                            <td class="px-4 py-3 text-xs text-gray-700">${entry.date}</td>
+                            <td class="px-4 py-3 text-xs font-semibold text-gray-900">
                                 <a href="${entry.link}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">
                                     ${entry.title}
                                 </a>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600 max-w-md">
+                            <td class="px-4 py-3 text-xs text-gray-600 max-w-md">
                                 <div class="line-clamp-2">${entry.summary}</div>
                             </td>
-                            <td class="px-4 py-3 text-sm">
+                            <td class="px-4 py-3 text-xs">
                                 <div class="flex gap-2 justify-center">
                                     <button onclick="openEditModal(${allEntries.indexOf(entry)})" 
                                         class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-xs">
@@ -1034,171 +719,6 @@
             };
         }
 
-        async function syncWithFoldersQuietly() {
-            // Silent background sync after loading JSON to refresh memory
-            try {
-                const dirHandle = await window.showDirectoryPicker({
-                    mode: 'read',
-                    startIn: 'documents'
-                });
-                
-                const foundFiles = await scanDirectory(dirHandle);
-                if (foundFiles.length === 0) return;
-                
-                const existingMap = new Map();
-                allEntries.forEach(e => {
-                    const key = makeSyncKey(e);
-                    if (!existingMap.has(key)) {
-                        existingMap.set(key, e);
-                    }
-                });
-                
-                foundFiles.forEach(file => {
-                    const existing = existingMap.get(makeSyncKey(file));
-                    
-                    if (existing) {
-                        const existingEdition = normalizeStr(existing.edition);
-                        const existingDate = normalizeStr(existing.date);
-                        const fileEdition = normalizeStr(file.edition);
-                        const fileDate = normalizeStr(file.date);
-                        
-                        const hasChanges = existingEdition !== fileEdition || existingDate !== fileDate;
-                        
-                        if (hasChanges) {
-                            existing.edition = file.edition;
-                            existing.date = file.date;
-                            if (file.month && !existing.month) {
-                                existing.month = file.month;
-                            }
-                        }
-                    } else {
-                        const newEntry = {
-                            sr_no: getNextSrNo(),
-                            edition: file.edition,
-                            month: file.month || '',
-                            date: file.date,
-                            title: '',
-                            link: '',
-                            summary: ''
-                        };
-                        allEntries.push(newEntry);
-                        existingMap.set(makeSyncKey(newEntry), newEntry);
-                    }
-                });
-                
-                allEntries.sort((a, b) => parseInt(a.sr_no) - parseInt(b.sr_no));
-                filteredEntries = [...allEntries];
-                initializeApp();
-                
-            } catch (error) {
-                // Silent fail - user cancelled or error, just continue with loaded JSON
-                console.log('Background sync skipped:', error.name);
-            }
-        }
-
-        async function syncWithFolders() {
-            if (allEntries.length === 0) {
-                console.warn('Please load a JSON file first using the "Load JSON" button.');
-                return;
-            }
-            
-            try {
-                // Request directory access
-                const dirHandle = await window.showDirectoryPicker({
-                    mode: 'read',
-                    startIn: 'documents'
-                });
-                
-                // Show loading message
-                const container = document.getElementById('entriesContainer');
-                container.innerHTML = '<div class="col-span-full text-center py-12"><div class="text-blue-600 text-xl font-semibold">Scanning folders...</div></div>';
-                
-                // Scan for .md files
-                const foundFiles = await scanDirectory(dirHandle);
-                
-                if (foundFiles.length === 0) {
-                    console.warn('No enamor .md files found in the selected folder.');
-                    renderEntries();
-                    return;
-                }
-                
-                // Create a map of existing entries by (date + edition) so sr_no renumbering doesn't break sync
-                const existingMap = new Map();
-                allEntries.forEach(e => {
-                    const key = makeSyncKey(e);
-                    if (!existingMap.has(key)) {
-                        existingMap.set(key, e);
-                    }
-                });
-                
-                // Update or add entries from found files
-                let addedCount = 0;
-                let updatedCount = 0;
-                const newEntries = [];
-                const updatedEntries = [];
-                
-                foundFiles.forEach(file => {
-                    const existing = existingMap.get(makeSyncKey(file));
-                    
-                    if (existing) {
-                        const existingEdition = normalizeStr(existing.edition);
-                        const existingDate = normalizeStr(existing.date);
-                        const fileEdition = normalizeStr(file.edition);
-                        const fileDate = normalizeStr(file.date);
-                        
-                        // Check if there are actual changes (only compare edition and date, NOT title)
-                        const hasChanges = existingEdition !== fileEdition || 
-                                          existingDate !== fileDate;
-                        
-                        if (hasChanges) {
-                            // Update existing entry with file info (only edition and date)
-                            existing.edition = file.edition;
-                            existing.date = file.date;
-                            // Only update month if it's empty in JSON
-                            if (file.month && !existing.month) {
-                                existing.month = file.month;
-                            }
-                            updatedCount++;
-                            updatedEntries.push(existing.sr_no);
-                        }
-                    } else {
-                        // Add new entry (title will be empty, user needs to fill it)
-                        const newEntry = {
-                            sr_no: getNextSrNo(),
-                            edition: file.edition,
-                            month: file.month || '',
-                            date: file.date,
-                            title: '',
-                            link: '',
-                            summary: ''
-                        };
-                        allEntries.push(newEntry);
-                        existingMap.set(makeSyncKey(newEntry), newEntry);
-                        addedCount++;
-                        newEntries.push(newEntry.sr_no);
-                    }
-                });
-                
-                // Sort by sr_no
-                allEntries.sort((a, b) => parseInt(a.sr_no) - parseInt(b.sr_no));
-                filteredEntries = [...allEntries];
-                
-                // Update UI immediately
-                initializeApp();
-                
-                // Show sync summary in custom modal
-                showSyncUpdateReport(foundFiles.length, addedCount, updatedCount, newEntries, updatedEntries);
-                
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    renderEntries();
-                    return; // User cancelled
-                }
-                console.error('Error syncing folders: ' + error.message);
-                renderEntries();
-            }
-        }
-
         async function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('l', 'mm', 'a4'); // Landscape for better table fit
@@ -1283,9 +803,10 @@
             
             // Statistics Section
             // Calculate statistics
-            const totalEntries = allEntries.length;
+            const maxSrNo = getMaxSrNo(allEntries);
+            const totalEntries = maxSrNo;
             const filteredCount = filteredEntries.length;
-            const latest = allEntries.length > 0 ? allEntries[allEntries.length - 1] : null;
+            const latest = allEntries.find(e => parseInt(e?.sr_no, 10) === maxSrNo) || (allEntries.length > 0 ? allEntries[allEntries.length - 1] : null);
             
             const monthCounts = {};
             allEntries.forEach(entry => {
@@ -1302,7 +823,7 @@
             const stats = [
                 { label: 'Total Entries', value: totalEntries },
                 { label: 'Filtered', value: filteredCount },
-                { label: 'Latest Entry', value: latest ? `#${latest.sr_no}` : 'N/A' },
+                { label: 'Latest Entry', value: maxSrNo ? `#${maxSrNo}` : 'N/A' },
                 { label: 'Current Month', value: latest ? latest.month : 'N/A' },
                 { label: 'Total Months', value: totalMonths },
                 { label: 'Avg/Month', value: avgPerMonth },
@@ -1379,8 +900,8 @@
                     // Table header row: use extracted banner color
                     doc.setFillColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
                     doc.rect(startX, rowTop, pageWidth - (2 * margin), baseRowHeight, 'F');
-                    const headerTextColor = getTextColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
-                    doc.setTextColor(headerTextColor[0], headerTextColor[1], headerTextColor[2]);
+                    // Force white text for header band
+                    doc.setTextColor(255, 255, 255);
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(9);
                     
@@ -1396,7 +917,7 @@
                 } else {
                     doc.setTextColor(0, 0, 0);
                     doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(8);
+                    doc.setFontSize(7);
                     
                     // Draw cells
                     const data = [
@@ -1521,10 +1042,10 @@
                 const monthBgB = Math.min(255, headerBannerColor.b + 20);
                 doc.setFillColor(monthBgR, monthBgG, monthBgB);
                 doc.rect(startX, y - 5, pageWidth - (2 * margin), baseRowHeight, 'F');
-                doc.setFontSize(9);
+                doc.setFontSize(8);
                 doc.setFont('helvetica', 'bold');
-                const monthTextColor = getTextColor(monthBgR, monthBgG, monthBgB);
-                doc.setTextColor(monthTextColor[0], monthTextColor[1], monthTextColor[2]);
+                // Force grey text for month group band
+                doc.setTextColor(110, 110, 110);
                 doc.text(`Month ${monthIndex + 1} - ${month} (${monthEntries.length} entries)`, startX + 2, y);
                 y += baseRowHeight;
                 
