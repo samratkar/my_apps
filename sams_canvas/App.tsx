@@ -82,6 +82,8 @@ const App: React.FC = () => {
   const [personName, setPersonName] = useState('');
   const [place, setPlace] = useState('Locating...');
   const [now, setNow] = useState(new Date());
+  const [isSignatureTimestampAuto, setIsSignatureTimestampAuto] = useState(true);
+  const [signatureTimestamp, setSignatureTimestamp] = useState<Date>(new Date());
   const [imageDominantColor, setImageDominantColor] = useState<string | null>(null);
   const [imageBgColor, setImageBgColor] = useState('#ffffff');
 
@@ -112,11 +114,24 @@ const App: React.FC = () => {
     init();
   }, []);
   
-  // Update time every minute
+  // Update time every minute (only when signature timestamp is set to auto)
   useEffect(() => {
+    if (!isSignatureTimestampAuto) return;
     const timer = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isSignatureTimestampAuto]);
+
+  const signatureTimestampInputValue = useMemo(() => {
+    const base = isSignatureTimestampAuto ? now : signatureTimestamp;
+
+    const pad2 = (n: number) => String(n).padStart(2, '0');
+    const yyyy = base.getFullYear();
+    const mm = pad2(base.getMonth() + 1);
+    const dd = pad2(base.getDate());
+    const hh = pad2(base.getHours());
+    const min = pad2(base.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  }, [isSignatureTimestampAuto, now, signatureTimestamp]);
 
   // Geolocation Logic
   useEffect(() => {
@@ -172,11 +187,12 @@ const App: React.FC = () => {
 
   // Format timestamp: time - day - date
   const formattedTimestamp = useMemo(() => {
-    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const day = now.toLocaleDateString([], { weekday: 'long' });
-    const date = now.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
+    const base = isSignatureTimestampAuto ? now : signatureTimestamp;
+    const time = base.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const day = base.toLocaleDateString([], { weekday: 'long' });
+    const date = base.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
     return `${time} • ${day} • ${date}`;
-  }, [now]);
+  }, [isSignatureTimestampAuto, now, signatureTimestamp]);
 
 
   // --- Handlers ---
@@ -186,7 +202,8 @@ const App: React.FC = () => {
     setIsSaving(true);
     try {
       const sessionId = currentSessionId || generateSessionId();
-      const now = new Date().toISOString();
+      const nowIso = new Date().toISOString();
+      const signatureIso = (isSignatureTimestampAuto ? now : signatureTimestamp).toISOString();
       
       const session: Session = {
         id: sessionId,
@@ -197,8 +214,9 @@ const App: React.FC = () => {
         authorName,
         personName,
         imageBgColor,
-        createdAt: currentSessionId ? (sessions.find(s => s.id === sessionId)?.createdAt || now) : now,
-        updatedAt: now,
+        signatureTimestamp: signatureIso,
+        createdAt: currentSessionId ? (sessions.find(s => s.id === sessionId)?.createdAt || nowIso) : nowIso,
+        updatedAt: nowIso,
       };
       
       await saveSession(session);
@@ -222,6 +240,13 @@ const App: React.FC = () => {
     setAuthorName(session.authorName);
     setPersonName(session.personName);
     setImageBgColor(session.imageBgColor || '#ffffff');
+
+    // Restore the user-editable signature timestamp (fallback to createdAt for older sessions)
+    const restoredSignature = session.signatureTimestamp || session.createdAt || session.updatedAt;
+    if (restoredSignature) {
+      setIsSignatureTimestampAuto(false);
+      setSignatureTimestamp(new Date(restoredSignature));
+    }
     
     // Extract dominant color from first image if exists
     if (session.images.length > 0) {
@@ -267,6 +292,9 @@ const App: React.FC = () => {
     setActiveGradient(GRADIENTS[1]);
     setImageBgColor('#ffffff');
     setImageDominantColor(null);
+    setIsSignatureTimestampAuto(true);
+    setNow(new Date());
+    setSignatureTimestamp(new Date());
     
     if (editorRef.current) {
       editorRef.current.innerHTML = '<p style="text-align: left;">Write your beautiful masterpiece here...</p>';
@@ -685,6 +713,24 @@ const App: React.FC = () => {
                         onChange={(e) => setPersonName(e.target.value)}
                         placeholder="Dedicate to..."
                         className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                    />
+                </div>
+
+                <div className="relative sm:col-span-2">
+                    <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                        type="datetime-local"
+                        value={signatureTimestampInputValue}
+                        onChange={(e) => {
+                          setIsSignatureTimestampAuto(false);
+                          const parsed = new Date(e.target.value);
+                          if (!Number.isNaN(parsed.getTime())) {
+                            setSignatureTimestamp(parsed);
+                          }
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                        title={isSignatureTimestampAuto ? 'Auto-filled (edits will switch to manual)' : 'Manual signature date/time'}
                     />
                 </div>
             </div>

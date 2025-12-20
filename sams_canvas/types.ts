@@ -21,6 +21,8 @@ export interface Session {
   authorName: string;
   personName: string;
   imageBgColor: string;
+  /** Optional: the user-editable signature timestamp shown on the card */
+  signatureTimestamp?: string;
   createdAt: string;
   updatedAt: string;
 }
