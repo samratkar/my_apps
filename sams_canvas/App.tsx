@@ -78,7 +78,7 @@ const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<'editor' | 'preview'>('editor'); // For mobile mainly
 
   // Signature State
-  const [authorName, setAuthorName] = useState('Samrat');
+  const [authorName, setAuthorName] = useState('');
   const [personName, setPersonName] = useState('');
   const [place, setPlace] = useState('Locating...');
   const [now, setNow] = useState(new Date());
