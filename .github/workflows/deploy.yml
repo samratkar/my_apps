@@ -36,9 +36,24 @@ jobs:
         run: npm run build
 
       # Build journal-scout
+      - name: Install system dependencies (journal-scout)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libvips-dev
+
       - name: Install dependencies (journal-scout)
         working-directory: ./journal-scout
-        run: npm install
+        env:
+          # Prefer system libvips to avoid flaky libvips downloads during sharp install
+          SHARP_IGNORE_GLOBAL_LIBVIPS: 0
+        run: |
+          set -e
+          for i in 1 2 3; do
+            echo "Attempt $i: npm install (journal-scout)"
+            npm install && break
+            echo "npm install failed; sleeping before retry..."
+            sleep $((i*15))
+          done
 
       - name: Build (journal-scout)
         working-directory: ./journal-scout
