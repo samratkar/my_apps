@@ -121,16 +121,22 @@ const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [isSignatureTimestampAuto]);
 
-  const signatureTimestampInputValue = useMemo(() => {
+  const signatureDateInputValue = useMemo(() => {
     const base = isSignatureTimestampAuto ? now : signatureTimestamp;
 
     const pad2 = (n: number) => String(n).padStart(2, '0');
     const yyyy = base.getFullYear();
     const mm = pad2(base.getMonth() + 1);
     const dd = pad2(base.getDate());
+    return `${yyyy}-${mm}-${dd}`;
+  }, [isSignatureTimestampAuto, now, signatureTimestamp]);
+
+  const signatureTimeInputValue = useMemo(() => {
+    const base = isSignatureTimestampAuto ? now : signatureTimestamp;
+    const pad2 = (n: number) => String(n).padStart(2, '0');
     const hh = pad2(base.getHours());
     const min = pad2(base.getMinutes());
-    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    return `${hh}:${min}`;
   }, [isSignatureTimestampAuto, now, signatureTimestamp]);
 
   // Geolocation Logic
@@ -213,6 +219,7 @@ const App: React.FC = () => {
         gradientId: activeGradient.id,
         authorName,
         personName,
+        place,
         imageBgColor,
         signatureTimestamp: signatureIso,
         createdAt: currentSessionId ? (sessions.find(s => s.id === sessionId)?.createdAt || nowIso) : nowIso,
@@ -240,6 +247,10 @@ const App: React.FC = () => {
     setAuthorName(session.authorName);
     setPersonName(session.personName);
     setImageBgColor(session.imageBgColor || '#ffffff');
+
+    if (session.place) {
+      setPlace(session.place);
+    }
 
     // Restore the user-editable signature timestamp (fallback to createdAt for older sessions)
     const restoredSignature = session.signatureTimestamp || session.createdAt || session.updatedAt;
@@ -693,46 +704,95 @@ const App: React.FC = () => {
               />
             </div>
 
-            {/* Signature Settings */}
-            <div className="border-t border-slate-800 bg-slate-900 p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 flex-shrink-0">
-                <div className="relative">
-                    <PenTool size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input 
-                        type="text" 
-                        value={authorName}
-                        onChange={(e) => setAuthorName(e.target.value)}
-                        placeholder="Author Name"
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
-                    />
-                </div>
-                <div className="relative">
-                    <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input 
-                        type="text" 
-                        value={personName}
-                        onChange={(e) => setPersonName(e.target.value)}
-                        placeholder="Dedicate to..."
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
-                    />
-                </div>
+            {/* Signature Settings (single line) */}
+            <div className="border-t border-slate-800 bg-slate-900 p-4 flex flex-nowrap gap-2 items-center overflow-x-auto flex-shrink-0">
+              <div className="relative flex-shrink-0">
+                <PenTool size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input 
+                  type="text" 
+                  value={authorName}
+                  onChange={(e) => setAuthorName(e.target.value)}
+                  placeholder="Author"
+                  className="w-[9.5rem] pl-9 pr-3 py-2 text-xs border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                />
+              </div>
 
-                <div className="relative sm:col-span-2">
-                    <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input
-                        type="datetime-local"
-                        value={signatureTimestampInputValue}
-                        onChange={(e) => {
-                          setIsSignatureTimestampAuto(false);
-                          const parsed = new Date(e.target.value);
-                          if (!Number.isNaN(parsed.getTime())) {
-                            setSignatureTimestamp(parsed);
-                          }
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
-                        title={isSignatureTimestampAuto ? 'Auto-filled (edits will switch to manual)' : 'Manual signature date/time'}
-                    />
-                </div>
+              <div className="relative flex-shrink-0">
+                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input 
+                  type="text" 
+                  value={personName}
+                  onChange={(e) => setPersonName(e.target.value)}
+                  placeholder="Dedicate"
+                  className="w-[10.5rem] pl-9 pr-3 py-2 text-xs border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                />
+              </div>
+
+              <input
+                type="date"
+                value={signatureDateInputValue}
+                onChange={(e) => {
+                  setIsSignatureTimestampAuto(false);
+                  const [yyyyStr, mmStr, ddStr] = e.target.value.split('-');
+                  const yyyy = Number(yyyyStr);
+                  const mm = Number(mmStr);
+                  const dd = Number(ddStr);
+                  if (!Number.isFinite(yyyy) || !Number.isFinite(mm) || !Number.isFinite(dd)) return;
+
+                  const base = isSignatureTimestampAuto ? now : signatureTimestamp;
+                  const merged = new Date(
+                  yyyy,
+                  mm - 1,
+                  dd,
+                  base.getHours(),
+                  base.getMinutes(),
+                  0,
+                  0
+                  );
+                  setSignatureTimestamp(merged);
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="flex-shrink-0 w-[9.25rem] px-3 py-2 text-xs border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                title={isSignatureTimestampAuto ? 'Auto-filled (edits will switch to manual)' : 'Manual signature date'}
+              />
+
+              <input
+                type="time"
+                value={signatureTimeInputValue}
+                onChange={(e) => {
+                  setIsSignatureTimestampAuto(false);
+                  const [hhStr, mmStr] = e.target.value.split(':');
+                  const hh = Number(hhStr);
+                  const min = Number(mmStr);
+                  if (!Number.isFinite(hh) || !Number.isFinite(min)) return;
+
+                  const base = isSignatureTimestampAuto ? now : signatureTimestamp;
+                  const merged = new Date(
+                  base.getFullYear(),
+                  base.getMonth(),
+                  base.getDate(),
+                  hh,
+                  min,
+                  0,
+                  0
+                  );
+                  setSignatureTimestamp(merged);
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="flex-shrink-0 w-[6.25rem] px-3 py-2 text-xs border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                title={isSignatureTimestampAuto ? 'Auto-filled (edits will switch to manual)' : 'Manual signature time'}
+              />
+
+              <div className="relative min-w-0 flex-1">
+                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="text"
+                  value={place}
+                  onChange={(e) => setPlace(e.target.value)}
+                  placeholder="Place"
+                  className="w-full min-w-[8rem] pl-9 pr-3 py-2 text-xs border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                />
+              </div>
             </div>
 
             {/* Image Manager (Mini) */}

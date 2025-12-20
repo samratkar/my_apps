@@ -20,6 +20,8 @@ export interface Session {
   gradientId: string;
   authorName: string;
   personName: string;
+  /** Optional: the user-editable place shown on the card */
+  place?: string;
   imageBgColor: string;
   /** Optional: the user-editable signature timestamp shown on the card */
   signatureTimestamp?: string;
