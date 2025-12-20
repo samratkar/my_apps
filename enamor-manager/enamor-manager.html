@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enamor Index Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .entry-card {
+            transition: all 0.3s ease;
+        }
+        .entry-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .drop-zone.dragover {
+            border-color: #667eea;
+            background: #ede9fe;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold">Enamor Index Manager</h1>
+                    <p class="text-blue-100 mt-2">Manage and explore your Enamor collection</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold" id="totalCount">0</div>
+                    <div class="text-sm text-blue-100">Total Entries</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Action Bar -->
+        <div id="actionBar" class="glass-effect rounded-lg shadow-md p-4 mb-6">
+            <div class="flex flex-nowrap gap-2 items-center overflow-x-auto">
+                <!-- Search -->
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search by title or summary..." 
+                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64 flex-shrink-0"
+                >
+                
+                <!-- Filter by Year and Month -->
+                <select id="yearFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 flex-shrink-0">
+                    <option value="">All Years</option>
+                </select>
+                <select id="monthFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 flex-shrink-0">
+                    <option value="">All Months</option>
+                </select>
+                
+                <!-- Action Buttons -->
+                <label class="cursor-pointer flex-shrink-0">
+                    <div class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        Load JSON
+                    </div>
+                    <input type="file" id="loadJsonInput" accept=".json" class="hidden" onchange="handleFileLoad(event)">
+                </label>
+                <label class="cursor-pointer flex-shrink-0">
+                    <div class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Load Header
+                    </div>
+                    <input type="file" id="loadHeaderInput" accept="image/*" class="hidden" onchange="handleHeaderLoad(event)">
+                </label>
+                <button onclick="reloadFromJSON()" class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-1 whitespace-nowrap text-sm flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Sync UI
+                </button>
+                <button onclick="backupJSON()" class="px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition flex items-center gap-1 whitespace-nowrap text-sm flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                    </svg>
+                    Backup
+                </button>
+                <button onclick="syncWithFolders()" class="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-1 whitespace-nowrap text-sm flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Sync Folders
+                </button>
+                <button onclick="exportToPDF()" class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-1 whitespace-nowrap text-sm flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Export PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div id="statsSection" class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <p class="text-gray-500 text-xs mb-1">Latest Entry</p>
+                <p class="text-xl font-bold text-blue-600" id="latestEntry">-</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <p class="text-gray-500 text-xs mb-1">Current Month</p>
+                <p class="text-xl font-bold text-purple-600" id="currentMonth">-</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <p class="text-gray-500 text-xs mb-1">Filtered Count</p>
+                <p class="text-xl font-bold text-green-600" id="filteredCount">0</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <p class="text-gray-500 text-xs mb-1">Total Months</p>
+                <p class="text-xl font-bold text-orange-600" id="totalMonths">0</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <p class="text-gray-500 text-xs mb-1">Avg/Month</p>
+                <p class="text-xl font-bold text-pink-600" id="avgPerMonth">0</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <p class="text-gray-500 text-xs mb-1">This Month</p>
+                <p class="text-xl font-bold text-indigo-600" id="thisMonthCount">0</p>
+            </div>
+        </div>
+
+        <!-- Entries Grid -->
+        <div id="entriesContainer" class="grid grid-cols-1 gap-6">
+            <div class="col-span-full bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-12 text-center">
+                <svg class="w-20 h-20 text-blue-600 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Click "Load JSON" button above</h2>
+                <p class="text-gray-600 text-lg">Select your enamor-index.json file to view all entries</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="gradient-bg text-white p-6 rounded-t-lg">
+                <h2 class="text-2xl font-bold">Edit Entry</h2>
+            </div>
+            <form id="editForm" class="p-6 space-y-4">
+                <input type="hidden" id="edit_index">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Serial No</label>
+                        <input type="text" id="edit_sr_no" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Edition</label>
+                        <input type="text" id="edit_edition" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Month</label>
+                        <input type="text" id="edit_month" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                        <input type="text" id="edit_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                    <input type="text" id="edit_title" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Link</label>
+                    <input type="text" id="edit_link" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Summary</label>
+                    <textarea id="edit_summary" rows="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                
+                <div class="flex gap-3 justify-end pt-4">
+                    <button type="button" onclick="closeEditModal()" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sync Report Modal -->
+    <div id="syncModal" class="modal">
+        <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="gradient-bg text-white p-6 rounded-t-lg">
+                <h2 class="text-2xl font-bold">Folder Sync Report</h2>
+            </div>
+            <div class="p-6">
+                <div id="syncContent" class="space-y-4">
+                    <!-- Sync report will be displayed here -->
+                </div>
+                <div class="flex gap-3 justify-end pt-4 border-t mt-4">
+                    <button type="button" onclick="closeSyncModal()" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sync Update Report Modal -->
+    <div id="syncUpdateModal" class="modal">
+        <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="gradient-bg text-white p-6 rounded-t-lg">
+                <h2 class="text-2xl font-bold">Sync Update Report</h2>
+            </div>
+            <div class="p-6">
+                <div id="syncUpdateContent" class="space-y-4">
+                    <!-- Sync update report will be displayed here -->
+                </div>
+                <div class="flex gap-3 justify-end pt-4 border-t mt-4">
+                    <button type="button" onclick="closeSyncUpdateModal()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allEntries = [];
+        let filteredEntries = [];
+        let headerImageBase64 = null;
+        let headerBannerColor = { r: 30, g: 64, b: 175 }; // Default blue
+
+        // Setup event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', filterEntries);
+            document.getElementById('yearFilter').addEventListener('change', filterEntries);
+            document.getElementById('monthFilter').addEventListener('change', filterEntries);
+            document.getElementById('editForm').addEventListener('submit', saveEntry);
+        }
+        
+        function reloadFromJSON() {
+            if (allEntries.length === 0) {
+                alert('Please load a JSON file first using the "Load JSON" button.');
+                return;
+            }
+            // Reset filters and refresh display
+            document.getElementById('searchInput').value = '';
+            document.getElementById('yearFilter').value = '';
+            document.getElementById('monthFilter').value = '';
+            filteredEntries = [...allEntries];
+            initializeApp();
+            alert('UI synced with loaded JSON data!');
+        }
+        
+        function backupJSON() {
+            if (allEntries.length === 0) {
+                alert('Please load a JSON file first using the "Load JSON" button.');
+                return;
+            }
+            
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const dataStr = JSON.stringify(allEntries, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `enamor-index-backup-${timestamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert(`Backup created successfully!\n\nFile: enamor-index-backup-${timestamp}.json`);
+        }
+        
+        function saveUpdatedJSON() {
+            const dataStr = JSON.stringify(allEntries, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'enamor-index.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            closeSyncUpdateModal();
+            alert('✅ Updated JSON downloaded!\n\nReplace your old enamor-index.json file with this new one, then reload the page and load the new JSON.');
+        }
+        
+        function handleFileLoad(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        // Validate it's an array
+                        if (!Array.isArray(data)) {
+                            throw new Error('JSON must be an array of entries');
+                        }
+                        
+                        // Validate entries have required fields
+                        if (data.length > 0) {
+                            const firstEntry = data[0];
+                            const requiredFields = ['sr_no', 'edition', 'month', 'date', 'title', 'link', 'summary'];
+                            const hasAllFields = requiredFields.every(field => field in firstEntry);
+                            
+                            if (!hasAllFields) {
+                                console.warn('Some entries may be missing fields:', firstEntry);
+                            }
+                        }
+                        
+                        allEntries = data;
+                        
+                        // Remove duplicates: keep entries with titles, remove empty duplicates
+                        const seenSrNos = new Map();
+                        allEntries = allEntries.filter(entry => {
+                            const existing = seenSrNos.get(entry.sr_no);
+                            if (!existing) {
+                                seenSrNos.set(entry.sr_no, entry);
+                                return true;
+                            }
+                            // If current has title and existing doesn't, replace
+                            if (entry.title && !existing.title) {
+                                seenSrNos.set(entry.sr_no, entry);
+                                return true;
+                            }
+                            // If existing has title, keep existing (skip current)
+                            if (existing.title) {
+                                return false;
+                            }
+                            // Both empty, keep first one
+                            return false;
+                        });
+                        
+                        filteredEntries = [...allEntries];
+                        initializeApp();
+                    } catch (error) {
+                        console.error('JSON parsing error:', error);
+                        alert(`Error loading JSON file:\n${error.message}\n\nPlease make sure you selected a valid enamor-index.json file.`);
+                    }
+                };
+                reader.onerror = () => {
+                    alert('Error reading file. Please try again.');
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        async function syncWithFolders() {
+            try {
+                // Request directory access
+                const dirHandle = await window.showDirectoryPicker({
+                    mode: 'read',
+                    startIn: 'documents'
+                });
+                
+                // Scan for .md files
+                const foundFiles = await scanDirectory(dirHandle);
+                
+                // Parse filenames and compare with JSON
+                const syncReport = compareWithJSON(foundFiles);
+                
+                // Show sync report
+                displaySyncReport(syncReport);
+                
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    return; // User cancelled
+                }
+                alert('Error accessing folder: ' + error.message);
+            }
+        }
+        
+        async function scanDirectory(dirHandle, path = '') {
+            const files = [];
+            
+            for await (const entry of dirHandle.values()) {
+                const fullPath = path ? `${path}/${entry.name}` : entry.name;
+                
+                if (entry.kind === 'file' && entry.name.endsWith('.md')) {
+                    // Parse filename: XXX-YYYY-MM-DD-eX.XX-title.md
+                    const match = entry.name.match(/(\d+)-(\d{4})-(\d{2})-(\d{2})-e(\d+)\.(\d+)-(.*?)\.md/);
+                    if (match) {
+                        const year = match[2];
+                        const monthNum = match[3];
+                        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const monthAbbr = monthNames[parseInt(monthNum) - 1];
+                        
+                        // Parse edition to match JSON format
+                        // Editions 0-6 with minor version 1 → "Enamor X" (no decimal)
+                        // All others → "Enamor X.XX" (with zero-padded minor version)
+                        const majorVersion = parseInt(match[5]);
+                        const minorVersion = parseInt(match[6]);
+                        let editionStr;
+                        
+                        if (majorVersion <= 6 && minorVersion === 1) {
+                            editionStr = `Enamor ${majorVersion}`;
+                        } else {
+                            const minorPadded = String(minorVersion).padStart(2, '0');
+                            editionStr = `Enamor ${majorVersion}.${minorPadded}`;
+                        }
+                        
+                        // Normalize sr_no: convert to number then to 2-digit string to match JSON format
+                        const normalizedSrNo = String(parseInt(match[1])).padStart(2, '0');
+                        
+                        files.push({
+                            name: entry.name,
+                            path: fullPath,
+                            sr_no: normalizedSrNo,
+                            date: `${match[3]}-${match[4]}-${match[2]}`,
+                            edition: editionStr,
+                            title: match[7].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+                            month: `${monthAbbr} ${year}`
+                        });
+                    }
+                } else if (entry.kind === 'directory' && entry.name.startsWith('enamor')) {
+                    // Recursively scan enamor folders
+                    const subFiles = await scanDirectory(entry, fullPath);
+                    files.push(...subFiles);
+                }
+            }
+            
+            return files;
+        }
+        
+        function compareWithJSON(foundFiles) {
+            const jsonSrNos = new Set(allEntries.map(e => e.sr_no));
+            const fileSrNos = new Set(foundFiles.map(f => f.sr_no));
+            
+            const missingInJSON = foundFiles.filter(f => !jsonSrNos.has(f.sr_no));
+            const missingFiles = allEntries.filter(e => !fileSrNos.has(e.sr_no));
+            const matched = foundFiles.filter(f => jsonSrNos.has(f.sr_no));
+            
+            return {
+                totalFiles: foundFiles.length,
+                totalJSON: allEntries.length,
+                matched: matched.length,
+                missingInJSON: missingInJSON,
+                missingFiles: missingFiles
+            };
+        }
+        
+        function displaySyncReport(report) {
+            const content = document.getElementById('syncContent');
+            
+            let html = `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-blue-900 mb-2">📊 Scan Summary</h3>
+                    <p class="text-sm text-blue-700">Files found: ${report.totalFiles}</p>
+                    <p class="text-sm text-blue-700">JSON entries: ${report.totalJSON}</p>
+                    <p class="text-sm text-blue-700">Matched: ${report.matched}</p>
+                </div>
+            `;
+            
+            if (report.missingInJSON.length > 0) {
+                html += `
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-yellow-900 mb-2">⚠️ Files Not in JSON (${report.missingInJSON.length})</h3>
+                        <div class="max-h-48 overflow-y-auto">
+                            <ul class="text-sm text-yellow-700 list-disc list-inside space-y-1">
+                                ${report.missingInJSON.map(f => `<li>#${f.sr_no} - ${f.name}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (report.missingFiles.length > 0) {
+                html += `
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-red-900 mb-2">❌ JSON Entries Without Files (${report.missingFiles.length})</h3>
+                        <div class="max-h-48 overflow-y-auto">
+                            <ul class="text-sm text-red-700 list-disc list-inside space-y-1">
+                                ${report.missingFiles.map(e => `<li>#${e.sr_no} - ${e.title}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (report.missingInJSON.length === 0 && report.missingFiles.length === 0) {
+                html += `
+                    <div class="bg-green-50 p-4 rounded-lg text-center">
+                        <svg class="w-12 h-12 text-green-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-green-900 font-semibold">✅ Everything is in sync!</p>
+                        <p class="text-sm text-green-700 mt-2">All files match JSON entries perfectly.</p>
+                    </div>
+                `;
+            }
+            
+            content.innerHTML = html;
+            document.getElementById('syncModal').classList.add('active');
+        }
+        
+        function closeSyncModal() {
+            document.getElementById('syncModal').classList.remove('active');
+        }
+        
+        function showSyncUpdateReport(filesScanned, addedCount, updatedCount, newEntries, updatedEntries) {
+            const content = document.getElementById('syncUpdateContent');
+            
+            let html = `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-blue-900 mb-2">📊 Scan Summary</h3>
+                    <p class="text-sm text-blue-700">Files scanned: ${filesScanned}</p>
+                </div>
+            `;
+            
+            if (addedCount > 0) {
+                html += `
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-green-900 mb-2">✅ New Entries Added: ${addedCount}</h3>
+                        <div class="max-h-48 overflow-y-auto">
+                            <p class="text-sm text-green-700">#${newEntries.join(', #')}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (updatedCount > 0) {
+                html += `
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-yellow-900 mb-2">🔄 Entries Updated: ${updatedCount}</h3>
+                        <div class="max-h-48 overflow-y-auto">
+                            <p class="text-sm text-yellow-700">#${updatedEntries.join(', #')}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (addedCount === 0 && updatedCount === 0) {
+                html += `
+                    <div class="bg-green-50 p-4 rounded-lg text-center">
+                        <svg class="w-12 h-12 text-green-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-green-900 font-semibold">✅ Everything is up to date!</p>
+                        <p class="text-sm text-green-700 mt-2">No changes detected. All entries match the files.</p>
+                    </div>
+                `;
+            }
+            
+            content.innerHTML = html;
+            document.getElementById('syncUpdateModal').classList.add('active');
+        }
+        
+        function closeSyncUpdateModal() {
+            document.getElementById('syncUpdateModal').classList.remove('active');
+        }
+
+        function initializeApp() {
+            populateMonthFilter();
+            updateStats();
+            renderEntries();
+        }
+
+        function populateMonthFilter() {
+            // Extract years from data
+            const years = new Set();
+            
+            allEntries.forEach(e => {
+                if (e.month) {
+                    // Extract year from "Month Year" format
+                    const parts = e.month.split(' ');
+                    if (parts.length === 2) {
+                        years.add(parts[1]); // Year
+                    }
+                }
+            });
+            
+            // Populate year filter
+            const yearSelect = document.getElementById('yearFilter');
+            yearSelect.innerHTML = '<option value="">All Years</option>';
+            [...years].sort().forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            });
+            
+            // Populate month filter with all 12 months
+            const monthSelect = document.getElementById('monthFilter');
+            monthSelect.innerHTML = '<option value="">All Months</option>';
+            const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            monthOrder.forEach(month => {
+                const option = document.createElement('option');
+                option.value = month;
+                option.textContent = month;
+                monthSelect.appendChild(option);
+            });
+        }
+
+        function filterEntries() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedYear = document.getElementById('yearFilter').value;
+            const selectedMonth = document.getElementById('monthFilter').value;
+            
+            // Map full month names to abbreviations
+            const monthAbbr = {
+                'January': 'Jan', 'February': 'Feb', 'March': 'Mar', 'April': 'Apr',
+                'May': 'May', 'June': 'Jun', 'July': 'Jul', 'August': 'Aug',
+                'September': 'Sep', 'October': 'Oct', 'November': 'Nov', 'December': 'Dec'
+            };
+            
+            filteredEntries = allEntries.filter(entry => {
+                const matchesSearch = !searchTerm || 
+                    entry.title.toLowerCase().includes(searchTerm) ||
+                    entry.summary.toLowerCase().includes(searchTerm);
+                
+                let matchesYear = !selectedYear;
+                let matchesMonth = !selectedMonth;
+                
+                if (entry.month) {
+                    if (selectedYear) {
+                        matchesYear = entry.month.includes(selectedYear);
+                    }
+                    if (selectedMonth) {
+                        const abbr = monthAbbr[selectedMonth];
+                        matchesMonth = entry.month.startsWith(abbr);
+                    }
+                }
+                
+                return matchesSearch && matchesYear && matchesMonth;
+            });
+            
+            updateStats();
+            renderEntries();
+        }
+
+        function updateStats() {
+            document.getElementById('totalCount').textContent = allEntries.length;
+            document.getElementById('filteredCount').textContent = filteredEntries.length;
+            
+            if (allEntries.length > 0) {
+                // Latest entry
+                const latest = allEntries[allEntries.length - 1];
+                document.getElementById('latestEntry').textContent = `#${latest.sr_no}`;
+                document.getElementById('currentMonth').textContent = latest.month;
+                
+                // Month statistics
+                const monthCounts = {};
+                allEntries.forEach(entry => {
+                    if (entry.month) {
+                        monthCounts[entry.month] = (monthCounts[entry.month] || 0) + 1;
+                    }
+                });
+                
+                const totalMonths = Object.keys(monthCounts).length;
+                const avgPerMonth = totalMonths > 0 ? (allEntries.length / totalMonths).toFixed(1) : 0;
+                
+                document.getElementById('totalMonths').textContent = totalMonths;
+                document.getElementById('avgPerMonth').textContent = avgPerMonth;
+                
+                // This month's count (based on latest entry month)
+                const thisMonthCount = monthCounts[latest.month] || 0;
+                document.getElementById('thisMonthCount').textContent = thisMonthCount;
+            }
+        }
+
+        function renderEntries() {
+            const container = document.getElementById('entriesContainer');
+            
+            if (filteredEntries.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">No entries found</div>';
+                return;
+            }
+            
+            // Group entries by month
+            const entriesByMonth = {};
+            filteredEntries.forEach(entry => {
+                const month = entry.month || 'Unknown';
+                if (!entriesByMonth[month]) {
+                    entriesByMonth[month] = [];
+                }
+                entriesByMonth[month].push(entry);
+            });
+            
+            // Sort entries by date within each month
+            Object.keys(entriesByMonth).forEach(month => {
+                entriesByMonth[month].sort((a, b) => {
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                    return dateA - dateB;
+                });
+            });
+            
+            // Sort months chronologically
+            const parseMonthYear = (monthYear) => {
+                const [month, year] = monthYear.split(' ');
+                const monthMap = {
+                    'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+                    'June': 5, 'Jul': 6, 'July': 6, 'Aug': 7, 'Sep': 8, 'Sept': 8,
+                    'Oct': 9, 'Nov': 10, 'Dec': 11
+                };
+                return new Date(parseInt(year), monthMap[month] || 0);
+            };
+            
+            const sortedMonths = Object.keys(entriesByMonth).sort((a, b) => {
+                return parseMonthYear(a) - parseMonthYear(b);
+            });
+            
+            // Build HTML with grouped entries
+            let tableHTML = '';
+            sortedMonths.forEach((month, monthIndex) => {
+                const monthEntries = entriesByMonth[month];
+                
+                // Month header row
+                tableHTML += `
+                    <tr class="bg-gradient-to-r from-blue-500 to-purple-500">
+                        <td colspan="7" class="px-4 py-3 text-white font-bold text-lg">
+                            Month ${monthIndex + 1} - ${month} <span class="text-sm font-normal">(${monthEntries.length} entries)</span>
+                        </td>
+                    </tr>
+                `;
+                
+                // Entries for this month
+                monthEntries.forEach((entry, index) => {
+                    tableHTML += `
+                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${entry.sr_no}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700">${entry.edition}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700">${entry.month}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700">${entry.date}</td>
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-900">
+                                <a href="${entry.link}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                    ${entry.title}
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600 max-w-md">
+                                <div class="line-clamp-2">${entry.summary}</div>
+                            </td>
+                            <td class="px-4 py-3 text-sm">
+                                <div class="flex gap-2 justify-center">
+                                    <button onclick="openEditModal(${allEntries.indexOf(entry)})" 
+                                        class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-xs">
+                                        Edit
+                                    </button>
+                                    <a href="${entry.link}" target="_blank" 
+                                        class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition text-xs inline-block">
+                                        View
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+            
+            container.innerHTML = `
+                <div class="col-span-full bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Sr No</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Edition</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Month</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Date</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Title</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Summary</th>
+                                    <th class="px-4 py-3 text-center text-sm font-semibold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableHTML}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openEditModal(index) {
+            const entry = allEntries[index];
+            
+            document.getElementById('edit_index').value = index;
+            document.getElementById('edit_sr_no').value = entry.sr_no;
+            document.getElementById('edit_edition').value = entry.edition;
+            document.getElementById('edit_month').value = entry.month;
+            document.getElementById('edit_date').value = entry.date;
+            document.getElementById('edit_title').value = entry.title;
+            document.getElementById('edit_link').value = entry.link;
+            document.getElementById('edit_summary').value = entry.summary;
+            
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        function saveEntry(e) {
+            e.preventDefault();
+            
+            const index = parseInt(document.getElementById('edit_index').value);
+            
+            allEntries[index] = {
+                sr_no: document.getElementById('edit_sr_no').value,
+                edition: document.getElementById('edit_edition').value,
+                month: document.getElementById('edit_month').value,
+                date: document.getElementById('edit_date').value,
+                title: document.getElementById('edit_title').value,
+                link: document.getElementById('edit_link').value,
+                summary: document.getElementById('edit_summary').value
+            };
+            
+            closeEditModal();
+            filterEntries();
+            alert('Entry updated! Don\'t forget to save the JSON file.');
+        }
+        
+        function handleHeaderLoad(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    headerImageBase64 = e.target.result;
+                    
+                    // Extract dominant color from image
+                    const img = new Image();
+                    img.onload = () => {
+                        headerBannerColor = extractDominantColor(img);
+                    };
+                    img.src = headerImageBase64;
+                };
+                reader.onerror = () => {
+                    alert('Error reading image file. Please try again.');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function extractDominantColor(img) {
+            // Create a canvas to sample the image
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Use a smaller sample size for performance
+            const sampleSize = 50;
+            canvas.width = sampleSize;
+            canvas.height = sampleSize;
+            
+            // Draw image scaled down
+            ctx.drawImage(img, 0, 0, sampleSize, sampleSize);
+            
+            // Get image data
+            const imageData = ctx.getImageData(0, 0, sampleSize, sampleSize);
+            const data = imageData.data;
+            
+            // Calculate average color (simple method)
+            let r = 0, g = 0, b = 0, count = 0;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                // Skip very light and very dark pixels
+                const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                if (brightness > 30 && brightness < 225) {
+                    r += data[i];
+                    g += data[i + 1];
+                    b += data[i + 2];
+                    count++;
+                }
+            }
+            
+            if (count === 0) count = 1; // Avoid division by zero
+            
+            return {
+                r: Math.round(r / count),
+                g: Math.round(g / count),
+                b: Math.round(b / count)
+            };
+        }
+
+        async function syncWithFoldersQuietly() {
+            // Silent background sync after loading JSON to refresh memory
+            try {
+                const dirHandle = await window.showDirectoryPicker({
+                    mode: 'read',
+                    startIn: 'documents'
+                });
+                
+                const foundFiles = await scanDirectory(dirHandle);
+                if (foundFiles.length === 0) return;
+                
+                const existingMap = new Map(allEntries.map(e => [e.sr_no, e]));
+                
+                foundFiles.forEach(file => {
+                    const existing = existingMap.get(file.sr_no);
+                    
+                    if (existing) {
+                        const normalize = (str) => String(str || '').trim();
+                        const existingEdition = normalize(existing.edition);
+                        const existingDate = normalize(existing.date);
+                        const fileEdition = normalize(file.edition);
+                        const fileDate = normalize(file.date);
+                        
+                        const hasChanges = existingEdition !== fileEdition || existingDate !== fileDate;
+                        
+                        if (hasChanges) {
+                            existing.edition = file.edition;
+                            existing.date = file.date;
+                            if (file.month && !existing.month) {
+                                existing.month = file.month;
+                            }
+                        }
+                    } else {
+                        const newEntry = {
+                            sr_no: file.sr_no,
+                            edition: file.edition,
+                            month: file.month || '',
+                            date: file.date,
+                            title: '',
+                            link: '',
+                            summary: ''
+                        };
+                        allEntries.push(newEntry);
+                    }
+                });
+                
+                allEntries.sort((a, b) => parseInt(a.sr_no) - parseInt(b.sr_no));
+                filteredEntries = [...allEntries];
+                initializeApp();
+                
+            } catch (error) {
+                // Silent fail - user cancelled or error, just continue with loaded JSON
+                console.log('Background sync skipped:', error.name);
+            }
+        }
+
+        async function syncWithFolders() {
+            if (allEntries.length === 0) {
+                alert('Please load a JSON file first using the "Load JSON" button.');
+                return;
+            }
+            
+            try {
+                // Request directory access
+                const dirHandle = await window.showDirectoryPicker({
+                    mode: 'read',
+                    startIn: 'documents'
+                });
+                
+                // Show loading message
+                const container = document.getElementById('entriesContainer');
+                container.innerHTML = '<div class="col-span-full text-center py-12"><div class="text-blue-600 text-xl font-semibold">Scanning folders...</div></div>';
+                
+                // Scan for .md files
+                const foundFiles = await scanDirectory(dirHandle);
+                
+                if (foundFiles.length === 0) {
+                    alert('No enamor .md files found in the selected folder.');
+                    renderEntries();
+                    return;
+                }
+                
+                // Create a map of existing entries by sr_no
+                const existingMap = new Map(allEntries.map(e => [e.sr_no, e]));
+                
+                // Update or add entries from found files
+                let addedCount = 0;
+                let updatedCount = 0;
+                const newEntries = [];
+                const updatedEntries = [];
+                
+                foundFiles.forEach(file => {
+                    const existing = existingMap.get(file.sr_no);
+                    
+                    if (existing) {
+                        // Normalize and trim values for comparison
+                        const normalize = (str) => String(str || '').trim();
+                        
+                        const existingEdition = normalize(existing.edition);
+                        const existingDate = normalize(existing.date);
+                        
+                        const fileEdition = normalize(file.edition);
+                        const fileDate = normalize(file.date);
+                        
+                        // Check if there are actual changes (only compare edition and date, NOT title)
+                        const hasChanges = existingEdition !== fileEdition || 
+                                          existingDate !== fileDate;
+                        
+                        if (hasChanges) {
+                            // Update existing entry with file info (only edition and date)
+                            existing.edition = file.edition;
+                            existing.date = file.date;
+                            // Only update month if it's empty in JSON
+                            if (file.month && !existing.month) {
+                                existing.month = file.month;
+                            }
+                            updatedCount++;
+                            updatedEntries.push(file.sr_no);
+                        }
+                    } else {
+                        // Add new entry (title will be empty, user needs to fill it)
+                        const newEntry = {
+                            sr_no: file.sr_no,
+                            edition: file.edition,
+                            month: file.month || '',
+                            date: file.date,
+                            title: '',
+                            link: '',
+                            summary: ''
+                        };
+                        allEntries.push(newEntry);
+                        addedCount++;
+                        newEntries.push(file.sr_no);
+                    }
+                });
+                
+                // Sort by sr_no
+                allEntries.sort((a, b) => parseInt(a.sr_no) - parseInt(b.sr_no));
+                filteredEntries = [...allEntries];
+                
+                // Update UI immediately
+                initializeApp();
+                
+                // Show sync summary in custom modal
+                showSyncUpdateReport(foundFiles.length, addedCount, updatedCount, newEntries, updatedEntries);
+                
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    renderEntries();
+                    return; // User cancelled
+                }
+                alert('Error syncing folders: ' + error.message);
+                renderEntries();
+            }
+        }
+
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape for better table fit
+            
+            // Use loaded header image if available
+            if (headerImageBase64) {
+                const img = new Image();
+                img.onload = () => generatePDF(doc, img);
+                img.onerror = () => generatePDF(doc, null);
+                img.src = headerImageBase64;
+            } else {
+                generatePDF(doc, null);
+            }
+        }
+        
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Image load failed'));
+                img.src = src;
+                setTimeout(() => reject(new Error('Image load timeout')), 3000);
+            });
+        }
+        
+        function generatePDF(doc, img) {
+            // Set elegant Helvetica font for clean appearance
+            doc.setFont('helvetica');
+            
+            // Helper function to determine if a color is light
+            const isLightColor = (r, g, b) => {
+                // Calculate relative luminance
+                const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                return luminance > 0.6; // Return true if light
+            };
+            
+            // Helper function to get appropriate text color based on background
+            const getTextColor = (bgR, bgG, bgB) => {
+                return isLightColor(bgR, bgG, bgB) ? [40, 40, 40] : [255, 255, 255];
+            };
+            
+            let y = 10;
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+            const margin = 10;
+            
+            // Calculate header band height based on image if provided
+            let headerHeight = 25; // Default height
+            let imgWidth = 0;
+            let imgHeight = 0;
+            
+            if (img) {
+                // Use original image dimensions (convert pixels to mm at 96 DPI)
+                imgWidth = (img.width * 25.4) / 96;
+                imgHeight = (img.height * 25.4) / 96;
+                headerHeight = Math.max(25, imgHeight + 4); // At least 25mm or image height + 4mm padding
+            }
+            
+            // Draw blue professional header band with calculated height
+            doc.setFillColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
+            doc.rect(0, 0, pageWidth, headerHeight, 'F');
+            doc.setFontSize(24);
+            const headerTextColor = getTextColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
+            doc.setTextColor(headerTextColor[0], headerTextColor[1], headerTextColor[2]);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ENAMOR INDEX', pageWidth / 2, 16, { align: 'center' });
+            y = headerHeight + 3;
+            
+            // Overlay header image on top if provided
+            if (img) {
+                try {
+                    // Center the image horizontally and vertically within the blue band
+                    const xPos = (pageWidth - imgWidth) / 2;
+                    const yPos = (headerHeight - imgHeight) / 2;
+                    
+                    doc.addImage(img, 'PNG', xPos, yPos, imgWidth, imgHeight, undefined, 'FAST');
+                } catch (e) {
+                    console.warn('Error adding image overlay:', e);
+                    // Blue band already drawn, just continue
+                }
+            }
+            
+            // Statistics Section
+            // Calculate statistics
+            const totalEntries = allEntries.length;
+            const filteredCount = filteredEntries.length;
+            const latest = allEntries.length > 0 ? allEntries[allEntries.length - 1] : null;
+            
+            const monthCounts = {};
+            allEntries.forEach(entry => {
+                if (entry.month) {
+                    monthCounts[entry.month] = (monthCounts[entry.month] || 0) + 1;
+                }
+            });
+            
+            const totalMonths = Object.keys(monthCounts).length;
+            const avgPerMonth = totalMonths > 0 ? (allEntries.length / totalMonths).toFixed(1) : 0;
+            const thisMonthCount = latest ? (monthCounts[latest.month] || 0) : 0;
+            
+            // Create styled stat boxes
+            const stats = [
+                { label: 'Total Entries', value: totalEntries },
+                { label: 'Filtered', value: filteredCount },
+                { label: 'Latest Entry', value: latest ? `#${latest.sr_no}` : 'N/A' },
+                { label: 'Current Month', value: latest ? latest.month : 'N/A' },
+                { label: 'Total Months', value: totalMonths },
+                { label: 'Avg/Month', value: avgPerMonth },
+                { label: 'This Month', value: thisMonthCount }
+            ];
+            
+            const boxWidth = 38;
+            const boxHeight = 14;
+            const boxGap = 2;
+            const startY = y;
+            
+            stats.forEach((stat, i) => {
+                const row = Math.floor(i / 7);
+                const col = i % 7;
+                const x = margin + (col * (boxWidth + boxGap));
+                const boxY = startY + (row * (boxHeight + boxGap));
+                
+                // Draw box with light background
+                doc.setFillColor(248, 250, 252);
+                doc.setDrawColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(x, boxY, boxWidth, boxHeight, 2, 2, 'FD');
+                
+                // Draw value (large)
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
+                doc.text(String(stat.value), x + boxWidth / 2, boxY + 7, { align: 'center' });
+                
+                // Draw label (small)
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(100, 100, 100);
+                doc.text(stat.label, x + boxWidth / 2, boxY + 11, { align: 'center' });
+            });
+            
+            y = startY + boxHeight + 6;
+            
+            // Separator line
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.2);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 6;
+            
+            // Table setup - Total width should be pageWidth - (2 * margin) = 277mm
+            const totalWidth = pageWidth - (2 * margin);
+            const colWidths = [15, 25, 22, 22, 55, 138]; // Total = 277mm
+            const startX = margin;
+            const rowHeight = 7;
+            
+            // Helper function to draw table row
+            function drawTableRow(entry, yPos, isHeader = false) {
+                let xPos = startX;
+                
+                if (isHeader) {
+                    doc.setFillColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
+                    doc.rect(startX, yPos - 5, pageWidth - (2 * margin), rowHeight, 'F');
+                    const textColor = getTextColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
+                    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(9);
+                    
+                    // Header text - centered
+                    const headers = ['Sr No', 'Edition', 'Month', 'Date', 'Title', 'Summary'];
+                    headers.forEach((text, i) => {
+                        doc.text(text, xPos + (colWidths[i] / 2), yPos, { align: 'center' });
+                        doc.setDrawColor(200, 200, 200);
+                        doc.rect(xPos, yPos - 5, colWidths[i], rowHeight);
+                        xPos += colWidths[i];
+                    });
+                } else {
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(8);
+                    // Alternating row colors
+                    if (Math.floor((yPos - y) / rowHeight) % 2 === 0) {
+                        doc.setFillColor(248, 248, 248);
+                        doc.rect(startX, yPos - 5, pageWidth - (2 * margin), rowHeight, 'F');
+                    }
+                    
+                    // Draw cells
+                    const data = [
+                        entry.sr_no,
+                        entry.edition,
+                        entry.month,
+                        entry.date,
+                        entry.title,
+                        entry.summary.substring(0, 150) + (entry.summary.length > 150 ? '...' : '')
+                    ];
+                    
+                    data.forEach((text, i) => {
+                        const cellText = doc.splitTextToSize(String(text || ''), colWidths[i] - 2);
+                        
+                        // If this is the title column (index 4) and has a link, make it blue and underlined
+                        if (i === 4 && entry.link) {
+                            doc.setTextColor(30, 64, 175); // Blue color
+                            doc.textWithLink(cellText[0], xPos + 1, yPos, { url: entry.link });
+                            doc.setTextColor(0, 0, 0); // Reset to black
+                        } else {
+                            doc.text(cellText[0], xPos + 1, yPos);
+                        }
+                        
+                        // Draw cell border
+                        doc.setDrawColor(200, 200, 200);
+                        doc.rect(xPos, yPos - 5, colWidths[i], rowHeight);
+                        
+                        xPos += colWidths[i];
+                    });
+                }
+            }
+            
+            // Group entries by month
+            const entriesByMonth = {};
+            filteredEntries.forEach(entry => {
+                const month = entry.month || 'Unknown';
+                if (!entriesByMonth[month]) {
+                    entriesByMonth[month] = [];
+                }
+                entriesByMonth[month].push(entry);
+            });
+            
+            // Sort entries by date within each month
+            Object.keys(entriesByMonth).forEach(month => {
+                entriesByMonth[month].sort((a, b) => {
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                    return dateA - dateB;
+                });
+            });
+            
+            // Sort months chronologically
+            const parseMonthYear = (monthYear) => {
+                const [month, year] = monthYear.split(' ');
+                const monthMap = {
+                    'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+                    'June': 5, 'Jul': 6, 'July': 6, 'Aug': 7, 'Sep': 8, 'Sept': 8,
+                    'Oct': 9, 'Nov': 10, 'Dec': 11
+                };
+                return new Date(parseInt(year), monthMap[month] || 0);
+            };
+            
+            const sortedMonths = Object.keys(entriesByMonth).sort((a, b) => {
+                return parseMonthYear(a) - parseMonthYear(b);
+            });
+            
+            // Draw header
+            drawTableRow(null, y, true);
+            y += rowHeight;
+            
+            // Draw data rows grouped by month
+            sortedMonths.forEach((month, monthIndex) => {
+                const monthEntries = entriesByMonth[month];
+                
+                // Draw month separator
+                if (y > pageHeight - 20) {
+                    doc.addPage();
+                    y = 15;
+                    drawTableRow(null, y, true);
+                    y += rowHeight;
+                }
+                
+                // Month header row
+                const monthBgR = Math.min(255, headerBannerColor.r + 30);
+                const monthBgG = Math.min(255, headerBannerColor.g + 30);
+                const monthBgB = Math.min(255, headerBannerColor.b + 30);
+                doc.setFillColor(monthBgR, monthBgG, monthBgB);
+                doc.rect(startX, y - 5, pageWidth - (2 * margin), rowHeight, 'F');
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                const monthTextColor = getTextColor(monthBgR, monthBgG, monthBgB);
+                doc.setTextColor(monthTextColor[0], monthTextColor[1], monthTextColor[2]);
+                doc.text(`Month ${monthIndex + 1} - ${month} (${monthEntries.length} entries)`, startX + 2, y);
+                y += rowHeight;
+                
+                // Draw entries for this month
+                monthEntries.forEach((entry, index) => {
+                    // Check if we need a new page
+                    if (y > pageHeight - 20) {
+                        doc.addPage();
+                        y = 15;
+                        // Redraw header on new page
+                        drawTableRow(null, y, true);
+                        y += rowHeight;
+                    }
+                    
+                    drawTableRow(entry, y);
+                    
+                    y += rowHeight;
+                });
+            });
+            
+            // Add footer to all pages
+            const totalPages = doc.internal.getNumberOfPages();
+            const exportDate = new Date().toLocaleDateString();
+            
+            for (let i = 1; i <= totalPages; i++) {
+                doc.setPage(i);
+                
+                // Footer background bar
+                const footerY = pageHeight - 8;
+                doc.setFillColor(headerBannerColor.r, headerBannerColor.g, headerBannerColor.b);
+                doc.rect(margin, footerY, pageWidth - (2 * margin), 5, 'F');
+                
+                // Footer text - white on colored background, all bold
+                doc.setFontSize(8);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                
+                // Exported date (left)
+                doc.text(`Exported: ${exportDate}`, margin + 2, footerY + 3.5);
+                
+                // Page number (right)
+                doc.text(`Page ${i} / ${totalPages}`, pageWidth - margin - 2, footerY + 3.5, { align: 'right' });
+            }
+            
+            doc.save(`enamor-index-${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+
+    </script>
+</body>
+</html>
