@@ -178,8 +178,33 @@
             </div>
         </div>
 
-        <!-- Entries Grid -->
-        <div id="entriesContainer" class="grid grid-cols-1 gap-6">
+        <!-- Main Content Area with Side Panel -->
+        <div class="flex gap-6">
+            <!-- Tags Side Panel -->
+            <div id="tagsSidePanel" class="hidden w-72 bg-white rounded-lg shadow-lg p-6 sticky top-6 self-start max-h-[calc(100vh-8rem)] overflow-y-auto">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                    Tags
+                </h3>
+                
+                <!-- Tag Filter Dropdown -->
+                <div class="mb-4">
+                    <select id="tagFilterSidePanel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" onchange="document.getElementById('tagFilter').value = this.value; filterEntries();">
+                        <option value="">All Tags</option>
+                    </select>
+                </div>
+                
+                <div id="tagsListContainer" class="space-y-2">
+                    <!-- Tags will be populated here -->
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 min-w-0">
+                <!-- Entries Grid -->
+                <div id="entriesContainer" class="grid grid-cols-1 gap-6">
             <div class="col-span-full bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-12 text-center">
                 <svg class="w-20 h-20 text-blue-600 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -404,6 +429,49 @@
             renderEntries();
         }
 
+        function populateTagsSidePanel() {
+            // Extract all unique tags and count articles for each
+            const tagCounts = {};
+            
+            allEntries.forEach(entry => {
+                if (entry.tag && Array.isArray(entry.tag)) {
+                    entry.tag.forEach(tag => {
+                        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                    });
+                }
+            });
+            
+            // Sort tags by count (descending) then alphabetically
+            const sortedTags = Object.entries(tagCounts).sort((a, b) => {
+                if (b[1] !== a[1]) return b[1] - a[1];
+                return a[0].localeCompare(b[0]);
+            });
+            
+            const container = document.getElementById('tagsListContainer');
+            const sidePanel = document.getElementById('tagsSidePanel');
+            
+            if (sortedTags.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-sm">No tags found</p>';
+                sidePanel.classList.add('hidden');
+                return;
+            }
+            
+            // Show side panel
+            sidePanel.classList.remove('hidden');
+            
+            // Populate tags list
+            container.innerHTML = sortedTags.map(([tag, count]) => {
+                const color = getTagColor(tag);
+                return `
+                    <div onclick="filterByTag('${tag}')" 
+                         class="flex items-center justify-between p-3 rounded-lg ${color.bg} ${color.text} cursor-pointer hover:opacity-80 transition group">
+                        <span class="font-medium text-sm">${tag}</span>
+                        <span class="bg-white bg-opacity-50 px-2 py-1 rounded text-xs font-bold">${count}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function populateTagFilter() {
             // Extract all unique tags from data
             const tags = new Set();
@@ -414,15 +482,18 @@
                 }
             });
             
-            // Populate tag filter
+            // Populate both tag filter dropdowns (main and side panel)
             const tagSelect = document.getElementById('tagFilter');
-            tagSelect.innerHTML = '<option value="">All Tags</option>';
-            [...tags].sort().forEach(tag => {
-                const option = document.createElement('option');
-                option.value = tag;
-                option.textContent = tag;
-                tagSelect.appendChild(option);
-            });
+            const tagSelectSidePanel = document.getElementById('tagFilterSidePanel');
+            
+            const optionsHTML = '<option value="">All Tags</option>' + 
+                [...tags].sort().map(tag => `<option value="${tag}">${tag}</option>`).join('');
+            
+            tagSelect.innerHTML = optionsHTML;
+            tagSelectSidePanel.innerHTML = optionsHTML;
+            
+            // Also populate the side panel
+            populateTagsSidePanel();
         }
         
         function populateMonthFilter() {
@@ -577,6 +648,7 @@
         function filterByTag(tagName) {
             // Set the tag filter dropdown to the clicked tag
             document.getElementById('tagFilter').value = tagName;
+            document.getElementById('tagFilterSidePanel').value = tagName;
             // Trigger the filter
             filterEntries();
         }
