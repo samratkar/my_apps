@@ -104,6 +104,9 @@
                     <select id="monthFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full sm:w-48">
                         <option value="">All Months</option>
                     </select>
+                    <select id="tagFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full sm:w-48">
+                        <option value="">All Tags</option>
+                    </select>
                 </div>
 
                 <!-- Right: Actions -->
@@ -285,6 +288,7 @@
             document.getElementById('searchInput').addEventListener('input', filterEntries);
             document.getElementById('yearFilter').addEventListener('change', filterEntries);
             document.getElementById('monthFilter').addEventListener('change', filterEntries);
+            document.getElementById('tagFilter').addEventListener('change', filterEntries);
             document.getElementById('editForm').addEventListener('submit', saveEntry);
         }
         
@@ -318,15 +322,30 @@
         function handleFileLoad(e) {
             const file = e.target.files[0];
             if (file) {
+                console.log('Loading file:', file.name);
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
-                        const data = JSON.parse(e.target.result);
+                        const jsonData = JSON.parse(e.target.result);
+                        console.log('Parsed JSON:', jsonData);
+                        console.log('Has entries field?', 'entries' in jsonData);
+                        console.log('Is entries an array?', Array.isArray(jsonData.entries));
+                        console.log('Is jsonData an array?', Array.isArray(jsonData));
                         
-                        // Validate it's an array
-                        if (!Array.isArray(data)) {
-                            throw new Error('JSON must be an array of entries');
+                        // Support new format with metadata and entries
+                        let data;
+                        if (jsonData.entries && Array.isArray(jsonData.entries)) {
+                            console.log('Using new format with entries field');
+                            data = jsonData.entries;
+                        } else if (Array.isArray(jsonData)) {
+                            console.log('Using old format (array)');
+                            data = jsonData;
+                        } else {
+                            console.log('JSON structure:', Object.keys(jsonData));
+                            throw new Error('JSON must be an array of entries or have an "entries" field');
                         }
+                        
+                        console.log('Data loaded:', data.length, 'entries');
                         
                         // Validate entries have required fields
                         if (data.length > 0) {
@@ -363,14 +382,16 @@
                         });
                         
                         filteredEntries = [...allEntries];
+                        console.log('Initializing app with', allEntries.length, 'entries');
                         initializeApp();
                     } catch (error) {
                         console.error('JSON parsing error:', error);
-                        console.error(`Error loading JSON file: ${error.message}`);
+                        alert(`Error loading JSON file: ${error.message}`);
                     }
                 };
                 reader.onerror = () => {
                     console.error('Error reading file. Please try again.');
+                    alert('Error reading file. Please try again.');
                 };
                 reader.readAsText(file);
             }
@@ -378,10 +399,32 @@
 
         function initializeApp() {
             populateMonthFilter();
+            populateTagFilter();
             updateStats();
             renderEntries();
         }
 
+        function populateTagFilter() {
+            // Extract all unique tags from data
+            const tags = new Set();
+            
+            allEntries.forEach(e => {
+                if (e.tag && Array.isArray(e.tag)) {
+                    e.tag.forEach(t => tags.add(t));
+                }
+            });
+            
+            // Populate tag filter
+            const tagSelect = document.getElementById('tagFilter');
+            tagSelect.innerHTML = '<option value="">All Tags</option>';
+            [...tags].sort().forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                tagSelect.appendChild(option);
+            });
+        }
+        
         function populateMonthFilter() {
             // Extract years from data
             const years = new Set();
@@ -423,6 +466,7 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const selectedYear = document.getElementById('yearFilter').value;
             const selectedMonth = document.getElementById('monthFilter').value;
+            const selectedTag = document.getElementById('tagFilter').value;
             
             // Map full month names to abbreviations
             const monthAbbr = {
@@ -438,6 +482,7 @@
                 
                 let matchesYear = !selectedYear;
                 let matchesMonth = !selectedMonth;
+                let matchesTag = !selectedTag;
                 
                 if (entry.month) {
                     if (selectedYear) {
@@ -449,7 +494,11 @@
                     }
                 }
                 
-                return matchesSearch && matchesYear && matchesMonth;
+                if (selectedTag && entry.tag && Array.isArray(entry.tag)) {
+                    matchesTag = entry.tag.includes(selectedTag);
+                }
+                
+                return matchesSearch && matchesYear && matchesMonth && matchesTag;
             });
             
             updateStats();
@@ -458,7 +507,7 @@
 
         function updateStats() {
             const maxSrNo = getMaxSrNo(allEntries);
-            document.getElementById('totalCount').textContent = maxSrNo;
+            document.getElementById('totalCount').textContent = allEntries.length;
             document.getElementById('filteredCount').textContent = filteredEntries.length;
             
             if (allEntries.length > 0) {
@@ -491,6 +540,45 @@
                 document.getElementById('avgPerMonth').textContent = 0;
                 document.getElementById('thisMonthCount').textContent = 0;
             }
+        }
+
+        function getTagColor(tag) {
+            // Predefined color palette for tags
+            const colors = [
+                { bg: 'bg-blue-100', text: 'text-blue-800' },
+                { bg: 'bg-green-100', text: 'text-green-800' },
+                { bg: 'bg-purple-100', text: 'text-purple-800' },
+                { bg: 'bg-pink-100', text: 'text-pink-800' },
+                { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+                { bg: 'bg-indigo-100', text: 'text-indigo-800' },
+                { bg: 'bg-red-100', text: 'text-red-800' },
+                { bg: 'bg-teal-100', text: 'text-teal-800' },
+                { bg: 'bg-orange-100', text: 'text-orange-800' },
+                { bg: 'bg-cyan-100', text: 'text-cyan-800' },
+                { bg: 'bg-lime-100', text: 'text-lime-800' },
+                { bg: 'bg-emerald-100', text: 'text-emerald-800' },
+                { bg: 'bg-violet-100', text: 'text-violet-800' },
+                { bg: 'bg-fuchsia-100', text: 'text-fuchsia-800' },
+                { bg: 'bg-rose-100', text: 'text-rose-800' },
+                { bg: 'bg-sky-100', text: 'text-sky-800' },
+                { bg: 'bg-amber-100', text: 'text-amber-800' }
+            ];
+            
+            // Simple hash function for consistent color assignment
+            let hash = 0;
+            for (let i = 0; i < tag.length; i++) {
+                hash = ((hash << 5) - hash) + tag.charCodeAt(i);
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            const index = Math.abs(hash) % colors.length;
+            return colors[index];
+        }
+
+        function filterByTag(tagName) {
+            // Set the tag filter dropdown to the clicked tag
+            document.getElementById('tagFilter').value = tagName;
+            // Trigger the filter
+            filterEntries();
         }
 
         function renderEntries() {
@@ -543,7 +631,7 @@
                 // Month header row
                 tableHTML += `
                     <tr class="bg-blue-50">
-                        <td colspan="7" class="px-4 py-2 font-semibold text-xs">
+                        <td colspan="8" class="px-4 py-2 font-semibold text-xs">
                             <span class="text-gray-700">Month ${monthIndex + 1} -</span>
                             <span class="text-gray-700"> ${month}</span>
                             <span class="text-xs font-normal text-gray-600"> (${monthEntries.length} entries)</span>
@@ -553,6 +641,13 @@
                 
                 // Entries for this month
                 monthEntries.forEach((entry, index) => {
+                    const tagsHTML = entry.tag && entry.tag.length > 0 
+                        ? entry.tag.map(tag => {
+                            const color = getTagColor(tag);
+                            return `<span onclick="filterByTag('${tag}')" class="inline-block ${color.bg} ${color.text} text-xs px-2 py-1 rounded mr-1 mb-1 cursor-pointer hover:opacity-80 transition">${tag}</span>`;
+                        }).join('')
+                        : '<span class="text-gray-400">-</span>';
+                    
                     tableHTML += `
                         <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
                             <td class="px-4 py-3 text-xs font-medium text-gray-900">${entry.sr_no}</td>
@@ -566,6 +661,9 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-gray-600 max-w-md">
                                 <div class="line-clamp-2">${entry.summary}</div>
+                            </td>
+                            <td class="px-4 py-3 text-xs">
+                                <div class="flex flex-wrap max-w-xs">${tagsHTML}</div>
                             </td>
                             <td class="px-4 py-3 text-xs">
                                 <div class="flex gap-2 justify-center">
@@ -596,6 +694,7 @@
                                     <th class="px-4 py-3 text-left text-sm font-semibold">Date</th>
                                     <th class="px-4 py-3 text-left text-sm font-semibold">Title</th>
                                     <th class="px-4 py-3 text-left text-sm font-semibold">Summary</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Tags</th>
                                     <th class="px-4 py-3 text-center text-sm font-semibold">Actions</th>
                                 </tr>
                             </thead>
@@ -804,7 +903,7 @@
             // Statistics Section
             // Calculate statistics
             const maxSrNo = getMaxSrNo(allEntries);
-            const totalEntries = maxSrNo;
+            const totalEntries = allEntries.length;
             const filteredCount = filteredEntries.length;
             const latest = allEntries.find(e => parseInt(e?.sr_no, 10) === maxSrNo) || (allEntries.length > 0 ? allEntries[allEntries.length - 1] : null);
             
