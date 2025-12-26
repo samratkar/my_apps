@@ -88,30 +88,41 @@
     <div class="container mx-auto px-4 py-8">
         <!-- Action Bar -->
         <div id="actionBar" class="glass-effect rounded-lg shadow-md p-4 mb-6">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <!-- Left: Search + Filters -->
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
-                    <input 
-                        type="text" 
-                        id="searchInput" 
-                        placeholder="Search by title or summary..." 
-                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-80"
-                    >
-                    
-                    <select id="yearFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full sm:w-40">
-                        <option value="">All Years</option>
-                    </select>
-                    <select id="monthFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full sm:w-48">
-                        <option value="">All Months</option>
-                    </select>
-                    <select id="tagFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full sm:w-48">
-                        <option value="">All Tags</option>
-                    </select>
-                </div>
+            <div class="flex flex-row items-center gap-2 flex-wrap">
+                <!-- Search + Filters -->
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search by title or summary..." 
+                    class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 min-w-[200px] text-sm"
+                    onkeyup="filterEntries()"
+                >
+                
+                <select id="yearFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-28 text-sm" onchange="filterEntries()">
+                    <option value="">All Years</option>
+                </select>
+                <select id="monthFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-32 text-sm" onchange="filterEntries()">
+                    <option value="">All Months</option>
+                </select>
+                <select id="tagFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-32 text-sm" onchange="document.getElementById('tagFilterSidePanel').value = this.value; filterEntries();">
+                    <option value="">All Tags</option>
+                </select>
+                
+                <button onclick="showAll()" class="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Show All
+                </button>
+                <button onclick="jumpToTopics()" class="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Jump to Topics
+                </button>
 
-                <!-- Right: Actions -->
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap md:justify-end">
-                    <label class="cursor-pointer">
+                <!-- Actions -->
+                <label class="cursor-pointer">
                     <div class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -141,7 +152,6 @@
                     </svg>
                     Export PDF
                 </button>
-                </div>
             </div>
         </div>
 
@@ -178,10 +188,10 @@
             </div>
         </div>
 
-        <!-- Main Content Area with Side Panel -->
-        <div class="flex gap-6">
-            <!-- Tags Side Panel -->
-            <div id="tagsSidePanel" class="hidden w-72 bg-white rounded-lg shadow-lg p-6 sticky top-6 self-start max-h-[calc(100vh-8rem)] overflow-y-auto">
+        <!-- Main Content Area with Side Panels -->
+        <div class="flex gap-4">
+            <!-- Tags Side Panel (Left) -->
+            <div id="tagsSidePanel" class="hidden w-56 bg-white rounded-lg shadow-lg p-4 sticky top-6 self-start max-h-[calc(100vh-8rem)] overflow-y-auto flex-shrink-0">
                 <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
@@ -202,7 +212,7 @@
             </div>
 
             <!-- Main Content -->
-            <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0 overflow-x-auto">
                 <!-- Entries Grid -->
                 <div id="entriesContainer" class="grid grid-cols-1 gap-6">
             <div class="col-span-full bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-12 text-center">
@@ -211,6 +221,24 @@
                 </svg>
                 <h2 class="text-3xl font-bold text-gray-800 mb-3">Click "Load JSON" button above</h2>
                 <p class="text-gray-600 text-lg">Select your enamor-index.json file to view all entries</p>
+            </div>
+        </div>
+            </div>
+
+            <!-- Topics/Subtopics Side Panel (Right) -->
+            <div id="topicsPanel" class="hidden w-64 bg-white rounded-lg shadow-lg sticky top-6 self-start max-h-[calc(100vh-8rem)] overflow-y-auto flex-shrink-0">
+                <div class="p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Topics & Subtopics
+                    </h3>
+                    
+                    <div id="topicsListContainer" class="space-y-2">
+                        <!-- Topics will be populated here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -261,6 +289,23 @@
                     <textarea id="edit_summary" rows="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
                 
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tags (comma-separated)</label>
+                    <input type="text" id="edit_tag" placeholder="e.g., reflection, travel, wisdom" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Enter tags separated by commas</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Topic</label>
+                        <input type="text" id="edit_topic" placeholder="e.g., Philosophy, Technology" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Subtopic</label>
+                        <input type="text" id="edit_subtopic" placeholder="e.g., Ethics, AI" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                
                 <div class="flex gap-3 justify-end pt-4">
                     <button type="button" onclick="closeEditModal()" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                         Cancel
@@ -270,6 +315,47 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Summary Modal -->
+    <div id="summaryModal" class="modal">
+        <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="gradient-bg text-white p-6 rounded-t-lg flex justify-between items-center">
+                <h2 class="text-2xl font-bold" id="summaryModalTitle">Entry Summary</h2>
+                <button onclick="closeSummaryModal()" class="text-white hover:text-gray-200 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <div class="text-sm text-gray-600 mb-2">
+                        <span class="font-semibold">Edition:</span> <span id="summaryEdition"></span> |
+                        <span class="font-semibold">Date:</span> <span id="summaryDate"></span>
+                    </div>
+                    <div class="text-sm text-gray-600 mb-2">
+                        <span class="font-semibold">Tags:</span> <span id="summaryTags"></span>
+                    </div>
+                    <div class="text-sm text-gray-600 mb-2" id="summaryTopicContainer" style="display: none;">
+                        <span class="font-semibold">Topic:</span> <span id="summaryTopic"></span>
+                    </div>
+                </div>
+                <div class="border-t pt-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Summary</h3>
+                    <div id="summaryContent" class="text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
+                </div>
+                <div class="mt-6 flex gap-3 justify-end">
+                    <a id="summaryViewLink" href="#" target="_blank" 
+                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        View Full Article
+                    </a>
+                    <button onclick="closeSummaryModal()" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        Close
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -422,6 +508,26 @@
             }
         }
 
+        function cleanSummary(summary) {
+            if (!summary) return '';
+            
+            // Remove YAML front matter (--- ... ---)
+            let cleaned = summary.replace(/^---\s*\n[\s\S]*?\n---\s*\n/gm, '');
+            
+            // Remove specific YAML front matter keys at the beginning
+            cleaned = cleaned.replace(/^layout\s*:\s*[^\n]*\s*/i, '');
+            cleaned = cleaned.replace(/^title\s*:\s*[^\n]*\s*/i, '');
+            cleaned = cleaned.replace(/^date\s*:\s*[^\n]*\s*/i, '');
+            cleaned = cleaned.replace(/^tag\s*:\s*[^\n]*\s*/i, '');
+            cleaned = cleaned.replace(/^topic\s*:\s*[^\n]*\s*/i, '');
+            cleaned = cleaned.replace(/^subtopic\s*:\s*[^\n]*\s*/i, '');
+            
+            // Remove excess whitespace
+            cleaned = cleaned.replace(/\s+/g, ' ').trim();
+            
+            return cleaned;
+        }
+
         function initializeApp() {
             populateMonthFilter();
             populateTagFilter();
@@ -430,6 +536,7 @@
         }
 
         function populateTagsSidePanel() {
+            console.log('Populating tags side panel...');
             // Extract all unique tags and count articles for each
             const tagCounts = {};
             
@@ -440,6 +547,8 @@
                     });
                 }
             });
+            
+            console.log('Tag counts:', tagCounts);
             
             // Sort tags by count (descending) then alphabetically
             const sortedTags = Object.entries(tagCounts).sort((a, b) => {
@@ -470,6 +579,7 @@
                     </div>
                 `;
             }).join('');
+            console.log('Tags side panel populated with', sortedTags.length, 'tags');
         }
 
         function populateTagFilter() {
@@ -494,6 +604,13 @@
             
             // Also populate the side panel
             populateTagsSidePanel();
+            
+            // Show tags side panel
+            document.getElementById('tagsSidePanel').classList.remove('hidden');
+            
+            // Show and build topics panel
+            document.getElementById('topicsPanel').classList.remove('hidden');
+            buildTopicsPanel();
         }
         
         function populateMonthFilter() {
@@ -576,6 +693,18 @@
             renderEntries();
         }
 
+        function showAll() {
+            // Clear all filters
+            document.getElementById('searchInput').value = '';
+            document.getElementById('yearFilter').value = '';
+            document.getElementById('monthFilter').value = '';
+            document.getElementById('tagFilter').value = '';
+            document.getElementById('tagFilterSidePanel').value = '';
+            
+            // Trigger filter to show all entries
+            filterEntries();
+        }
+
         function updateStats() {
             const maxSrNo = getMaxSrNo(allEntries);
             document.getElementById('totalCount').textContent = allEntries.length;
@@ -613,6 +742,173 @@
             }
         }
 
+        function buildTopicsPanel() {
+            const topicsMap = {};
+            
+            // Build hierarchical structure: topic -> subtopics -> entries
+            allEntries.forEach((entry, index) => {
+                const topic = entry.topic || '';
+                const subtopic = entry.subtopic || '';
+                
+                if (topic) {
+                    if (!topicsMap[topic]) {
+                        topicsMap[topic] = { subtopics: {}, entries: [] };
+                    }
+                    
+                    if (subtopic) {
+                        if (!topicsMap[topic].subtopics[subtopic]) {
+                            topicsMap[topic].subtopics[subtopic] = [];
+                        }
+                        topicsMap[topic].subtopics[subtopic].push({ entry, index });
+                    } else {
+                        topicsMap[topic].entries.push({ entry, index });
+                    }
+                }
+            });
+            
+            // Sort topics alphabetically
+            const sortedTopics = Object.keys(topicsMap).sort();
+            
+            if (sortedTopics.length === 0) {
+                document.getElementById('topicsListContainer').innerHTML = `
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-xs text-gray-600 mb-2">
+                            <span class="font-semibold">No topics defined yet.</span>
+                        </p>
+                        <p class="text-xs text-gray-500 mb-3">
+                            Topics help organize your entries by theme. Click "Edit" on any entry to add topics and subtopics.
+                        </p>
+                        <div class="bg-white rounded p-2 text-xs text-gray-600">
+                            <p class="font-semibold mb-1">Example structure:</p>
+                            <div class="ml-2">
+                                <div>📁 <span class="font-semibold">Philosophy</span></div>
+                                <div class="ml-4">→ Ethics</div>
+                                <div class="ml-4">→ Metaphysics</div>
+                                <div class="mt-2">📁 <span class="font-semibold">Travel</span></div>
+                                <div class="ml-4">→ Europe</div>
+                                <div class="ml-4">→ Asia</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Build HTML for topics panel
+            let html = '';
+            sortedTopics.forEach(topic => {
+                const topicData = topicsMap[topic];
+                const totalCount = topicData.entries.length + 
+                    Object.values(topicData.subtopics).reduce((sum, arr) => sum + arr.length, 0);
+                
+                const subtopics = Object.keys(topicData.subtopics).sort();
+                
+                html += `
+                    <div class="border border-gray-200 rounded-lg overflow-hidden mb-2">
+                        <div class="bg-gradient-to-r from-purple-50 to-blue-50 px-3 py-2 cursor-pointer hover:bg-purple-100 transition"
+                             onclick="toggleTopic('topic-${topic.replace(/\s+/g, '-')}')">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-semibold text-gray-800">${topic}</span>
+                                <span class="text-xs bg-purple-600 text-white px-2 py-1 rounded-full">${totalCount}</span>
+                            </div>
+                        </div>
+                        <div id="topic-${topic.replace(/\s+/g, '-')}" class="hidden bg-white">
+                `;
+                
+                // Add entries directly under topic (without subtopic)
+                if (topicData.entries.length > 0) {
+                    topicData.entries.forEach(({ entry, index }) => {
+                        html += `
+                            <div class="px-4 py-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition"
+                                 onclick="showEntrySummary(${index})">
+                                <div class="text-xs font-medium text-gray-700">${entry.title}</div>
+                                <div class="text-xs text-gray-500">#${entry.sr_no} - ${entry.date}</div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Add subtopics
+                subtopics.forEach(subtopic => {
+                    const subtopicEntries = topicData.subtopics[subtopic];
+                    html += `
+                        <div class="border-t border-gray-200">
+                            <div class="bg-blue-50 px-4 py-2 cursor-pointer hover:bg-blue-100 transition"
+                                 onclick="toggleSubtopic('subtopic-${topic.replace(/\s+/g, '-')}-${subtopic.replace(/\s+/g, '-')}')">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-gray-700 ml-2">→ ${subtopic}</span>
+                                    <span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">${subtopicEntries.length}</span>
+                                </div>
+                            </div>
+                            <div id="subtopic-${topic.replace(/\s+/g, '-')}-${subtopic.replace(/\s+/g, '-')}" class="hidden">
+                    `;
+                    
+                    subtopicEntries.forEach(({ entry, index }) => {
+                        html += `
+                            <div class="px-6 py-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition"
+                                 onclick="showEntrySummary(${index})">
+                                <div class="text-xs font-medium text-gray-700">${entry.title}</div>
+                                <div class="text-xs text-gray-500">#${entry.sr_no} - ${entry.date}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('topicsListContainer').innerHTML = html;
+        }
+        
+        function toggleTopic(topicId) {
+            const element = document.getElementById(topicId);
+            element.classList.toggle('hidden');
+        }
+        
+        function toggleSubtopic(subtopicId) {
+            const element = document.getElementById(subtopicId);
+            element.classList.toggle('hidden');
+        }
+        
+        function showEntrySummary(index) {
+            const entry = allEntries[index];
+            const rowId = `entry-row-${entry.sr_no}`;
+            const targetRow = document.getElementById(rowId);
+            
+            if (targetRow) {
+                // Remove previous highlights
+                document.querySelectorAll('tr[data-entry-index]').forEach(row => {
+                    row.classList.remove('bg-yellow-100', 'ring-2', 'ring-yellow-400');
+                });
+                
+                // Highlight the target row
+                targetRow.classList.add('bg-yellow-100', 'ring-2', 'ring-yellow-400');
+                
+                // Scroll to the entry in the main table
+                targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Remove highlight after 3 seconds
+                setTimeout(() => {
+                    targetRow.classList.remove('bg-yellow-100', 'ring-2', 'ring-yellow-400');
+                }, 3000);
+            }
+        }
+        
+        function jumpToTopics() {
+            const topicsPanel = document.getElementById('topicsPanel');
+            if (topicsPanel && !topicsPanel.classList.contains('hidden')) {
+                topicsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
         function getTagColor(tag) {
             // Predefined color palette for tags
             const colors = [
@@ -703,7 +999,7 @@
                 // Month header row
                 tableHTML += `
                     <tr class="bg-blue-50">
-                        <td colspan="8" class="px-4 py-2 font-semibold text-xs">
+                        <td colspan="7" class="px-4 py-2 font-semibold text-xs">
                             <span class="text-gray-700">Month ${monthIndex + 1} -</span>
                             <span class="text-gray-700"> ${month}</span>
                             <span class="text-xs font-normal text-gray-600"> (${monthEntries.length} entries)</span>
@@ -721,33 +1017,35 @@
                         : '<span class="text-gray-400">-</span>';
                     
                     tableHTML += `
-                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                        <tr id="entry-row-${entry.sr_no}" class="border-b border-gray-200 hover:bg-gray-50 transition" data-entry-index="${allEntries.indexOf(entry)}">
                             <td class="px-4 py-3 text-xs font-medium text-gray-900">${entry.sr_no}</td>
                             <td class="px-4 py-3 text-xs text-gray-700">${entry.edition}</td>
                             <td class="px-4 py-3 text-xs text-gray-700">${entry.month}</td>
                             <td class="px-4 py-3 text-xs text-gray-700">${entry.date}</td>
-                            <td class="px-4 py-3 text-xs font-semibold text-gray-900">
-                                <a href="${entry.link}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">
+                            <td class="px-4 py-3 text-xs font-semibold text-gray-900 max-w-[200px]">
+                                <a href="${entry.link}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline truncate block">
                                     ${entry.title}
                                 </a>
                             </td>
-                            <td class="px-4 py-3 text-xs text-gray-600 max-w-md">
-                                <div class="line-clamp-2">${entry.summary}</div>
-                            </td>
-                            <td class="px-4 py-3 text-xs">
-                                <div class="flex flex-wrap max-w-xs">${tagsHTML}</div>
-                            </td>
-                            <td class="px-4 py-3 text-xs">
-                                <div class="flex gap-2 justify-center">
+                            <td class="px-2 py-3 text-xs">
+                                <div class="flex gap-1 justify-center">
                                     <button onclick="openEditModal(${allEntries.indexOf(entry)})" 
-                                        class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-xs">
-                                        Edit
+                                        class="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition" title="Edit">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                        </svg>
                                     </button>
-                                    <a href="${entry.link}" target="_blank" 
-                                        class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition text-xs inline-block">
-                                        View
-                                    </a>
+                                    <button onclick="openSummaryModal(${allEntries.indexOf(entry)})" 
+                                        class="p-1.5 bg-gray-600 text-white rounded hover:bg-gray-700 transition" title="View Summary">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </button>
                                 </div>
+                            </td>
+                            <td class="px-4 py-3 text-xs">
+                                <div class="flex flex-wrap max-w-[100px]">${tagsHTML}</div>
                             </td>
                         </tr>
                     `;
@@ -757,17 +1055,16 @@
             container.innerHTML = `
                 <div class="col-span-full bg-white rounded-lg shadow-lg overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="w-full">
+                        <table class="w-full min-w-max">
                             <thead>
                                 <tr class="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                                    <th class="px-4 py-3 text-left text-sm font-semibold">Sr No</th>
-                                    <th class="px-4 py-3 text-left text-sm font-semibold">Edition</th>
-                                    <th class="px-4 py-3 text-left text-sm font-semibold">Month</th>
-                                    <th class="px-4 py-3 text-left text-sm font-semibold">Date</th>
-                                    <th class="px-4 py-3 text-left text-sm font-semibold">Title</th>
-                                    <th class="px-4 py-3 text-left text-sm font-semibold">Summary</th>
-                                    <th class="px-4 py-3 text-left text-sm font-semibold">Tags</th>
-                                    <th class="px-4 py-3 text-center text-sm font-semibold">Actions</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold w-16">Sr No</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold w-20">Edition</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold w-24">Month</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold w-24">Date</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold w-48">Title</th>
+                                    <th class="px-2 py-3 text-center text-sm font-semibold w-16">Actions</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold w-24">Tags</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -790,12 +1087,55 @@
             document.getElementById('edit_title').value = entry.title;
             document.getElementById('edit_link').value = entry.link;
             document.getElementById('edit_summary').value = entry.summary;
+            document.getElementById('edit_tag').value = (entry.tag && Array.isArray(entry.tag)) ? entry.tag.join(', ') : '';
+            document.getElementById('edit_topic').value = entry.topic || '';
+            document.getElementById('edit_subtopic').value = entry.subtopic || '';
             
             document.getElementById('editModal').classList.add('active');
         }
 
         function closeEditModal() {
             document.getElementById('editModal').classList.remove('active');
+        }
+
+        function openSummaryModal(index) {
+            const entry = allEntries[index];
+            
+            document.getElementById('summaryModalTitle').textContent = entry.title;
+            document.getElementById('summaryEdition').textContent = entry.edition;
+            document.getElementById('summaryDate').textContent = entry.date;
+            
+            // Tags
+            const tagsHTML = entry.tag && entry.tag.length > 0 
+                ? entry.tag.map(tag => {
+                    const color = getTagColor(tag);
+                    return `<span class="${color.bg} ${color.text} text-xs px-2 py-1 rounded mr-1">${tag}</span>`;
+                  }).join('')
+                : '<span class="text-gray-400">None</span>';
+            document.getElementById('summaryTags').innerHTML = tagsHTML;
+            
+            // Topic/Subtopic
+            if (entry.topic) {
+                document.getElementById('summaryTopicContainer').style.display = 'block';
+                const topicText = entry.subtopic 
+                    ? `${entry.topic} → ${entry.subtopic}`
+                    : entry.topic;
+                document.getElementById('summaryTopic').textContent = topicText;
+            } else {
+                document.getElementById('summaryTopicContainer').style.display = 'none';
+            }
+            
+            // Summary
+            document.getElementById('summaryContent').textContent = cleanSummary(entry.summary) || 'No summary available.';
+            
+            // View link
+            document.getElementById('summaryViewLink').href = entry.link;
+            
+            document.getElementById('summaryModal').classList.add('active');
+        }
+
+        function closeSummaryModal() {
+            document.getElementById('summaryModal').classList.remove('active');
         }
 
         function applyEditFormToEntry() {
@@ -811,7 +1151,13 @@
                 date: document.getElementById('edit_date').value,
                 title: document.getElementById('edit_title').value,
                 link: document.getElementById('edit_link').value,
-                summary: document.getElementById('edit_summary').value
+                summary: document.getElementById('edit_summary').value,
+                tag: document.getElementById('edit_tag').value
+                    .split(',')
+                    .map(t => t.trim())
+                    .filter(t => t.length > 0),
+                topic: document.getElementById('edit_topic').value.trim(),
+                subtopic: document.getElementById('edit_subtopic').value.trim()
             };
 
             hasUnsavedChanges = true;
@@ -822,8 +1168,13 @@
             try {
                 applyEditFormToEntry();
                 closeEditModal();
+                // Repopulate tag filters and side panel to include new tags
+                populateTagFilter();
+                // Rebuild topics panel to include new topics/subtopics
+                buildTopicsPanel();
+                // Re-filter and render to show updated entry with new tags
                 filterEntries();
-                console.log('Entry updated. Use Export JSON to download when ready.');
+                console.log('Entry updated. Tag filters and side panel refreshed.');
             } catch (err) {
                 console.error(err.message || String(err));
             }
