@@ -1392,26 +1392,36 @@
             
             // Table setup - Total width should be pageWidth - (2 * margin) = 277mm
             const totalWidth = pageWidth - (2 * margin);
-            const colWidths = [15, 25, 22, 22, 55, 138]; // Total = 277mm
+            const colWidths = [15, 25, 22, 22, 50, 143]; // Adjusted: reduced Title, increased Summary
             const startX = margin;
             const baseRowHeight = 7;
             const lineHeight = 3.2;
             
-            // Helper function to draw table row
-            function forceBreakLongTokens(text, chunkSize = 26) {
-                const raw = String(text || '').replace(/\s+/g, ' ').trim();
-                if (!raw) return '';
-                return raw
-                    .split(' ')
-                    .map(token => {
-                        if (token.length <= chunkSize) return token;
-                        const parts = [];
-                        for (let i = 0; i < token.length; i += chunkSize) {
-                            parts.push(token.slice(i, i + chunkSize));
+            // Helper function to break long words that exceed column width
+            function breakLongWords(text, maxWidth) {
+                if (!text) return '';
+                const words = String(text).split(' ');
+                const result = [];
+                
+                for (const word of words) {
+                    if (doc.getTextWidth(word) > maxWidth) {
+                        // Break long word into smaller chunks that fit
+                        let chunk = '';
+                        for (const char of word) {
+                            const testChunk = chunk + char;
+                            if (doc.getTextWidth(testChunk) > maxWidth) {
+                                if (chunk) result.push(chunk);
+                                chunk = char;
+                            } else {
+                                chunk = testChunk;
+                            }
                         }
-                        return parts.join(' ');
-                    })
-                    .join(' ');
+                        if (chunk) result.push(chunk);
+                    } else {
+                        result.push(word);
+                    }
+                }
+                return result.join(' ');
             }
 
             function drawTableRow(entry, yPos, isHeader = false, stripeIndex = 0) {
@@ -1448,13 +1458,16 @@
                         entry.month,
                         entry.date,
                         entry.title,
-                        entry.summary
+                        cleanSummary(entry.summary) // Clean summary before display
                     ];
 
+                    // First break long words, then split to size
                     const wrappedByCol = data.map((text, i) => {
-                        const normalized = forceBreakLongTokens(text);
-                        return doc.splitTextToSize(normalized, colWidths[i] - 2);
+                        const cellWidth = colWidths[i] - 2; // Padding
+                        const brokenText = breakLongWords(text, cellWidth);
+                        return doc.splitTextToSize(brokenText, cellWidth);
                     });
+                    
                     const maxLines = Math.max(1, ...wrappedByCol.map(lines => (lines?.length || 1)));
                     const rowHeight = baseRowHeight + (maxLines - 1) * lineHeight;
 
@@ -1494,7 +1507,7 @@
                                     doc.text(lineText, cellCenterX, lineY, { align: 'center' });
                                 }
                             } else {
-                                // Summary stays left-aligned
+                                // Summary stays left-aligned with padding
                                 doc.text(lineText, xPos + 1, lineY);
                             }
                         }
