@@ -6,6 +6,7 @@
     <title>Enamor Index Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -113,12 +114,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
                     Show All
-                </button>
-                <button onclick="jumpToTopics()" class="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Jump to Topics
                 </button>
 
                 <!-- Actions -->
@@ -1248,11 +1243,11 @@
             // Use loaded header image if available
             if (headerImageBase64) {
                 const img = new Image();
-                img.onload = () => generatePDF(doc, img);
-                img.onerror = () => generatePDF(doc, null);
+                img.onload = async () => await generatePDF(doc, img);
+                img.onerror = async () => await generatePDF(doc, null);
                 img.src = headerImageBase64;
             } else {
-                generatePDF(doc, null);
+                await generatePDF(doc, null);
             }
         }
         
@@ -1266,7 +1261,27 @@
             });
         }
         
-        function generatePDF(doc, img) {
+        async function generatePDF(doc, img) {
+            try {
+                // Pre-load all emojis from the data
+                const allEmojis = new Set();
+                filteredEntries.forEach(entry => {
+                    const titleEmojis = extractEmojis(entry.title || '');
+                    const summaryEmojis = extractEmojis(cleanSummary(entry.summary || ''));
+                    titleEmojis.forEach(e => allEmojis.add(e));
+                    summaryEmojis.forEach(e => allEmojis.add(e));
+                });
+                
+                // Load all emoji images
+                if (allEmojis.size > 0) {
+                    console.log('Loading', allEmojis.size, 'unique emojis...');
+                    await Promise.all([...allEmojis].map(emoji => loadEmojiImage(emoji)));
+                    console.log('Emojis loaded!');
+                }
+            } catch (error) {
+                console.warn('Error loading emojis:', error);
+            }
+            
             // Set elegant Helvetica font for clean appearance
             doc.setFont('helvetica');
             
@@ -1392,36 +1407,359 @@
             
             // Table setup - Total width should be pageWidth - (2 * margin) = 277mm
             const totalWidth = pageWidth - (2 * margin);
-            const colWidths = [15, 25, 22, 22, 50, 143]; // Adjusted: reduced Title, increased Summary
+            const colWidths = [15, 25, 22, 22, 50, 143];
             const startX = margin;
             const baseRowHeight = 7;
             const lineHeight = 3.2;
             
-            // Helper function to break long words that exceed column width
-            function breakLongWords(text, maxWidth) {
-                if (!text) return '';
-                const words = String(text).split(' ');
-                const result = [];
+            // Get Twemoji CDN URL for an emoji
+            function getTwemojiUrl(emoji) {
+                const codePoints = [];
+                for (const char of emoji) {
+                    const code = char.codePointAt(0);
+                    if (code) codePoints.push(code.toString(16));
+                }
+                return `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${codePoints.join('-')}.png`;
+            }
+            
+            // Cache for loaded emoji images
+            const emojiImageCache = {};
+            
+            // Load emoji image and cache it
+            function loadEmojiImage(emoji) {
+                if (emojiImageCache[emoji]) {
+                    return Promise.resolve(emojiImageCache[emoji]);
+                }
                 
-                for (const word of words) {
-                    if (doc.getTextWidth(word) > maxWidth) {
-                        // Break long word into smaller chunks that fit
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 72;
+                        canvas.height = 72;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, 72, 72);
+                        const dataUrl = canvas.toDataURL('image/png');
+                        emojiImageCache[emoji] = dataUrl;
+                        resolve(dataUrl);
+                    };
+                    img.onerror = () => {
+                        emojiImageCache[emoji] = null;
+                        resolve(null);
+                    };
+                    img.src = getTwemojiUrl(emoji);
+                });
+            }
+            
+            // Extract all emojis from text
+            function extractEmojis(text) {
+                if (!text) return [];
+                const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
+                return [...text.matchAll(emojiRegex)].map(m => m[0]);
+            }
+            
+            // Split text into segments of text and emojis
+            function splitTextAndEmojis(text) {
+                if (!text) return [];
+                const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
+                const parts = [];
+                let lastIndex = 0;
+                
+                const matches = [...text.matchAll(emojiRegex)];
+                matches.forEach(match => {
+                    if (match.index > lastIndex) {
+                        parts.push({ type: 'text', content: text.slice(lastIndex, match.index) });
+                    }
+                    parts.push({ type: 'emoji', content: match[0] });
+                    lastIndex = match.index + match[0].length;
+                });
+                
+                if (lastIndex < text.length) {
+                    parts.push({ type: 'text', content: text.slice(lastIndex) });
+                }
+                
+                return parts;
+            }
+            
+            // Render text with inline emoji images
+            function renderTextWithEmojis(doc, parts, xStart, y, maxWidth, fontSize = 7) {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(fontSize);
+                
+                const lines = [];
+                let currentLine = [];
+                let currentWidth = 0;
+                const emojiSize = fontSize * 0.4; // Emoji size in mm
+                const spaceWidth = doc.getTextWidth(' ');
+                
+                parts.forEach(part => {
+                    if (part.type === 'text') {
+                        const words = part.content.split(/\s+/);
+                        words.forEach((word, idx) => {
+                            if (!word) return;
+                            
+                            const wordWidth = doc.getTextWidth(word);
+                            const addSpace = idx > 0 || currentLine.length > 0;
+                            const testWidth = currentWidth + wordWidth + (addSpace ? spaceWidth : 0);
+                            
+                            if (testWidth > maxWidth && currentLine.length > 0) {
+                                lines.push(currentLine);
+                                currentLine = [{ type: 'text', content: word }];
+                                currentWidth = wordWidth;
+                            } else {
+                                if (addSpace && currentLine.length > 0) {
+                                    currentLine.push({ type: 'text', content: ' ' });
+                                    currentWidth += spaceWidth;
+                                }
+                                currentLine.push({ type: 'text', content: word });
+                                currentWidth += wordWidth;
+                            }
+                        });
+                    } else if (part.type === 'emoji') {
+                        const testWidth = currentWidth + emojiSize;
+                        if (testWidth > maxWidth && currentLine.length > 0) {
+                            lines.push(currentLine);
+                            currentLine = [part];
+                            currentWidth = emojiSize;
+                        } else {
+                            currentLine.push(part);
+                            currentWidth += emojiSize;
+                        }
+                    }
+                });
+                
+                if (currentLine.length > 0) {
+                    lines.push(currentLine);
+                }
+                
+                return lines;
+            }
+            
+            // Convert emojis to text descriptions for PDF rendering
+            function convertEmojisToText(text) {
+                if (!text) return '';
+                
+                const emojiMap = {
+                    '😀': '[grinning]', '😃': '[grinning big]', '😄': '[smile]', '😁': '[beaming]',
+                    '😆': '[laughing]', '😅': '[sweat smile]', '🤣': '[rofl]', '😂': '[joy]',
+                    '🙂': '[smile]', '🙃': '[upside down]', '😉': '[wink]', '😊': '[blush]',
+                    '😇': '[angel]', '🥰': '[hearts]', '😍': '[heart eyes]', '🤩': '[star eyes]',
+                    '😘': '[kiss]', '😗': '[kissing]', '😚': '[kissing]', '😙': '[kissing smile]',
+                    '😋': '[yum]', '😛': '[tongue]', '😜': '[wink tongue]', '🤪': '[zany]',
+                    '😝': '[squint tongue]', '🤑': '[money mouth]', '🤗': '[hugging]', '🤭': '[hand over mouth]',
+                    '🤫': '[shushing]', '🤔': '[thinking]', '🤐': '[zipper mouth]', '🤨': '[raised eyebrow]',
+                    '😐': '[neutral]', '😑': '[expressionless]', '😶': '[no mouth]', '😏': '[smirk]',
+                    '😒': '[unamused]', '🙄': '[eye roll]', '😬': '[grimace]', '🤥': '[lying]',
+                    '😌': '[relieved]', '😔': '[pensive]', '😪': '[sleepy]', '🤤': '[drool]',
+                    '😴': '[sleeping]', '😷': '[mask]', '🤒': '[thermometer]', '🤕': '[bandage]',
+                    '🤢': '[nauseated]', '🤮': '[vomit]', '🤧': '[sneeze]', '🥵': '[hot]',
+                    '🥶': '[cold]', '😵': '[dizzy]', '🤯': '[mind blown]', '🥴': '[woozy]',
+                    '😎': '[cool]', '🤓': '[nerd]', '🧐': '[monocle]', '😕': '[confused]',
+                    '😟': '[worried]', '🙁': '[frown]', '☹️': '[frown]', '😮': '[gasp]',
+                    '😯': '[surprised]', '😲': '[astonished]', '😳': '[flushed]', '🥺': '[pleading]',
+                    '😦': '[frowning]', '😧': '[anguished]', '😨': '[fearful]', '😰': '[anxious]',
+                    '😥': '[sad]', '😢': '[crying]', '😭': '[sobbing]', '😱': '[scream]',
+                    '😖': '[confounded]', '😣': '[persevere]', '😞': '[disappointed]', '😓': '[downcast]',
+                    '😩': '[weary]', '😫': '[tired]', '🥱': '[yawn]', '😤': '[triumph]',
+                    '😡': '[angry]', '😠': '[mad]', '🤬': '[cursing]', '😈': '[devil]',
+                    '👿': '[angry devil]', '💀': '[skull]', '☠️': '[skull bones]', '💩': '[poop]',
+                    '🤡': '[clown]', '👹': '[ogre]', '👺': '[goblin]', '👻': '[ghost]',
+                    '👽': '[alien]', '👾': '[space invader]', '🤖': '[robot]', '🎃': '[pumpkin]',
+                    '😺': '[cat smile]', '😸': '[cat grin]', '😹': '[cat joy]', '😻': '[cat hearts]',
+                    '😼': '[cat smirk]', '😽': '[cat kiss]', '🙀': '[cat scream]', '😿': '[cat cry]',
+                    '😾': '[cat pout]', '❤️': '[heart]', '🧡': '[orange heart]', '💛': '[yellow heart]',
+                    '💚': '[green heart]', '💙': '[blue heart]', '💜': '[purple heart]', '🖤': '[black heart]',
+                    '🤍': '[white heart]', '🤎': '[brown heart]', '💔': '[broken heart]', '❣️': '[heart exclamation]',
+                    '💕': '[two hearts]', '💞': '[revolving hearts]', '💓': '[beating heart]', '💗': '[growing heart]',
+                    '💖': '[sparkling heart]', '💘': '[arrow heart]', '💝': '[heart box]', '💟': '[heart decoration]',
+                    '☮️': '[peace]', '✝️': '[cross]', '☪️': '[star crescent]', '🕉️': '[om]',
+                    '☸️': '[dharma]', '✡️': '[star of david]', '🔯': '[dotted six star]', '🕎': '[menorah]',
+                    '☯️': '[yin yang]', '☦️': '[orthodox cross]', '🛐': '[worship]', '⛎': '[ophiuchus]',
+                    '♈': '[aries]', '♉': '[taurus]', '♊': '[gemini]', '♋': '[cancer]',
+                    '♌': '[leo]', '♍': '[virgo]', '♎': '[libra]', '♏': '[scorpio]',
+                    '♐': '[sagittarius]', '♑': '[capricorn]', '♒': '[aquarius]', '♓': '[pisces]',
+                    '🆔': '[ID]', '⚛️': '[atom]', '🉑': '[accept]', '☢️': '[radioactive]',
+                    '☣️': '[biohazard]', '📴': '[mobile off]', '📳': '[vibrate]', '🆚': '[vs]',
+                    '💮': '[white flower]', '🉐': '[bargain]', '㊙️': '[secret]', '㊗️': '[congratulations]',
+                    '🈴': '[passing]', '🈵': '[full]', '🈹': '[discount]', '🈲': '[prohibited]',
+                    '🅰️': '[A]', '🅱️': '[B]', '🆎': '[AB]', '🆑': '[CL]',
+                    '🅾️': '[O]', '🆘': '[SOS]', '❌': '[X]', '⭕': '[O]',
+                    '🛑': '[stop]', '⛔': '[no entry]', '📛': '[name badge]', '🚫': '[prohibited]',
+                    '💯': '[100]', '💢': '[anger]', '♨️': '[hot springs]', '🚷': '[no pedestrians]',
+                    '🚯': '[no litter]', '🚳': '[no bikes]', '🚱': '[no water]', '🔞': '[18+]',
+                    '📵': '[no phones]', '🚭': '[no smoking]', '❗': '[!]', '❕': '[!]',
+                    '❓': '[?]', '❔': '[?]', '‼️': '[!!]', '⁉️': '[!?]',
+                    '🔅': '[dim]', '🔆': '[bright]', '〽️': '[part alternation]', '⚠️': '[warning]',
+                    '🚸': '[children crossing]', '🔱': '[trident]', '⚜️': '[fleur de lis]', '🔰': '[beginner]',
+                    '♻️': '[recycle]', '✅': '[check]', '🈯': '[reserved]', '💹': '[chart up]',
+                    '❇️': '[sparkle]', '✳️': '[*]', '❎': '[x mark]', '🌐': '[globe]',
+                    '💠': '[diamond]', 'Ⓜ️': '[M]', '🌀': '[cyclone]', '💤': '[zzz]',
+                    '🏧': '[ATM]', '🚾': '[WC]', '♿': '[wheelchair]', '🅿️': '[P]',
+                    '🈳': '[vacancy]', '🈂️': '[sa]', '🛂': '[passport]', '🛃': '[customs]',
+                    '🛄': '[baggage]', '🛅': '[left luggage]', '🚹': '[men]', '🚺': '[women]',
+                    '🚼': '[baby]', '🚻': '[restroom]', '🚮': '[litter bin]', '🎦': '[cinema]',
+                    '📶': '[signal]', '🈁': '[here]', '🔣': '[symbols]', 'ℹ️': '[info]',
+                    '🔤': '[abc]', '🔡': '[abcd]', '🔠': '[ABCD]', '🆖': '[NG]',
+                    '🆗': '[OK]', '🆙': '[UP]', '🆒': '[COOL]', '🆕': '[NEW]',
+                    '🆓': '[FREE]', '0️⃣': '[0]', '1️⃣': '[1]', '2️⃣': '[2]',
+                    '3️⃣': '[3]', '4️⃣': '[4]', '5️⃣': '[5]', '6️⃣': '[6]',
+                    '7️⃣': '[7]', '8️⃣': '[8]', '9️⃣': '[9]', '🔟': '[10]',
+                    '👍': '[thumbs up]', '👎': '[thumbs down]', '👌': '[ok hand]', '✌️': '[peace]',
+                    '🤞': '[fingers crossed]', '🤟': '[love you]', '🤘': '[rock]', '🤙': '[call me]',
+                    '👈': '[left]', '👉': '[right]', '👆': '[up]', '👇': '[down]',
+                    '☝️': '[point up]', '✋': '[hand]', '🤚': '[raised hand]', '🖐️': '[hand]',
+                    '🖖': '[vulcan]', '👋': '[wave]', '🤙': '[call]', '💪': '[muscle]',
+                    '🦾': '[mech arm]', '🖕': '[middle finger]', '✍️': '[writing]', '🙏': '[pray]',
+                    '🦶': '[foot]', '🦵': '[leg]', '🦷': '[tooth]', '🦴': '[bone]',
+                    '👀': '[eyes]', '👁️': '[eye]', '👅': '[tongue]', '👄': '[lips]',
+                    '💋': '[kiss mark]', '🩸': '[blood]', '👶': '[baby]', '👧': '[girl]',
+                    '🧒': '[child]', '👦': '[boy]', '👩': '[woman]', '🧑': '[person]',
+                    '👨': '[man]', '👩‍🦱': '[woman red hair]', '👨‍🦱': '[man red hair]', '👩‍🦰': '[woman red hair]',
+                    '✨': '[sparkles]', '⭐': '[star]', '🌟': '[glowing star]', '💫': '[dizzy]',
+                    '🔥': '[fire]', '💥': '[boom]', '💦': '[sweat drops]', '💨': '[dash]',
+                    '🌈': '[rainbow]', '☀️': '[sun]', '🌤️': '[sun cloud]', '⛅': '[cloud sun]',
+                    '🌥️': '[cloud]', '☁️': '[cloud]', '🌦️': '[sun rain]', '🌧️': '[rain]',
+                    '⛈️': '[storm]', '🌩️': '[lightning]', '🌨️': '[snow]', '❄️': '[snowflake]',
+                    '☃️': '[snowman]', '⛄': '[snowman]', '💧': '[droplet]', '💦': '[sweat]',
+                    '🌊': '[wave]', '🎉': '[party]', '🎊': '[confetti]', '🎈': '[balloon]',
+                    '🎁': '[gift]', '🎀': '[ribbon]', '🎂': '[cake]', '🍰': '[shortcake]',
+                    '🧁': '[cupcake]', '🥳': '[party face]', '🎯': '[target]', '🎭': '[drama]',
+                    '🎨': '[art]', '🎬': '[clapper]', '🎤': '[mic]', '🎧': '[headphone]',
+                    '🎼': '[music]', '🎹': '[piano]', '🥁': '[drum]', '🎷': '[sax]',
+                    '🎺': '[trumpet]', '🎸': '[guitar]', '🪕': '[banjo]', '🎻': '[violin]',
+                    '🎲': '[dice]', '♟️': '[pawn]', '🎳': '[bowling]', '🎮': '[game]',
+                    '🎰': '[slot]', '🧩': '[puzzle]', '🚗': '[car]', '🚕': '[taxi]',
+                    '🚙': '[SUV]', '🚌': '[bus]', '🚎': '[trolley]', '🏎️': '[race car]',
+                    '🚓': '[police]', '🚑': '[ambulance]', '🚒': '[fire truck]', '🚐': '[minibus]',
+                    '🛻': '[pickup]', '🚚': '[truck]', '🚛': '[semi]', '🚜': '[tractor]',
+                    '🏍️': '[motorcycle]', '🛵': '[scooter]', '🚲': '[bike]', '🛴': '[kick scooter]',
+                    '✈️': '[plane]', '🛩️': '[small plane]', '🛫': '[takeoff]', '🛬': '[landing]',
+                    '🚀': '[rocket]', '🛸': '[UFO]', '🚁': '[helicopter]', '🛶': '[canoe]',
+                    '⛵': '[sailboat]', '🚤': '[speedboat]', '🛥️': '[motor boat]', '🛳️': '[ship]',
+                    '⚓': '[anchor]', '🪝': '[hook]', '⛽': '[fuel]', '🚧': '[construction]',
+                    '🚦': '[traffic light]', '🚥': '[light]', '🏁': '[checkered flag]', '🎌': '[crossed flags]',
+                    '⚽': '[soccer]', '⚾': '[baseball]', '🥎': '[softball]', '🏀': '[basketball]',
+                    '🏐': '[volleyball]', '🏈': '[football]', '🏉': '[rugby]', '🎾': '[tennis]',
+                    '🥏': '[frisbee]', '🎳': '[bowling]', '🏏': '[cricket]', '🏑': '[field hockey]',
+                    '🏒': '[ice hockey]', '🥍': '[lacrosse]', '🏓': '[ping pong]', '🏸': '[badminton]',
+                    '🥊': '[boxing]', '🥋': '[martial arts]', '🥅': '[goal]', '⛳': '[golf]',
+                    '⛸️': '[skate]', '🎣': '[fishing]', '🤿': '[diving]', '🎽': '[running shirt]',
+                    '🎿': '[ski]', '🛷': '[sled]', '🥌': '[curling]', '🎯': '[bullseye]',
+                    '🪀': '[yoyo]', '🪁': '[kite]', '🎱': '[8ball]', '🔮': '[crystal ball]',
+                    '🪄': '[wand]', '🧿': '[nazar]', '🎮': '[controller]', '🕹️': '[joystick]',
+                    '🎰': '[slots]', '🎲': '[dice]', '🧩': '[puzzle piece]', '🧸': '[teddy]',
+                    '🪅': '[pinata]', '🪆': '[nesting dolls]', '♠️': '[spade]', '♥️': '[heart]',
+                    '♦️': '[diamond]', '♣️': '[club]', '♟️': '[chess]', '🃏': '[joker]',
+                    '🀄': '[mahjong]', '🎴': '[flower cards]', '🎭': '[theater]', '🖼️': '[frame]',
+                    '🎨': '[palette]', '🧵': '[thread]', '🪡': '[needle]', '🧶': '[yarn]',
+                    '📚': '[books]', '📖': '[book]', '📕': '[red book]', '📗': '[green book]',
+                    '📘': '[blue book]', '📙': '[orange book]', '📓': '[notebook]', '📔': '[book]',
+                    '📒': '[ledger]', '📃': '[page]', '📜': '[scroll]', '📄': '[page]',
+                    '📰': '[newspaper]', '🗞️': '[paper]', '📑': '[bookmark]', '🔖': '[bookmark]',
+                    '🏷️': '[label]', '💰': '[money bag]', '💴': '[yen]', '💵': '[dollar]',
+                    '💶': '[euro]', '💷': '[pound]', '💸': '[money wings]', '💳': '[card]',
+                    '🧾': '[receipt]', '💹': '[chart]', '💱': '[exchange]', '💲': '[$]',
+                    '✉️': '[envelope]', '📧': '[email]', '📨': '[incoming]', '📩': '[envelope arrow]',
+                    '📤': '[outbox]', '📥': '[inbox]', '📦': '[package]', '📫': '[mailbox]',
+                    '📪': '[mailbox down]', '📬': '[mailbox up]', '📭': '[mailbox no mail]', '📮': '[postbox]',
+                    '🗳️': '[ballot]', '✏️': '[pencil]', '✒️': '[pen]', '🖋️': '[fountain pen]',
+                    '🖊️': '[pen]', '🖌️': '[brush]', '🖍️': '[crayon]', '📝': '[memo]',
+                    '💼': '[briefcase]', '📁': '[folder]', '📂': '[open folder]', '🗂️': '[dividers]',
+                    '📅': '[calendar]', '📆': '[calendar]', '🗒️': '[notepad]', '🗓️': '[calendar]',
+                    '📇': '[card index]', '📈': '[chart up]', '📉': '[chart down]', '📊': '[bar chart]',
+                    '📋': '[clipboard]', '📌': '[pin]', '📍': '[pin]', '📎': '[paperclip]',
+                    '🖇️': '[linked clips]', '📏': '[ruler]', '📐': '[triangle]', '✂️': '[scissors]',
+                    '🗃️': '[card box]', '🗄️': '[filing cabinet]', '🗑️': '[trash]', '🔒': '[locked]',
+                    '🔓': '[unlocked]', '🔏': '[locked pen]', '🔐': '[locked key]', '🔑': '[key]',
+                    '🗝️': '[old key]', '🔨': '[hammer]', '🪓': '[axe]', '⛏️': '[pick]',
+                    '⚒️': '[hammer pick]', '🛠️': '[tools]', '🗡️': '[dagger]', '⚔️': '[crossed swords]',
+                    '🔫': '[pistol]', '🪃': '[boomerang]', '🏹': '[bow]', '🛡️': '[shield]',
+                    '🪚': '[saw]', '🔧': '[wrench]', '🪛': '[screwdriver]', '🔩': '[nut]',
+                    '⚙️': '[gear]', '🗜️': '[clamp]', '⚖️': '[scale]', '🦯': '[cane]',
+                    '🔗': '[link]', '⛓️': '[chains]', '🪝': '[hook]', '🧰': '[toolbox]',
+                    '🧲': '[magnet]', '🪜': '[ladder]', '⚗️': '[alembic]', '🧪': '[test tube]',
+                    '🧫': '[petri]', '🧬': '[DNA]', '🔬': '[microscope]', '🔭': '[telescope]',
+                    '📡': '[satellite]', '💉': '[syringe]', '🩸': '[blood drop]', '💊': '[pill]',
+                    '🩹': '[bandaid]', '🩺': '[stethoscope]', '🚪': '[door]', '🛗': '[elevator]',
+                    '🪞': '[mirror]', '🪟': '[window]', '🛏️': '[bed]', '🛋️': '[couch]',
+                    '🪑': '[chair]', '🚽': '[toilet]', '🪠': '[plunger]', '🚿': '[shower]',
+                    '🛁': '[bathtub]', '🪤': '[trap]', '🪒': '[razor]', '🧴': '[lotion]',
+                    '🧷': '[safety pin]', '🧹': '[broom]', '🧺': '[basket]', '🧻': '[toilet paper]',
+                    '🪣': '[bucket]', '🧼': '[soap]', '🪥': '[toothbrush]', '🧽': '[sponge]',
+                    '🧯': '[extinguisher]', '🛒': '[cart]', '🚬': '[cigarette]', '⚰️': '[coffin]',
+                    '🪦': '[headstone]', '⚱️': '[urn]', '🗿': '[moai]', '🪧': '[placard]'
+                };
+                
+                let result = String(text);
+                
+                // Replace known emojis
+                for (const [emoji, replacement] of Object.entries(emojiMap)) {
+                    result = result.split(emoji).join(replacement);
+                }
+                
+                // Replace any remaining emojis with generic placeholder
+                result = result.replace(/[\u{1F300}-\u{1F9FF}|\u{2600}-\u{26FF}|\u{2700}-\u{27BF}]/gu, '[emoji]');
+                
+                return result;
+            }
+            
+            // Manual word wrapping function - builds lines word by word
+            function wrapText(text, maxWidth, fontSize = 7) {
+                if (!text) return [''];
+                
+                // Convert emojis to text before processing
+                text = convertEmojisToText(text);
+                
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(fontSize);
+                
+                const words = String(text).split(/\s+/);
+                const lines = [];
+                let currentLine = '';
+                
+                for (let i = 0; i < words.length; i++) {
+                    let word = words[i];
+                    
+                    // If word itself is too long, break it
+                    while (doc.getTextWidth(word) > maxWidth) {
                         let chunk = '';
-                        for (const char of word) {
-                            const testChunk = chunk + char;
+                        for (let j = 0; j < word.length; j++) {
+                            const testChunk = chunk + word[j];
                             if (doc.getTextWidth(testChunk) > maxWidth) {
-                                if (chunk) result.push(chunk);
-                                chunk = char;
+                                if (chunk) {
+                                    if (currentLine) {
+                                        lines.push(currentLine);
+                                        currentLine = '';
+                                    }
+                                    lines.push(chunk);
+                                }
+                                chunk = word[j];
                             } else {
                                 chunk = testChunk;
                             }
                         }
-                        if (chunk) result.push(chunk);
+                        word = chunk;
+                    }
+                    
+                    const testLine = currentLine ? currentLine + ' ' + word : word;
+                    const testWidth = doc.getTextWidth(testLine);
+                    
+                    if (testWidth > maxWidth) {
+                        if (currentLine) {
+                            lines.push(currentLine);
+                        }
+                        currentLine = word;
                     } else {
-                        result.push(word);
+                        currentLine = testLine;
                     }
                 }
-                return result.join(' ');
+                
+                if (currentLine) {
+                    lines.push(currentLine);
+                }
+                
+                return lines.length > 0 ? lines : [''];
             }
 
             function drawTableRow(entry, yPos, isHeader = false, stripeIndex = 0) {
@@ -1461,11 +1799,11 @@
                         cleanSummary(entry.summary) // Clean summary before display
                     ];
 
-                    // First break long words, then split to size
+                    // Use manual wrapping with proper width calculation
                     const wrappedByCol = data.map((text, i) => {
-                        const cellWidth = colWidths[i] - 2; // Padding
-                        const brokenText = breakLongWords(text, cellWidth);
-                        return doc.splitTextToSize(brokenText, cellWidth);
+                        const cellPadding = 6; // Extra padding
+                        const cellWidth = colWidths[i] - cellPadding;
+                        return wrapText(text, cellWidth, 7);
                     });
                     
                     const maxLines = Math.max(1, ...wrappedByCol.map(lines => (lines?.length || 1)));
@@ -1479,10 +1817,10 @@
                     
                     wrappedByCol.forEach((lines, i) => {
                         const safeLines = Array.isArray(lines) ? lines : [String(lines || '')];
-
+                        
                         // Draw wrapped text lines within the cell
                         for (let li = 0; li < safeLines.length; li++) {
-                            const lineText = safeLines[li];
+                            const lineText = String(safeLines[li] || '');
                             const lineY = yPos + (li * lineHeight);
 
                             const isSummaryCol = i === 5;
@@ -1508,7 +1846,7 @@
                                 }
                             } else {
                                 // Summary stays left-aligned with padding
-                                doc.text(lineText, xPos + 1, lineY);
+                                doc.text(lineText, xPos + 2, lineY);
                             }
                         }
 
@@ -1587,8 +1925,28 @@
                 // Draw entries for this month
                 let stripeIndex = 0;
                 monthEntries.forEach((entry) => {
-                    // Check if we need a new page (conservative)
-                    if (y > pageHeight - 20) {
+                    // Pre-calculate row height to check if it fits on current page
+                    const tempData = [
+                        entry.sr_no,
+                        entry.edition,
+                        entry.month,
+                        entry.date,
+                        entry.title,
+                        cleanSummary(entry.summary)
+                    ];
+                    
+                    const tempWrapped = tempData.map((text, i) => {
+                        const cellPadding = 6;
+                        const cellWidth = colWidths[i] - cellPadding;
+                        const parts = splitTextAndEmojis(String(text || ''));
+                        return renderTextWithEmojis(doc, parts, 0, 0, cellWidth, 7);
+                    });
+                    
+                    const tempMaxLines = Math.max(1, ...tempWrapped.map(lines => (lines?.length || 1)));
+                    const estimatedRowHeight = baseRowHeight + (tempMaxLines - 1) * lineHeight;
+                    
+                    // Check if row will fit on current page (with margin for safety)
+                    if (y + estimatedRowHeight > pageHeight - 15) {
                         doc.addPage();
                         y = 15;
                         // Redraw header on new page
