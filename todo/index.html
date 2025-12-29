@@ -1297,11 +1297,15 @@
         function editTask(projectIndex, todoIndex) {
             const todo = todoData.projects[projectIndex].todos[todoIndex];
             const todoItem = document.getElementById(`todo-${projectIndex}-${todoIndex}`);
+            const titleDiv = todoItem.querySelector('.todo-title');
             const descDiv = document.getElementById(`desc-${projectIndex}-${todoIndex}`);
             const metaDiv = document.getElementById(`meta-${projectIndex}-${todoIndex}`);
             
             // Add edit mode class
             todoItem.classList.add('edit-mode');
+            
+            // Replace title with input
+            titleDiv.innerHTML = `<input type="text" class="edit-input" id="edit-title-${projectIndex}-${todoIndex}" value="${todo.title}" style="font-size: 1em; font-weight: 600; margin-bottom: 6px;">`;
             
             // Replace description with textarea
             descDiv.innerHTML = `<textarea class="edit-textarea" id="edit-desc-${projectIndex}-${todoIndex}">${todo.description || ''}</textarea>`;
@@ -1324,15 +1328,17 @@
                 </div>
             `;
         }
-
+        
         // Save task
         function saveTask(projectIndex, todoIndex) {
+            const newTitle = document.getElementById(`edit-title-${projectIndex}-${todoIndex}`).value;
             const newDescription = document.getElementById(`edit-desc-${projectIndex}-${todoIndex}`).value;
             const newPriority = document.getElementById(`edit-priority-${projectIndex}-${todoIndex}`).value;
             const newDueDate = document.getElementById(`edit-date-${projectIndex}-${todoIndex}`).value;
             const tagsInput = document.getElementById(`edit-tags-${projectIndex}-${todoIndex}`).value;
             const newTags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
             
+            todoData.projects[projectIndex].todos[todoIndex].title = newTitle;
             todoData.projects[projectIndex].todos[todoIndex].description = newDescription;
             todoData.projects[projectIndex].todos[todoIndex].priority = newPriority;
             todoData.projects[projectIndex].todos[todoIndex].dueDate = newDueDate;
@@ -1444,19 +1450,23 @@
 
         // Auto-load todos.yml on page load
         window.addEventListener('DOMContentLoaded', async () => {
+            console.log('Attempting to load todos.yml...');
             try {
                 const response = await fetch('todos.yml');
+                console.log('Fetch response:', response.status, response.ok);
                 if (response.ok) {
                     const text = await response.text();
+                    console.log('YML content loaded, length:', text.length);
                     todoData = jsyaml.load(text);
+                    console.log('YML parsed successfully, projects:', todoData.projects?.length);
                     renderTodos();
                     showNotification('Data loaded successfully!', 'success');
                 } else {
-                    // File doesn't exist or can't be loaded, show empty state
+                    console.log('Response not OK:', response.status, response.statusText);
                     console.log('No default todos.yml found, starting with empty state');
                 }
             } catch (error) {
-                // Failed to load, just show empty state
+                console.error('Error loading todos.yml:', error);
                 console.log('Could not load default data:', error.message);
             }
         });
