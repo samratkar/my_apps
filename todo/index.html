@@ -139,7 +139,93 @@
         }
 
         .content {
+            display: flex;
+            gap: 20px;
             padding: 30px;
+        }
+
+        .sidebar {
+            flex: 0 0 250px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.1em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .tag-search {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .tag-search:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tag-filter {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tag-filter:hover {
+            background: #e9ecef;
+        }
+
+        .tag-filter.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tag-filter-name {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .tag-filter-count {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+        }
+
+        .tag-filter.active .tag-filter-count {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
         }
 
         .stats {
@@ -303,6 +389,23 @@
             margin-top: 10px;
         }
 
+        .task-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .task-tag {
+            background: #e9ecef;
+            color: #495057;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 600;
+            border: 1px solid #dee2e6;
+        }
+
         .priority-badge {
             padding: 3px 8px;
             border-radius: 12px;
@@ -393,6 +496,15 @@
             .btn {
                 width: 100%;
                 justify-content: center;
+            }
+
+            .content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                flex: 1;
+                position: static;
             }
 
             .projects-grid {
@@ -718,7 +830,18 @@
         </div>
 
         <div class="content">
-            <div class="stats" id="stats">
+            <div class="sidebar">
+                <h3>🏷️ Filter by Tags</h3>
+                <input type="text" class="tag-search" id="tagSearch" placeholder="Search tags...">
+                <div class="tag-list" id="tagList">
+                    <div class="tag-filter active" onclick="filterByTag(null)">
+                        <span class="tag-filter-name">All Tasks</span>
+                        <span class="tag-filter-count" id="allTagCount">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="main-content">
+                <div class="stats" id="stats">
                 <div class="stat-card">
                     <h3 id="totalTasks">0</h3>
                     <p>Total Tasks</p>
@@ -745,6 +868,7 @@
                 </svg>
                 <h3>No To-Dos Yet</h3>
                 <p>Load a YML file or sample data to get started</p>
+            </div>
             </div>
         </div>
     </div>
@@ -809,6 +933,10 @@
                         <option value="completed">Completed</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="taskTags">Tags (comma-separated)</label>
+                    <input type="text" id="taskTags" placeholder="e.g., work, urgent, meeting">
+                </div>
                 <button type="submit" class="btn btn-primary">Add Task</button>
             </form>
         </div>
@@ -817,6 +945,7 @@
     <script>
         let todoData = null;
         let hideCompleted = false;
+        let selectedTag = null;
 
         // Load YML file
         document.getElementById('fileInput').addEventListener('change', async (event) => {
@@ -902,11 +1031,23 @@
             renderTodos();
         });
 
+        // Tag search
+        document.getElementById('tagSearch').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            updateTagList(searchTerm);
+        });
+
         // Render todos
         function renderTodos() {
             if (!todoData || !todoData.projects) {
                 document.getElementById('emptyState').style.display = 'block';
                 document.getElementById('projects').innerHTML = '';
+                document.getElementById('tagList').innerHTML = `
+                    <div class="tag-filter active" onclick="filterByTag(null)">
+                        <span class="tag-filter-name">All Tasks</span>
+                        <span class="tag-filter-count" id="allTagCount">0</span>
+                    </div>
+                `;
                 return;
             }
 
@@ -914,13 +1055,26 @@
             
             // Update stats
             updateStats();
+            
+            // Update tag list
+            updateTagList();
 
             // Render projects
             const projectsContainer = document.getElementById('projects');
             projectsContainer.innerHTML = `<div class="projects-grid">${todoData.projects.map((project, projectIndex) => {
-                const filteredTodos = hideCompleted 
-                    ? (project.todos || []).filter(todo => todo.status !== 'completed')
-                    : (project.todos || []);
+                let filteredTodos = project.todos || [];
+                
+                // Filter by completed status
+                if (hideCompleted) {
+                    filteredTodos = filteredTodos.filter(todo => todo.status !== 'completed');
+                }
+                
+                // Filter by selected tag
+                if (selectedTag) {
+                    filteredTodos = filteredTodos.filter(todo => 
+                        todo.tags && todo.tags.includes(selectedTag)
+                    );
+                }
                 
                 return `
                 <div class="project">
@@ -943,6 +1097,7 @@
                             <div class="todo-item" id="todo-${projectIndex}-${todoIndex}">
                                 <div class="todo-title">${todo.title}</div>
                                 <div class="todo-description" id="desc-${projectIndex}-${todoIndex}">${todo.description || 'No description'}</div>
+                                ${todo.tags && todo.tags.length > 0 ? `<div class="task-tags">${todo.tags.map(tag => `<span class="task-tag">${tag}</span>`).join('')}</div>` : ''}
                                 <div class="todo-meta" id="meta-${projectIndex}-${todoIndex}">
                                     ${todo.priority ? `<span class="priority-badge priority-${todo.priority}" id="priority-${projectIndex}-${todoIndex}">${todo.priority.charAt(0).toUpperCase()}</span>` : ''}
                                     ${todo.dueDate ? `<span class="due-date" id="date-${projectIndex}-${todoIndex}">📅 ${todo.dueDate}</span>` : '<span class="due-date" id="date-${projectIndex}-${todoIndex}" style="color: #999;">No due date</span>'}
@@ -967,6 +1122,56 @@
             todoData.projects[projectIndex].todos[todoIndex].status = newStatus;
             renderTodos();
             showNotification('Task status updated!', 'success');
+        }
+
+        // Update tag list
+        function updateTagList(searchTerm = '') {
+            const tagCounts = {};
+            let totalTasks = 0;
+            
+            todoData.projects.forEach(project => {
+                if (project.todos) {
+                    project.todos.forEach(todo => {
+                        totalTasks++;
+                        if (todo.tags) {
+                            todo.tags.forEach(tag => {
+                                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                            });
+                        }
+                    });
+                }
+            });
+            
+            // Sort tags by count (descending)
+            let sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+            
+            // Filter tags by search term
+            if (searchTerm) {
+                sortedTags = sortedTags.filter(([tag]) => 
+                    tag.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            const tagList = document.getElementById('tagList');
+            tagList.innerHTML = `
+                <div class="tag-filter ${selectedTag === null ? 'active' : ''}" onclick="filterByTag(null)">
+                    <span class="tag-filter-name">All Tasks</span>
+                    <span class="tag-filter-count">${totalTasks}</span>
+                </div>
+                ${sortedTags.map(([tag, count]) => `
+                    <div class="tag-filter ${selectedTag === tag ? 'active' : ''}" onclick="filterByTag('${tag}')">
+                        <span class="tag-filter-name">${tag}</span>
+                        <span class="tag-filter-count">${count}</span>
+                    </div>
+                `).join('')}
+                ${sortedTags.length === 0 && searchTerm ? '<div style="text-align: center; color: #999; padding: 10px; font-size: 0.85em;">No tags found</div>' : ''}
+            `;
+        }
+        
+        // Filter by tag
+        function filterByTag(tag) {
+            selectedTag = tag;
+            renderTodos();
         }
 
         // Update stats
@@ -1054,13 +1259,17 @@
                 }
             });
 
+            const tagsInput = document.getElementById('taskTags').value;
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+            
             const newTask = {
                 id: maxId + 1,
                 title: document.getElementById('taskTitle').value,
                 description: document.getElementById('taskDescription').value,
                 status: document.getElementById('taskStatus').value,
                 priority: document.getElementById('taskPriority').value,
-                dueDate: document.getElementById('taskDueDate').value
+                dueDate: document.getElementById('taskDueDate').value,
+                tags: tags
             };
 
             project.todos.push(newTask);
@@ -1099,14 +1308,20 @@
             
             // Replace meta with edit controls
             metaDiv.innerHTML = `
-                <select class="edit-select" id="edit-priority-${projectIndex}-${todoIndex}">
-                    <option value="low" ${todo.priority === 'low' ? 'selected' : ''}>Low Priority</option>
-                    <option value="medium" ${todo.priority === 'medium' ? 'selected' : ''}>Medium Priority</option>
-                    <option value="high" ${todo.priority === 'high' ? 'selected' : ''}>High Priority</option>
-                </select>
-                <input type="date" class="edit-input" id="edit-date-${projectIndex}-${todoIndex}" value="${todo.dueDate || ''}" style="width: auto; display: inline-block; margin-bottom: 0;">
-                <button class="btn-save" onclick="saveTask(${projectIndex}, ${todoIndex})">💾</button>
-                <button class="btn-cancel" onclick="renderTodos()">✖️</button>
+                <div style="width: 100%; margin-bottom: 10px;">
+                    <label style="display: block; font-weight: 600; color: #2c3e50; margin-bottom: 5px; font-size: 0.85em;">Tags (comma-separated)</label>
+                    <input type="text" class="edit-input" id="edit-tags-${projectIndex}-${todoIndex}" value="${todo.tags ? todo.tags.join(', ') : ''}" placeholder="e.g., work, urgent, meeting" style="width: 100%; margin-bottom: 0;">
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <select class="edit-select" id="edit-priority-${projectIndex}-${todoIndex}">
+                        <option value="low" ${todo.priority === 'low' ? 'selected' : ''}>Low Priority</option>
+                        <option value="medium" ${todo.priority === 'medium' ? 'selected' : ''}>Medium Priority</option>
+                        <option value="high" ${todo.priority === 'high' ? 'selected' : ''}>High Priority</option>
+                    </select>
+                    <input type="date" class="edit-input" id="edit-date-${projectIndex}-${todoIndex}" value="${todo.dueDate || ''}" style="width: auto; display: inline-block; margin-bottom: 0;">
+                    <button class="btn-save" onclick="saveTask(${projectIndex}, ${todoIndex})">💾</button>
+                    <button class="btn-cancel" onclick="renderTodos()">✖️</button>
+                </div>
             `;
         }
 
@@ -1115,10 +1330,13 @@
             const newDescription = document.getElementById(`edit-desc-${projectIndex}-${todoIndex}`).value;
             const newPriority = document.getElementById(`edit-priority-${projectIndex}-${todoIndex}`).value;
             const newDueDate = document.getElementById(`edit-date-${projectIndex}-${todoIndex}`).value;
+            const tagsInput = document.getElementById(`edit-tags-${projectIndex}-${todoIndex}`).value;
+            const newTags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
             
             todoData.projects[projectIndex].todos[todoIndex].description = newDescription;
             todoData.projects[projectIndex].todos[todoIndex].priority = newPriority;
             todoData.projects[projectIndex].todos[todoIndex].dueDate = newDueDate;
+            todoData.projects[projectIndex].todos[todoIndex].tags = newTags;
             
             renderTodos();
             showNotification('Task updated successfully!', 'success');
@@ -1222,6 +1440,26 @@
         window.deleteTask = deleteTask;
         window.editTask = editTask;
         window.saveTask = saveTask;
+        window.filterByTag = filterByTag;
+
+        // Auto-load todos.yml on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('todos.yml');
+                if (response.ok) {
+                    const text = await response.text();
+                    todoData = jsyaml.load(text);
+                    renderTodos();
+                    showNotification('Data loaded successfully!', 'success');
+                } else {
+                    // File doesn't exist or can't be loaded, show empty state
+                    console.log('No default todos.yml found, starting with empty state');
+                }
+            } catch (error) {
+                // Failed to load, just show empty state
+                console.log('Could not load default data:', error.message);
+            }
+        });
     </script>
 </body>
 </html>

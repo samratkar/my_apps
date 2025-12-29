@@ -1,0 +1,68 @@
+projects:
+  - name: Work
+    description: Work-related tasks
+    todos:
+      - id: 1
+        title: Complete project proposal
+        description: Draft and submit the Q1 project proposal
+        status: pending
+        priority: high
+        dueDate: 2025-01-15
+        tags: [planning, deadline, important]
+      - id: 2
+        title: Review code changes
+        description: Review pull requests from the team
+        status: in-progress
+        priority: medium
+        dueDate: 2025-01-05
+        tags: [code-review, team, development]
+      - id: 3
+        title: Update documentation
+        description: Update API documentation with new endpoints
+        status: completed
+        priority: low
+        dueDate: 2024-12-28
+        tags: [documentation, api]
+
+  - name: Personal
+    description: Personal tasks and goals
+    todos:
+      - id: 4
+        title: Plan vacation
+        description: Research and book summer vacation
+        status: pending
+        priority: medium
+        dueDate: 2025-02-01
+        tags: [travel, planning, family]
+      - id: 5
+        title: Read book
+        description: Finish reading "The Pragmatic Programmer"
+        status: in-progress
+        priority: low
+        dueDate: 2025-01-20
+        tags: [reading, learning, self-improvement]
+      - id: 6
+        title: Exercise routine
+        description: Complete 30-day exercise challenge
+        status: in-progress
+        priority: high
+        dueDate: 2025-01-30
+        tags: [health, fitness, challenge]
+
+  - name: Learning
+    description: Educational and skill development
+    todos:
+      - id: 7
+        title: Complete Python course
+        description: Finish advanced Python course on Coursera
+        status: pending
+        priority: high
+        dueDate: 2025-01-25
+        tags: [python, course, learning, programming]
+      - id: 8
+        title: Practice algorithms
+        description: Solve 10 LeetCode problems
+        status: pending
+        priority: medium
+        dueDate: 2025-01-10
+        tags: [algorithms, practice, coding, problem-solving]
