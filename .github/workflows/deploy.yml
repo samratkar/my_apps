@@ -78,11 +78,13 @@ jobs:
           mkdir -p _site/mediscribeai
           mkdir -p _site/enamor-manager
           mkdir -p _site/poem-cards
+          mkdir -p _site/todo
           cp -r sams_canvas/dist/* _site/sams_canvas/
           cp -r journal-scout/dist/* _site/journal-scout/
           cp -r mediscribeai/dist/* _site/mediscribeai/
           cp -r enamor-manager/* _site/enamor-manager/
           cp -r poem-cards/* _site/poem-cards/
+          cp -r todo/* _site/todo/
           cp index.html _site/
 
       - name: Upload artifact
