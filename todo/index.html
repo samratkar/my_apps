@@ -15,7 +15,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -23,15 +23,15 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
+            background: #0f1419;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #2d3561 0%, #1f2544 100%);
+            color: #e8eaf6;
             padding: 30px;
             text-align: center;
         }
@@ -48,8 +48,8 @@
 
         .controls {
             padding: 20px 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
+            background: #1a1f2e;
+            border-bottom: 1px solid #2d3561;
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
@@ -61,9 +61,9 @@
             align-items: center;
             gap: 8px;
             padding: 10px 15px;
-            background: white;
+            background: #0f1419;
             border-radius: 8px;
-            border: 2px solid #e9ecef;
+            border: 2px solid #2d3561;
         }
 
         .filter-group input[type="checkbox"] {
@@ -75,7 +75,7 @@
         .filter-group label {
             cursor: pointer;
             font-weight: 600;
-            color: #2c3e50;
+            color: #c5cae9;
             user-select: none;
         }
 
@@ -93,45 +93,45 @@
         }
 
         .btn-primary {
-            background: #667eea;
-            color: white;
+            background: #5568d3;
+            color: #e8eaf6;
         }
 
         .btn-primary:hover {
-            background: #5568d3;
+            background: #4557c2;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(85, 104, 211, 0.5);
         }
 
         .btn-success {
-            background: #28a745;
-            color: white;
+            background: #2e7d32;
+            color: #e8f5e9;
         }
 
         .btn-success:hover {
-            background: #218838;
+            background: #256728;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.5);
         }
 
         .btn-info {
-            background: #17a2b8;
-            color: white;
+            background: #0277bd;
+            color: #e1f5fe;
         }
 
         .btn-info:hover {
-            background: #138496;
+            background: #01579b;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+            box-shadow: 0 4px 12px rgba(2, 119, 189, 0.5);
         }
 
         .btn-secondary {
-            background: #6c757d;
-            color: white;
+            background: #455a64;
+            color: #e0e0e0;
         }
 
         .btn-secondary:hover {
-            background: #5a6268;
+            background: #37474f;
         }
 
         input[type="file"] {
@@ -146,37 +146,39 @@
 
         .sidebar {
             flex: 0 0 250px;
-            background: white;
+            background: #1a1f2e;
             border-radius: 12px;
             padding: 20px;
             height: fit-content;
             position: sticky;
             top: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .sidebar h3 {
             margin-top: 0;
             margin-bottom: 15px;
-            color: #2c3e50;
+            color: #c5cae9;
             font-size: 1.1em;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #5568d3;
             padding-bottom: 10px;
         }
 
         .tag-search {
             width: 100%;
             padding: 10px;
-            border: 2px solid #e9ecef;
+            border: 2px solid #2d3561;
             border-radius: 8px;
             font-size: 0.9em;
             margin-bottom: 15px;
             transition: border-color 0.3s;
+            background: #0f1419;
+            color: #e8eaf6;
         }
 
         .tag-search:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #5568d3;
         }
 
         .tag-list {
@@ -187,7 +189,7 @@
 
         .tag-filter {
             padding: 8px 12px;
-            background: #f8f9fa;
+            background: #0f1419;
             border: 2px solid transparent;
             border-radius: 6px;
             cursor: pointer;
@@ -198,18 +200,19 @@
         }
 
         .tag-filter:hover {
-            background: #e9ecef;
+            background: #2d3561;
         }
 
         .tag-filter.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
+            background: #5568d3;
+            color: #e8eaf6;
+            border-color: #5568d3;
         }
 
         .tag-filter-name {
             font-weight: 600;
             font-size: 0.9em;
+            color: #c5cae9;
         }
 
         .tag-filter-count {
@@ -236,23 +239,27 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #3949ab 0%, #283593 100%);
+            color: #e8eaf6;
             padding: 12px 15px;
             border-radius: 10px;
             text-align: center;
+            border: 1px solid #5568d3;
         }
 
         .stat-card.pending {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #d81b60 0%, #ad1457 100%);
+            border-color: #f06292;
         }
 
         .stat-card.in-progress {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: linear-gradient(135deg, #0277bd 0%, #01579b 100%);
+            border-color: #4fc3f7;
         }
 
         .stat-card.completed {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            border-color: #66bb6a;
         }
 
         .stat-card h3 {
@@ -274,11 +281,11 @@
         }
 
         .project {
-            background: #fff;
-            border: none;
+            background: #1a1f2e;
+            border: 1px solid #2d3561;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -287,12 +294,13 @@
 
         .project:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            border-color: #5568d3;
         }
 
         .project-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #3949ab 0%, #283593 100%);
+            color: #e8eaf6;
             padding: 20px;
             display: flex;
             justify-content: space-between;
@@ -313,11 +321,11 @@
 
         .project-description {
             padding: 12px 15px;
-            background: #f8f9fa;
+            background: #0f1419;
             font-style: italic;
-            color: #6c757d;
+            color: #9fa8da;
             font-size: 0.9em;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid #2d3561;
         }
 
         .todos {
@@ -332,21 +340,21 @@
         }
 
         .todos::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: #0f1419;
         }
 
         .todos::-webkit-scrollbar-thumb {
-            background: #888;
+            background: #5568d3;
             border-radius: 3px;
         }
 
         .todos::-webkit-scrollbar-thumb:hover {
-            background: #555;
+            background: #4557c2;
         }
 
         .todo-item {
-            background: #fafbfc;
-            border: 1px solid #e9ecef;
+            background: #0f1419;
+            border: 1px solid #2d3561;
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 10px;
@@ -354,9 +362,9 @@
         }
 
         .todo-item:hover {
-            background: white;
-            border-color: #667eea;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+            background: #1a1f2e;
+            border-color: #5568d3;
+            box-shadow: 0 2px 8px rgba(85, 104, 211, 0.3);
         }
 
         .todo-header {
@@ -369,13 +377,13 @@
         .todo-title {
             font-size: 1em;
             font-weight: 600;
-            color: #2c3e50;
+            color: #e8eaf6;
             flex: 1;
             margin-bottom: 6px;
         }
 
         .todo-description {
-            color: #6c757d;
+            color: #9fa8da;
             margin: 8px 0;
             line-height: 1.5;
             font-size: 0.85em;
@@ -397,13 +405,13 @@
         }
 
         .task-tag {
-            background: #e9ecef;
-            color: #495057;
+            background: #2d3561;
+            color: #c5cae9;
             padding: 3px 10px;
             border-radius: 12px;
             font-size: 0.7em;
             font-weight: 600;
-            border: 1px solid #dee2e6;
+            border: 1px solid #5568d3;
         }
 
         .priority-badge {
@@ -414,62 +422,64 @@
         }
 
         .priority-high {
-            background: #fee;
-            color: #c00;
+            background: #b71c1c;
+            color: #ffcdd2;
         }
 
         .priority-medium {
-            background: #ffe;
-            color: #c60;
+            background: #e65100;
+            color: #ffe0b2;
         }
 
         .priority-low {
-            background: #efe;
-            color: #060;
+            background: #1b5e20;
+            color: #c8e6c9;
         }
 
         .due-date {
-            color: #6c757d;
+            color: #9fa8da;
             font-size: 0.75em;
         }
 
         .status-selector {
             padding: 5px 10px;
-            border: 1px solid #e9ecef;
+            border: 1px solid #2d3561;
             border-radius: 6px;
             font-size: 0.75em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            background: #0f1419;
+            color: #e8eaf6;
         }
 
         .status-selector:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #5568d3;
         }
 
         .status-pending {
-            background: #fff5f5;
-            color: #c53030;
-            border-color: #fc8181;
+            background: #b71c1c;
+            color: #ffcdd2;
+            border-color: #e57373;
         }
 
         .status-in-progress {
-            background: #ebf8ff;
-            color: #2c5282;
-            border-color: #63b3ed;
+            background: #01579b;
+            color: #b3e5fc;
+            border-color: #4fc3f7;
         }
 
         .status-completed {
-            background: #f0fff4;
-            color: #22543d;
-            border-color: #68d391;
+            background: #1b5e20;
+            color: #c8e6c9;
+            border-color: #66bb6a;
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #6c757d;
+            color: #9fa8da;
         }
 
         .empty-state svg {
@@ -525,10 +535,11 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: white;
+            background: #1a1f2e;
+            color: #e8eaf6;
             padding: 15px 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             display: none;
             z-index: 1000;
             animation: slideIn 0.3s ease;
@@ -539,11 +550,11 @@
         }
 
         .notification.success {
-            border-left: 4px solid #28a745;
+            border-left: 4px solid #66bb6a;
         }
 
         .notification.error {
-            border-left: 4px solid #dc3545;
+            border-left: 4px solid #ef5350;
         }
 
         @keyframes slideIn {
@@ -576,15 +587,16 @@
         }
 
         .modal-content {
-            background: white;
+            background: #1a1f2e;
             padding: 30px;
             border-radius: 15px;
             max-width: 500px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
             animation: slideUp 0.3s ease;
+            border: 1px solid #2d3561;
         }
 
         .modal-header {
@@ -596,7 +608,7 @@
 
         .modal-header h2 {
             margin: 0;
-            color: #2c3e50;
+            color: #e8eaf6;
         }
 
         .close-btn {
@@ -604,12 +616,12 @@
             border: none;
             font-size: 28px;
             cursor: pointer;
-            color: #999;
+            color: #9fa8da;
             transition: color 0.3s;
         }
 
         .close-btn:hover {
-            color: #333;
+            color: #e8eaf6;
         }
 
         .form-group {
@@ -620,7 +632,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #2c3e50;
+            color: #c5cae9;
         }
 
         .form-group input,
@@ -628,18 +640,20 @@
         .form-group select {
             width: 100%;
             padding: 10px;
-            border: 2px solid #e9ecef;
+            border: 2px solid #2d3561;
             border-radius: 8px;
             font-size: 14px;
             font-family: inherit;
             transition: border-color 0.3s;
+            background: #0f1419;
+            color: #e8eaf6;
         }
 
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #5568d3;
         }
 
         .form-group textarea {
@@ -648,8 +662,8 @@
         }
 
         .btn-add {
-            background: #28a745;
-            color: white;
+            background: #2e7d32;
+            color: #e8f5e9;
             padding: 8px 16px;
             border: none;
             border-radius: 6px;
@@ -660,7 +674,7 @@
         }
 
         .btn-add:hover {
-            background: #218838;
+            background: #256728;
             transform: scale(1.05);
         }
 
@@ -670,8 +684,8 @@
         }
 
         .btn-delete {
-            background: #dc3545;
-            color: white;
+            background: #c62828;
+            color: #ffcdd2;
             border: none;
             padding: 4px 8px;
             border-radius: 4px;
@@ -682,13 +696,13 @@
         }
 
         .btn-delete:hover {
-            background: #c82333;
+            background: #b71c1c;
             transform: scale(1.1);
         }
 
         .btn-edit {
-            background: #ffc107;
-            color: #333;
+            background: #e65100;
+            color: #ffe0b2;
             border: none;
             padding: 4px 8px;
             border-radius: 4px;
@@ -698,13 +712,13 @@
         }
 
         .btn-edit:hover {
-            background: #e0a800;
+            background: #d84315;
             transform: scale(1.1);
         }
 
         .btn-save {
-            background: #28a745;
-            color: white;
+            background: #2e7d32;
+            color: #e8f5e9;
             border: none;
             padding: 4px 8px;
             border-radius: 4px;
@@ -714,12 +728,12 @@
         }
 
         .btn-save:hover {
-            background: #218838;
+            background: #256728;
         }
 
         .btn-cancel {
-            background: #6c757d;
-            color: white;
+            background: #455a64;
+            color: #e0e0e0;
             border: none;
             padding: 4px 8px;
             border-radius: 4px;
@@ -729,43 +743,49 @@
         }
 
         .btn-cancel:hover {
-            background: #5a6268;
+            background: #37474f;
         }
 
         .edit-input {
             width: 100%;
             padding: 6px;
-            border: 2px solid #667eea;
+            border: 2px solid #5568d3;
             border-radius: 4px;
             font-size: 0.85em;
             margin-bottom: 8px;
             font-family: inherit;
+            background: #0f1419;
+            color: #e8eaf6;
         }
 
         .edit-textarea {
             width: 100%;
             padding: 6px;
-            border: 2px solid #667eea;
+            border: 2px solid #5568d3;
             border-radius: 4px;
             font-size: 0.85em;
             margin-bottom: 8px;
             font-family: inherit;
             resize: vertical;
             min-height: 60px;
+            background: #0f1419;
+            color: #e8eaf6;
         }
 
         .edit-select {
             padding: 6px;
-            border: 2px solid #667eea;
+            border: 2px solid #5568d3;
             border-radius: 4px;
             font-size: 0.75em;
             margin-right: 8px;
             font-family: inherit;
+            background: #0f1419;
+            color: #e8eaf6;
         }
 
         .edit-mode {
-            background: #f0f7ff;
-            border-color: #667eea;
+            background: #1a1f2e;
+            border-color: #5568d3;
         }
 
         @keyframes fadeIn {
@@ -795,6 +815,91 @@
             display: flex;
             gap: 10px;
             align-items: center;
+        }
+
+        .add-task-inline {
+            padding: 15px;
+            background: #0f1419;
+            border-top: 2px solid #2d3561;
+            display: none;
+        }
+
+        .add-task-inline.show {
+            display: block;
+        }
+
+        .inline-form-group {
+            margin-bottom: 10px;
+        }
+
+        .inline-form-group input,
+        .inline-form-group textarea,
+        .inline-form-group select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid #2d3561;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            background: #1a1f2e;
+            color: #e8eaf6;
+        }
+
+        .inline-form-group input:focus,
+        .inline-form-group textarea:focus,
+        .inline-form-group select:focus {
+            outline: none;
+            border-color: #5568d3;
+        }
+
+        .inline-form-group input::placeholder,
+        .inline-form-group textarea::placeholder {
+            color: #7986cb;
+        }
+
+        .inline-form-group textarea {
+            resize: vertical;
+            min-height: 50px;
+        }
+
+        .inline-form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .inline-form-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-add-inline {
+            padding: 8px 15px;
+            font-size: 13px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit {
+            background: #2e7d32;
+            color: #e8f5e9;
+        }
+
+        .btn-submit:hover {
+            background: #256728;
+        }
+
+        .btn-cancel-inline {
+            background: #455a64;
+            color: #e0e0e0;
+        }
+
+        .btn-cancel-inline:hover {
+            background: #37474f;
         }
     </style>
 </head>
@@ -1085,11 +1190,45 @@
                             </div>
                             <div class="project-actions">
                                 <span class="badge">${filteredTodos.length}</span>
-                                <button class="btn-add btn-small" onclick="openAddTaskModal(${projectIndex})">➕</button>
+                                <button class="btn-add btn-small" onclick="toggleAddTaskForm(${projectIndex})">➕</button>
                             </div>
                         </div>
                     </div>
                     ${project.description ? `<div class="project-description">${project.description}</div>` : ''}
+                    <div class="add-task-inline" id="addTaskForm-${projectIndex}">
+                        <div class="inline-form-group">
+                            <input type="text" id="inline-title-${projectIndex}" placeholder="Task title *" required>
+                        </div>
+                        <div class="inline-form-group">
+                            <textarea id="inline-desc-${projectIndex}" placeholder="Description (optional)"></textarea>
+                        </div>
+                        <div class="inline-form-row">
+                            <div class="inline-form-group" style="flex: 1;">
+                                <select id="inline-priority-${projectIndex}">
+                                    <option value="low">Low Priority</option>
+                                    <option value="medium" selected>Medium Priority</option>
+                                    <option value="high">High Priority</option>
+                                </select>
+                            </div>
+                            <div class="inline-form-group" style="flex: 1;">
+                                <input type="date" id="inline-date-${projectIndex}" placeholder="Due date">
+                            </div>
+                            <div class="inline-form-group" style="flex: 1;">
+                                <select id="inline-status-${projectIndex}">
+                                    <option value="pending" selected>Pending</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="inline-form-group">
+                            <input type="text" id="inline-tags-${projectIndex}" placeholder="Tags (comma-separated, e.g., work, urgent)">
+                        </div>
+                        <div class="inline-form-actions">
+                            <button class="btn-add-inline btn-submit" onclick="addTaskInline(${projectIndex})">Add Task</button>
+                            <button class="btn-add-inline btn-cancel-inline" onclick="toggleAddTaskForm(${projectIndex})">Cancel</button>
+                        </div>
+                    </div>
                     <div class="todos">
                         ${filteredTodos.length > 0 ? filteredTodos.map((todo) => {
                             const todoIndex = project.todos.indexOf(todo);
@@ -1233,7 +1372,72 @@
             showNotification('Project added successfully!', 'success');
         });
 
-        // Add Task
+        // Toggle inline add task form
+        function toggleAddTaskForm(projectIndex) {
+            const form = document.getElementById(`addTaskForm-${projectIndex}`);
+            if (form.classList.contains('show')) {
+                form.classList.remove('show');
+                // Clear form
+                document.getElementById(`inline-title-${projectIndex}`).value = '';
+                document.getElementById(`inline-desc-${projectIndex}`).value = '';
+                document.getElementById(`inline-priority-${projectIndex}`).value = 'medium';
+                document.getElementById(`inline-date-${projectIndex}`).value = '';
+                document.getElementById(`inline-status-${projectIndex}`).value = 'pending';
+                document.getElementById(`inline-tags-${projectIndex}`).value = '';
+            } else {
+                // Close all other forms
+                document.querySelectorAll('.add-task-inline.show').forEach(f => f.classList.remove('show'));
+                form.classList.add('show');
+                // Focus on title input
+                setTimeout(() => {
+                    document.getElementById(`inline-title-${projectIndex}`).focus();
+                }, 100);
+            }
+        }
+
+        // Add task inline
+        function addTaskInline(projectIndex) {
+            const title = document.getElementById(`inline-title-${projectIndex}`).value.trim();
+            
+            if (!title) {
+                showNotification('Please enter a task title!', 'error');
+                return;
+            }
+
+            const project = todoData.projects[projectIndex];
+            if (!project.todos) {
+                project.todos = [];
+            }
+
+            // Generate new ID
+            let maxId = 0;
+            todoData.projects.forEach(p => {
+                if (p.todos) {
+                    p.todos.forEach(t => {
+                        if (t.id > maxId) maxId = t.id;
+                    });
+                }
+            });
+
+            const tagsInput = document.getElementById(`inline-tags-${projectIndex}`).value;
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+            
+            const newTask = {
+                id: maxId + 1,
+                title: title,
+                description: document.getElementById(`inline-desc-${projectIndex}`).value,
+                status: document.getElementById(`inline-status-${projectIndex}`).value,
+                priority: document.getElementById(`inline-priority-${projectIndex}`).value,
+                dueDate: document.getElementById(`inline-date-${projectIndex}`).value,
+                tags: tags
+            };
+
+            project.todos.push(newTask);
+            renderTodos();
+            showNotification('Task added successfully!', 'success');
+        }
+
+        // Add Task (keep modal version for backwards compatibility)
         function openAddTaskModal(projectIndex) {
             document.getElementById('taskProjectIndex').value = projectIndex;
             document.getElementById('taskModal').classList.add('show');
@@ -1442,6 +1646,8 @@
         // Make functions available globally
         window.updateStatus = updateStatus;
         window.openAddTaskModal = openAddTaskModal;
+        window.toggleAddTaskForm = toggleAddTaskForm;
+        window.addTaskInline = addTaskInline;
         window.closeModal = closeModal;
         window.deleteTask = deleteTask;
         window.editTask = editTask;
@@ -1460,16 +1666,51 @@
                     todoData = jsyaml.load(text);
                     console.log('YML parsed successfully, projects:', todoData.projects?.length);
                     renderTodos();
-                    showNotification('Data loaded successfully!', 'success');
+                    showNotification('todos.yml loaded successfully!', 'success');
                 } else {
                     console.log('Response not OK:', response.status, response.statusText);
-                    console.log('No default todos.yml found, starting with empty state');
+                    loadSampleData();
                 }
             } catch (error) {
                 console.error('Error loading todos.yml:', error);
-                console.log('Could not load default data:', error.message);
+                console.log('Could not load default data, loading sample data');
+                loadSampleData();
             }
         });
+
+        // Load sample data if no YML file is available
+        function loadSampleData() {
+            todoData = {
+                projects: [
+                    {
+                        name: "Sample Project",
+                        description: "This is a sample project to get you started",
+                        todos: [
+                            {
+                                id: 1,
+                                title: "Welcome to Todo Manager",
+                                description: "Click the + button to add new tasks inline, or load your own YML file",
+                                status: "pending",
+                                priority: "high",
+                                dueDate: "",
+                                tags: ["welcome", "tutorial"]
+                            },
+                            {
+                                id: 2,
+                                title: "Try editing a task",
+                                description: "Click the edit button to modify task details",
+                                status: "pending",
+                                priority: "medium",
+                                dueDate: "",
+                                tags: ["tutorial"]
+                            }
+                        ]
+                    }
+                ]
+            };
+            renderTodos();
+            showNotification('Sample data loaded. Load your YML file to get started!', 'success');
+        }
     </script>
 </body>
 </html>
