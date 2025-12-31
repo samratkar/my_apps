@@ -111,59 +111,77 @@ tags:
 
 # Reflection fields - add or modify as needed
 reflections:
-  - id: grateful
-    label: I am grateful for the day because
+  - id: gratitude
+    label: Gratitude
     icon: 🙏
     placeholder: "What am I grateful for today..."
-    rows: 3
+    rows: 2
     
-  - id: failed_love
-    label: Where I failed to express love
-    icon: 💔
-    placeholder: "Moments where I could have shown more love..."
-    rows: 3
+  - id: love
+    label: Love
+    icon: 💖
+    placeholder: "Where did I fail to love today..."
+    rows: 2
     
   - id: unburden
-    label: Unburden and cleanse the self to uncover love
+    label: Unburden
     icon: 🌊
-    placeholder: "Release what weighs on your heart..."
-    rows: 4
+    placeholder: "What do I need to unburden..."
+    rows: 2
     
   - id: learning
-    label: Learning from the day
+    label: Learning
     icon: 📚
     placeholder: "What did I learn today..."
-    rows: 3
+    rows: 2
     
-  - id: reflections
-    label: Reflections
+  - id: reflection
+    label: Reflection
     icon: 🤔
     placeholder: "General reflections on the day..."
-    rows: 4
+    rows: 2
     
-  - id: proud
-    label: I am proud of myself today because
+  - id: pride
+    label: Pride
     icon: 🌟
-    placeholder: "What made me proud today..."
-    rows: 3
+    placeholder: "What am I proud of today..."
+    rows: 2
     
-  - id: tomorrow
-    label: Tomorrow I will
-    icon: 🌅
-    placeholder: "Intentions for tomorrow..."
-    rows: 3
+  - id: plan
+    label: Plan
+    icon: 🎯
+    placeholder: "What will I focus on tomorrow..."
+    rows: 2
     
-  - id: better_teacher
-    label: How I became a better teacher today
-    icon: 👨‍🏫
-    placeholder: "Ways I grew as a teacher..."
-    rows: 3
-
-  - id: worth_it
-    label: What made today all worth it
-    icon: 💫
-    placeholder: "The moments that made today meaningful..."
-    rows: 4
+  - id: health
+    label: Health
+    icon: 💪
+    placeholder: "Health updates and observations..."
+    rows: 2
+    
+  - id: finance
+    label: Finance
+    icon: 💰
+    placeholder: "Financial notes and decisions..."
+    rows: 2
+    
+  - id: work
+    label: Work
+    icon: 💼
+    placeholder: "Work progress and achievements..."
+    rows: 2
+    
+  - id: family
+    label: Family
+    icon: 👨‍👩‍👧‍👦
+    placeholder: "Family moments and connections..."
+    rows: 2
+    
+  - id: friends
+    label: Friends
+    icon: 🤝
+    placeholder: "Time with friends and relationships..."
+    rows: 2
 
 # App Settings
 app_title: "Daily Journal & Habit Tracker"
