@@ -878,7 +878,8 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                                     <span>${reflection.label}</span>
                                 </label>
                                 <textarea 
-                                    class="w-full px-3 py-2 bg-gray-800 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 text-gray-200 resize-none"
+                                    class="w-full px-3 py-2 bg-gray-800 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 text-gray-200 resize-none text-xs"
+                                    style="font-family: Consolas, monospace;"
                                     rows="${reflection.rows || 3}"
                                     placeholder="${reflection.placeholder || ''}"
                                     onchange="updateEntryReflection(${entry.id}, '${reflection.id}', this.value)"
