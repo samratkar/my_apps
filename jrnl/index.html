@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Journal & Habit Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #4a1a4a;
+            --color-secondary: #6b2d6b;
+            --color-accent: #8b4789;
+            --color-text: #e0e0e0;
+            --color-text-dim: #808090;
+            --color-bg: #1a1a2e;
+            --color-bg-card: #2a2a3e;
+            --color-bg-input: #2a2a3e;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .lavender-gradient {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 50%, var(--color-accent) 100%);
+        }
+        .lavender-bg {
+            background-color: var(--color-secondary);
+        }
+        .lavender-border {
+            border-color: var(--color-accent);
+        }
+        .lavender-text {
+            color: var(--color-accent);
+        }
+        .glass-effect {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-accent);
+            transition: background-color 0.3s ease;
+        }
+        .habit-checkbox {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--color-accent);
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            background-color: var(--color-bg-input);
+        }
+        .habit-checkbox:checked {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-secondary) 100%);
+            border-color: var(--color-accent);
+        }
+        .habit-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .habit-card {
+            transition: all 0.3s ease;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-accent);
+        }
+        .habit-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(147, 112, 219, 0.4);
+            border-color: var(--color-accent);
+        }
+        .entry-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--color-accent);
+            background: var(--color-bg-card);
+        }
+        .entry-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 8px 16px rgba(147, 112, 219, 0.3);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(4px);
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stats-card {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+            border: 2px solid var(--color-accent);
+        }
+        input[type="date"],
+        input[type="text"],
+        textarea,
+        select {
+            background-color: var(--color-bg-input);
+            color: var(--color-text);
+            border-color: var(--color-accent);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        input[type="date"]:focus,
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            background-color: var(--color-bg-card);
+            border-color: var(--color-accent);
+        }
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--color-text-dim);
+        }
+        .reflection-field {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-accent);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .reflection-label {
+            color: var(--color-accent);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .entry-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            opacity: 1;
+        }
+        .entry-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        .entry-collapse-icon {
+            transition: transform 0.3s ease;
+        }
+        .entry-collapse-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+        .tag-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .tag-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .tag-badge.selected {
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <!-- Header -->
+    <header class="lavender-gradient text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-4xl font-bold text-purple-100">📔 Daily Journal & Habit Tracker</h1>
+                    <p class="text-purple-200 mt-2">Track your daily habits and reflect on what makes life worth living</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold text-purple-100" id="totalEntries">0</div>
+                    <div class="text-sm text-purple-200">Total Entries</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Status Bar -->
+    <div class="bg-gray-800 border-b border-gray-700 shadow-md">
+        <div class="container mx-auto px-4 py-3 max-w-7xl">
+            <div class="flex flex-col md:flex-row gap-3 text-sm">
+                <div class="flex items-center gap-2 flex-1">
+                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="text-gray-400 font-medium">Config:</span>
+                    <span id="configPath" class="text-purple-300 font-mono text-xs truncate" title="">jrnl_config.yml (default)</span>
+                </div>
+                <div class="flex items-center gap-2 flex-1">
+                    <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                    </svg>
+                    <span class="text-gray-400 font-medium">Data:</span>
+                    <span id="dataPath" class="text-green-300 font-mono text-xs truncate" title="">LocalStorage</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        
+        <!-- Action Bar -->
+        <div class="glass-effect rounded-lg shadow-md p-4 mb-6 fade-in">
+            <div class="flex flex-wrap items-center gap-3">
+                <button onclick="showNewEntryModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2 font-semibold shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    New Entry
+                </button>
+                
+                <label class="cursor-pointer">
+                    <div class="px-4 py-2 bg-purple-400 text-purple-900 rounded-lg hover:bg-purple-300 transition flex items-center gap-2 font-semibold shadow-md">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        Load Config
+                    </div>
+                    <input type="file" id="loadConfigInput" accept=".yml,.yaml" class="hidden" onchange="handleConfigLoad(event)">
+                </label>
+
+                <label class="cursor-pointer">
+                    <div class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 font-semibold shadow-md">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        Import Data
+                    </div>
+                    <input type="file" id="loadDataInput" accept=".json" class="hidden" onchange="handleDataImport(event)">
+                </label>
+
+                <button onclick="exportData()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2 font-semibold shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                    </svg>
+                    Export Data
+                </button>
+
+                <input 
+                    type="date" 
+                    id="dateFilter" 
+                    class="px-4 py-2 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    onchange="filterEntries()"
+                >
+
+                <select id="tagFilter" onchange="filterEntries()" class="px-4 py-2 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 bg-gray-800 text-gray-200 font-semibold cursor-pointer">
+                    <option value="">🏷️ All Tags</option>
+                </select>
+
+                <button onclick="showAll()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition flex items-center gap-2 font-semibold shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Show All
+                </button>
+
+                <button onclick="showStats()" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition flex items-center gap-2 font-semibold shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Stats
+                </button>
+
+                <select id="themeSelector" onchange="changeTheme(this.value)" class="px-4 py-2 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 bg-gray-800 text-gray-200 font-semibold cursor-pointer">
+                    <option value="">🎨 Theme</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Entries List -->
+        <div id="entriesList" class="space-y-4">
+            <!-- Entries will be dynamically inserted here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-16 hidden">
+            <div class="text-6xl mb-4">📔</div>
+            <h3 class="text-2xl font-semibold text-gray-300 mb-2">No entries yet</h3>
+            <p class="text-gray-400 mb-6">Start your journey by creating your first entry</p>
+            <button onclick="showNewEntryModal()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold">
+                Create First Entry
+            </button>
+        </div>
+    </div>
+
+    <!-- New Entry Modal -->
+    <div id="newEntryModal" class="modal">
+        <div class="glass-effect rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold lavender-text">✨ New Journal Entry</h2>
+                <button onclick="closeNewEntryModal()" class="text-gray-400 hover:text-gray-200 text-2xl">×</button>
+            </div>
+
+            <form id="entryForm" onsubmit="saveEntry(event)">
+                <div class="mb-6">
+                    <label class="block lavender-text font-semibold mb-2">📅 Date</label>
+                    <input 
+                        type="date" 
+                        id="entryDate" 
+                        required 
+                        class="w-full px-4 py-2 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    >
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold lavender-text mb-4">📊 Habit Tracker</h3>
+                    <div id="habitsContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <!-- Habits will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold lavender-text mb-4">🏷️ Tags</h3>
+                    <div id="tagsContainer" class="flex flex-wrap gap-2">
+                        <!-- Tags will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold lavender-text mb-4">📝 Reflections</h3>
+                    <div id="reflectionsContainer">
+                        <!-- Reflection fields will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <div class="flex gap-3 justify-end">
+                    <button 
+                        type="button" 
+                        onclick="closeNewEntryModal()" 
+                        class="px-6 py-3 bg-gray-600 text-gray-200 rounded-lg hover:bg-gray-700 transition font-semibold"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold shadow-md"
+                    >
+                        Save Entry
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="statsModal" class="modal">
+        <div class="glass-effect rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold lavender-text">📊 Habit Statistics</h2>
+                <button onclick="closeStatsModal()" class="text-gray-400 hover:text-gray-200 text-2xl">×</button>
+            </div>
+            <div id="statsContent">
+                <!-- Stats will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let habits = [];
+        let reflections = [];
+        let tags = [];
+        let entries = [];
+        let colorSchemes = [];
+        let activeConfigPath = 'jrnl_config.yml (default)';
+        let activeDataPath = 'LocalStorage';
+        let currentTheme = 'lavender';
+        let appConfig = {
+            app_title: "Daily Journal & Habit Tracker",
+            app_subtitle: "Track your daily habits and reflect on what makes life worth living"
+        };
+
+        // Default configuration
+        const defaultConfig = `habits:
+  - id: yoga
+    label: Yoga
+    icon: 🧘
+    type: boolean
+    
+  - id: meditation
+    label: Meditation
+    icon: 🙏
+    type: boolean
+    
+  - id: sex
+    label: Sex
+    icon: ❤️
+    type: boolean
+    
+  - id: mbate
+    label: M-Bate
+    icon: 💫
+    type: boolean
+    
+  - id: music
+    label: Music
+    icon: 🎵
+    type: boolean
+    
+  - id: enamor
+    label: Enamor
+    icon: 💖
+    type: boolean
+    
+  - id: reachout
+    label: Reach Out
+    icon: 🤝
+    type: boolean
+    
+  - id: code
+    label: Code
+    icon: 💻
+    type: boolean
+    
+  - id: blog
+    label: Blog
+    icon: ✍️
+    type: boolean
+    
+  - id: work
+    label: Work
+    icon: 💼
+    type: boolean
+    
+  - id: n_overeat
+    label: No Overeat
+    icon: 🥗
+    type: boolean
+    
+  - id: n_junk
+    label: No Junk
+    icon: 🚫
+    type: boolean
+    
+  - id: puja
+    label: Puja
+    icon: 🕉️
+    type: boolean
+    
+  - id: serve
+    label: Serve
+    icon: 🤲
+    type: boolean
+
+app_title: "Daily Journal & Habit Tracker"
+app_subtitle: "Track your daily habits and reflect on what makes life worth living"`;
+
+        // Initialize app
+        async function init() {
+            await loadConfigFromFile();
+            loadFromLocalStorage();
+            renderHabits();
+            renderReflections();
+            renderTags();
+            populateTagFilter();
+            renderEntries();
+            updateStats();
+            
+            // Set today's date as default
+            document.getElementById('entryDate').valueAsDate = new Date();
+        }
+
+        // Load config from jrnl_config.yml file
+        async function loadConfigFromFile() {
+            try {
+                const response = await fetch('jrnl_config.yml');
+                if (!response.ok) {
+                    throw new Error('Config file not found');
+                }
+                const yamlText = await response.text();
+                const config = jsyaml.load(yamlText);
+                habits = config.habits || [];
+                reflections = config.reflections || [];
+                tags = config.tags || [];
+                colorSchemes = config.color_schemes || [];
+                appConfig = {
+                    app_title: config.app_title || appConfig.app_title,
+                    app_subtitle: config.app_subtitle || appConfig.app_subtitle
+                };
+                
+                // Update config path display
+                activeConfigPath = 'jrnl_config.yml (default)';
+                updateStatusBar();
+                
+                // Load saved theme or default
+                const savedTheme = localStorage.getItem('journal_theme') || config.default_theme || 'lavender';
+                currentTheme = savedTheme;
+                
+                // Populate theme selector
+                populateThemeSelector();
+                applyTheme(currentTheme);
+                
+                console.log('Config loaded from jrnl_config.yml');
+            } catch (error) {
+                console.warn('Could not load jrnl_config.yml, using default config:', error);
+                loadDefaultConfig();
+            }
+        }
+
+        // Load default configuration
+        function loadDefaultConfig() {
+            try {
+                const config = jsyaml.load(defaultConfig);
+                habits = config.habits || [];
+                reflections = config.reflections || [];
+                tags = config.tags || [];
+                colorSchemes = config.color_schemes || [];
+                appConfig = {
+                    app_title: config.app_title || appConfig.app_title,
+                    app_subtitle: config.app_subtitle || appConfig.app_subtitle
+                };
+                
+                // Update config path display
+                activeConfigPath = 'Default (fallback)';
+                updateStatusBar();
+            } catch (error) {
+                console.error('Error loading default config:', error);
+            }
+        }
+
+        // Handle config file load
+        function handleConfigLoad(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const config = jsyaml.load(e.target.result);
+                    habits = config.habits || [];
+                    reflections = config.reflections || [];
+                    tags = config.tags || [];
+                    colorSchemes = config.color_schemes || [];
+                    appConfig = {
+                        app_title: config.app_title || appConfig.app_title,
+                        app_subtitle: config.app_subtitle || appConfig.app_subtitle
+                    };
+                    
+                    // Update config path display
+                    activeConfigPath = file.name;
+                    updateStatusBar();
+                    
+                    saveToLocalStorage();
+                    renderHabits();
+                    renderReflections();
+                    renderTags();
+                    populateTagFilter();
+                    renderEntries();
+                    updateStats();
+                    populateThemeSelector();
+                    showToast('Configuration loaded successfully! ✨');
+                } catch (error) {
+                    console.error('Error parsing YAML:', error);
+                    showToast('Error loading configuration file ❌');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Populate theme selector
+        function populateThemeSelector() {
+            const selector = document.getElementById('themeSelector');
+            selector.innerHTML = '<option value="">🎨 Theme</option>';
+            
+            colorSchemes.forEach(scheme => {
+                const option = document.createElement('option');
+                option.value = scheme.id;
+                option.textContent = scheme.name;
+                if (scheme.id === currentTheme) {
+                    option.selected = true;
+                }
+                selector.appendChild(option);
+            });
+        }
+
+        // Change theme
+        function changeTheme(themeId) {
+            if (!themeId) return;
+            currentTheme = themeId;
+            localStorage.setItem('journal_theme', themeId);
+            applyTheme(themeId);
+            showToast(`Theme changed to ${colorSchemes.find(s => s.id === themeId)?.name || themeId} 🎨`);
+        }
+
+        // Apply theme
+        function applyTheme(themeId) {
+            const theme = colorSchemes.find(s => s.id === themeId);
+            if (!theme) return;
+
+            const root = document.documentElement;
+            root.style.setProperty('--color-primary', theme.primary);
+            root.style.setProperty('--color-secondary', theme.secondary);
+            root.style.setProperty('--color-accent', theme.accent);
+            root.style.setProperty('--color-text', theme.text);
+            root.style.setProperty('--color-text-dim', theme.textDim);
+            root.style.setProperty('--color-bg', theme.bg);
+            root.style.setProperty('--color-bg-card', theme.bgCard);
+            root.style.setProperty('--color-bg-input', theme.bgInput);
+
+            // Update body background
+            document.body.style.backgroundColor = theme.bg;
+            document.body.style.color = theme.text;
+        }
+
+        // Render habits in the form
+        function renderHabits() {
+            const container = document.getElementById('habitsContainer');
+            container.innerHTML = '';
+            
+            habits.forEach(habit => {
+                const habitCard = document.createElement('div');
+                habitCard.className = 'habit-card glass-effect rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer';
+                habitCard.innerHTML = `
+                    <div class="text-3xl">${habit.icon}</div>
+                    <div class="text-sm font-semibold text-gray-300 text-center">${habit.label}</div>
+                    <input 
+                        type="checkbox" 
+                        id="habit_${habit.id}" 
+                        class="habit-checkbox"
+                    >
+                `;
+                container.appendChild(habitCard);
+                
+                // Make card clickable to toggle checkbox
+                habitCard.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = habitCard.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                });
+            });
+        }
+
+        // Render tags in the form
+        function renderTags() {
+            const container = document.getElementById('tagsContainer');
+            container.innerHTML = '';
+            
+            tags.forEach(tag => {
+                const tagBadge = document.createElement('div');
+                tagBadge.className = 'tag-badge';
+                tagBadge.style.backgroundColor = tag.color;
+                tagBadge.style.color = '#ffffff';
+                tagBadge.setAttribute('data-tag-id', tag.id);
+                tagBadge.innerHTML = `
+                    <span>${tag.icon}</span>
+                    <span>${tag.label}</span>
+                `;
+                
+                tagBadge.addEventListener('click', () => {
+                    tagBadge.classList.toggle('selected');
+                });
+                
+                container.appendChild(tagBadge);
+            });
+        }
+
+        // Populate tag filter dropdown
+        function populateTagFilter() {
+            const selector = document.getElementById('tagFilter');
+            selector.innerHTML = '<option value="">🏷️ All Tags</option>';
+            
+            tags.forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag.id;
+                option.textContent = `${tag.icon} ${tag.label}`;
+                selector.appendChild(option);
+            });
+        }
+
+        // Render reflection fields in the form
+        function renderReflections() {
+            const container = document.getElementById('reflectionsContainer');
+            container.innerHTML = '';
+            
+            reflections.forEach(reflection => {
+                const fieldDiv = document.createElement('div');
+                fieldDiv.className = 'reflection-field';
+                fieldDiv.innerHTML = `
+                    <label class="reflection-label">
+                        <span class="text-2xl">${reflection.icon}</span>
+                        <span>${reflection.label}</span>
+                    </label>
+                    <textarea 
+                        id="reflection_${reflection.id}" 
+                        rows="${reflection.rows || 3}" 
+                        placeholder="${reflection.placeholder || ''}"
+                        class="w-full px-4 py-3 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                    ></textarea>
+                `;
+                container.appendChild(fieldDiv);
+            });
+        }
+
+        // Show new entry modal
+        function showNewEntryModal() {
+            document.getElementById('newEntryModal').classList.add('active');
+            document.getElementById('entryDate').valueAsDate = new Date();
+            document.getElementById('entryForm').reset();
+            document.getElementById('entryDate').valueAsDate = new Date();
+        }
+
+        // Close new entry modal
+        function closeNewEntryModal() {
+            document.getElementById('newEntryModal').classList.remove('active');
+        }
+
+        // Save entry
+        function saveEntry(event) {
+            event.preventDefault();
+            
+            const date = document.getElementById('entryDate').value;
+            
+            // Collect habit data
+            const habitData = {};
+            habits.forEach(habit => {
+                const checkbox = document.getElementById(`habit_${habit.id}`);
+                habitData[habit.id] = checkbox ? checkbox.checked : false;
+            });
+            
+            // Collect reflection data
+            const reflectionData = {};
+            reflections.forEach(reflection => {
+                const textarea = document.getElementById(`reflection_${reflection.id}`);
+                reflectionData[reflection.id] = textarea ? textarea.value : '';
+            });
+            
+            // Collect selected tags
+            const selectedTags = [];
+            document.querySelectorAll('.tag-badge.selected').forEach(badge => {
+                selectedTags.push(badge.getAttribute('data-tag-id'));
+            });
+            
+            // Create entry object
+            const entry = {
+                id: Date.now(),
+                date: date,
+                habits: habitData,
+                reflections: reflectionData,
+                tags: selectedTags,
+                createdAt: new Date().toISOString()
+            };
+            
+            // Check if entry for this date already exists
+            const existingIndex = entries.findIndex(e => e.date === date);
+            if (existingIndex !== -1) {
+                if (confirm('An entry for this date already exists. Do you want to replace it?')) {
+                    entries[existingIndex] = entry;
+                } else {
+                    return;
+                }
+            } else {
+                entries.unshift(entry);
+            }
+            
+            saveToLocalStorage();
+            renderEntries();
+            updateStats();
+            closeNewEntryModal();
+            
+            // Show success message
+            showToast('Entry saved successfully! 🎉');
+        }
+
+        // Render entries
+        function renderEntries() {
+            const container = document.getElementById('entriesList');
+            const emptyState = document.getElementById('emptyState');
+            
+            // Apply filters
+            const dateFilter = document.getElementById('dateFilter').value;
+            const tagFilter = document.getElementById('tagFilter').value;
+            
+            let filteredEntries = entries;
+            
+            if (dateFilter) {
+                filteredEntries = filteredEntries.filter(e => e.date === dateFilter);
+            }
+            
+            if (tagFilter) {
+                filteredEntries = filteredEntries.filter(e => e.tags && e.tags.includes(tagFilter));
+            }
+            
+            if (filteredEntries.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            container.innerHTML = '';
+            
+            filteredEntries.forEach(entry => {
+                const entryCard = document.createElement('div');
+                entryCard.className = 'entry-card glass-effect rounded-lg p-6 shadow-md fade-in';
+                entryCard.setAttribute('data-entry-id', entry.id);
+                
+                const date = new Date(entry.date);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                // Count completed habits
+                const completedCount = Object.values(entry.habits).filter(v => v).length;
+                const totalCount = habits.length;
+                const completionPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+                
+                // Build habits display
+                let habitsHTML = '<div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 mt-3 mb-4">';
+                habits.forEach(habit => {
+                    const completed = entry.habits[habit.id];
+                    const opacity = completed ? 'opacity-100' : 'opacity-30';
+                    habitsHTML += `
+                        <div class="flex flex-col items-center ${opacity} cursor-pointer hover:scale-110 transition-transform" 
+                             title="${habit.label}" 
+                             onclick="toggleEntryHabit(${entry.id}, '${habit.id}')">
+                            <div class="text-2xl">${habit.icon}</div>
+                            ${completed ? '<div class="text-xs text-green-600 font-bold">✓</div>' : '<div class="text-xs text-gray-600">○</div>'}
+                        </div>
+                    `;
+                });
+                habitsHTML += '</div>';
+                
+                // Build reflections display
+                let reflectionsHTML = '';
+                if (entry.reflections && reflections.length > 0) {
+                    reflectionsHTML = '<div class="mt-4 pt-4 border-t-2 lavender-border space-y-4">';
+                    reflections.forEach(reflection => {
+                        const value = entry.reflections[reflection.id] || '';
+                        reflectionsHTML += `
+                            <div class="reflection-field">
+                                <label class="reflection-label text-sm mb-2">
+                                    <span class="text-xl">${reflection.icon}</span>
+                                    <span>${reflection.label}</span>
+                                </label>
+                                <textarea 
+                                    class="w-full px-3 py-2 bg-gray-800 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 text-gray-200 resize-none"
+                                    rows="${reflection.rows || 3}"
+                                    placeholder="${reflection.placeholder || ''}"
+                                    onchange="updateEntryReflection(${entry.id}, '${reflection.id}', this.value)"
+                                >${escapeHtml(value)}</textarea>
+                            </div>
+                        `;
+                    });
+                    reflectionsHTML += '</div>';
+                }
+                
+                // Build tags display
+                let tagsHTML = '';
+                if (entry.tags && entry.tags.length > 0) {
+                    tagsHTML = '<div class="flex flex-wrap gap-2 mt-3">';
+                    entry.tags.forEach(tagId => {
+                        const tag = tags.find(t => t.id === tagId);
+                        if (tag) {
+                            tagsHTML += `
+                                <span class="tag-badge" style="background-color: ${tag.color}; color: white;">
+                                    <span>${tag.icon}</span>
+                                    <span>${tag.label}</span>
+                                </span>
+                            `;
+                        }
+                    });
+                    tagsHTML += '</div>';
+                }
+                
+                entryCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-4 cursor-pointer" onclick="toggleEntryCollapse(${entry.id})">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-gray-400 transition-transform entry-collapse-icon" data-entry="${entry.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                                <h3 class="text-xl font-bold text-gray-200">${formattedDate}</h3>
+                            </div>
+                            <div class="text-sm text-gray-400 mt-1 ml-7">
+                                Completion: <span class="font-bold lavender-text">${completionPercent}%</span> 
+                                (${completedCount}/${totalCount} habits)
+                            </div>
+                        </div>
+                        <button onclick="event.stopPropagation(); deleteEntry(${entry.id})" class="text-red-400 hover:text-red-300 transition" title="Delete Entry">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="entry-content" data-entry="${entry.id}">
+                        ${tagsHTML}
+                        ${habitsHTML}
+                        ${reflectionsHTML}
+                    </div>
+                `;
+                
+                container.appendChild(entryCard);
+            });
+        }
+
+        // Update entry reflection inline
+        function updateEntryReflection(entryId, reflectionId, value) {
+            const entry = entries.find(e => e.id === entryId);
+            if (entry) {
+                if (!entry.reflections) {
+                    entry.reflections = {};
+                }
+                entry.reflections[reflectionId] = value;
+                saveToLocalStorage();
+                showToast('Reflection updated ✓');
+            }
+        }
+
+        // Toggle entry habit inline
+        function toggleEntryHabit(entryId, habitId) {
+            const entry = entries.find(e => e.id === entryId);
+            if (entry) {
+                entry.habits[habitId] = !entry.habits[habitId];
+                saveToLocalStorage();
+                renderEntries();
+                updateStats();
+            }
+        }
+
+        // Toggle entry collapse/expand
+        function toggleEntryCollapse(entryId) {
+            const content = document.querySelector(`.entry-content[data-entry="${entryId}"]`);
+            const icon = document.querySelector(`.entry-collapse-icon[data-entry="${entryId}"]`);
+            
+            if (content && icon) {
+                content.classList.toggle('collapsed');
+                icon.classList.toggle('collapsed');
+            }
+        }
+
+        // Delete entry
+        function deleteEntry(id) {
+            if (!confirm('Are you sure you want to delete this entry?')) return;
+            
+            entries = entries.filter(e => e.id !== id);
+            saveToLocalStorage();
+            renderEntries();
+            updateStats();
+            showToast('Entry deleted');
+        }
+
+        // Filter entries
+        function filterEntries() {
+            renderEntries();
+        }
+
+        // Show all entries (clear filters)
+        function showAll() {
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('tagFilter').value = '';
+            renderEntries();
+        }
+
+        // Update status bar with current paths
+        function updateStatusBar() {
+            const configElement = document.getElementById('configPath');
+            const dataElement = document.getElementById('dataPath');
+            
+            if (configElement) {
+                configElement.textContent = activeConfigPath;
+                configElement.title = activeConfigPath;
+            }
+            
+            if (dataElement) {
+                dataElement.textContent = activeDataPath;
+                dataElement.title = activeDataPath;
+            }
+        }
+
+        // Update status bar with current paths
+        function updateStatusBar() {
+            const configElement = document.getElementById('configPath');
+            const dataElement = document.getElementById('dataPath');
+            
+            if (configElement) {
+                configElement.textContent = activeConfigPath;
+                configElement.title = activeConfigPath;
+            }
+            
+            if (dataElement) {
+                dataElement.textContent = activeDataPath;
+                dataElement.title = activeDataPath;
+            }
+        }
+
+        // Show stats
+        function showStats() {
+            const modal = document.getElementById('statsModal');
+            const content = document.getElementById('statsContent');
+            
+            if (entries.length === 0) {
+                content.innerHTML = '<p class="text-center text-gray-500">No data available yet. Start tracking to see statistics!</p>';
+                modal.classList.add('active');
+                return;
+            }
+            
+            // Calculate statistics
+            const stats = {};
+            const totalEntries = entries.length;
+            
+            habits.forEach(habit => {
+                const completed = entries.filter(e => e.habits[habit.id]).length;
+                const percentage = Math.round((completed / totalEntries) * 100);
+                stats[habit.id] = {
+                    habit: habit,
+                    completed: completed,
+                    total: totalEntries,
+                    percentage: percentage
+                };
+            });
+            
+            // Sort by completion rate
+            const sortedStats = Object.values(stats).sort((a, b) => b.percentage - a.percentage);
+            
+            let html = `
+                <div class="mb-6 stats-card rounded-lg p-4">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold lavender-text">${totalEntries}</div>
+                        <div class="text-gray-600">Total Entries</div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+            `;
+            
+            sortedStats.forEach(stat => {
+                html += `
+                    <div class="glass-effect rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">${stat.habit.icon}</span>
+                                <span class="font-semibold text-gray-300">${stat.habit.label}</span>
+                            </div>
+                            <span class="text-xl font-bold lavender-text">${stat.percentage}%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="lavender-gradient h-3 rounded-full transition-all duration-500" style="width: ${stat.percentage}%"></div>
+                        </div>
+                        <div class="text-sm text-gray-400 mt-1 text-right">${stat.completed} / ${stat.total} days</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            content.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        // Close stats modal
+        function closeStatsModal() {
+            document.getElementById('statsModal').classList.remove('active');
+        }
+
+        // Update stats counter
+        function updateStats() {
+            document.getElementById('totalEntries').textContent = entries.length;
+        }
+
+        // Export data to JSON
+        function exportData() {
+            const dataToExport = {
+                version: "1.0",
+                exportDate: new Date().toISOString(),
+                config: {
+                    habits: habits,
+                    reflections: reflections,
+                    app_title: appConfig.app_title,
+                    app_subtitle: appConfig.app_subtitle
+                },
+                entries: entries
+            };
+            
+            const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `jrnl_data_${new Date().getFullYear()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Data exported successfully! 📥');
+        }
+
+        // Import data from JSON
+        function handleDataImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.config) {
+                        habits = data.config.habits || habits;
+                        reflections = data.config.reflections || reflections;
+                        appConfig = {
+                            app_title: data.config.app_title || appConfig.app_title,
+                            app_subtitle: data.config.app_subtitle || appConfig.app_subtitle
+                        };
+                    }
+                    
+                    if (data.entries) {
+                        if (confirm('This will replace all existing entries. Continue?')) {
+                            entries = data.entries;
+                            saveToLocalStorage();
+                            
+                            // Update data path display
+                            activeDataPath = file.name;
+                            updateStatusBar();
+                            
+                            renderHabits();
+                            renderReflections();
+                            renderEntries();
+                            updateStats();
+                            showToast('Data imported successfully! 🎉');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    showToast('Error importing data ❌');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Local storage functions
+        function saveToLocalStorage() {
+            localStorage.setItem('journal_entries', JSON.stringify(entries));
+            localStorage.setItem('journal_habits', JSON.stringify(habits));
+            localStorage.setItem('journal_reflections', JSON.stringify(reflections));
+            localStorage.setItem('journal_config', JSON.stringify(appConfig));
+        }
+
+        function loadFromLocalStorage() {
+            const savedEntries = localStorage.getItem('journal_entries');
+            const savedHabits = localStorage.getItem('journal_habits');
+            const savedReflections = localStorage.getItem('journal_reflections');
+            const savedConfig = localStorage.getItem('journal_config');
+            
+            if (savedEntries) {
+                entries = JSON.parse(savedEntries);
+            }
+            
+            if (savedHabits) {
+                habits = JSON.parse(savedHabits);
+            }
+            
+            if (savedReflections) {
+                reflections = JSON.parse(savedReflections);
+            }
+            
+            if (savedConfig) {
+                appConfig = JSON.parse(savedConfig);
+            }
+        }
+
+        // Utility functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message) {
+            // Simple toast notification
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 lavender-gradient text-white px-6 py-3 rounded-lg shadow-lg font-semibold z-50 fade-in';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
