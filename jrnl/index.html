@@ -850,14 +850,14 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                 const completionPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
                 
                 // Build habits display
-                let habitsHTML = '<div class="flex gap-1 mt-3 mb-4 overflow-x-auto">';
+                let habitsHTML = '<div class="flex gap-1 mt-3 mb-4 overflow-x-auto" onclick="event.stopPropagation()">';
                 habits.forEach(habit => {
                     const completed = entry.habits[habit.id];
                     const opacity = completed ? 'opacity-100' : 'opacity-30';
                     habitsHTML += `
                         <div class="flex flex-col items-center ${opacity} cursor-pointer hover:scale-110 transition-transform flex-shrink-0" 
                              title="${habit.label}" 
-                             onclick="toggleEntryHabit(${entry.id}, '${habit.id}')">
+                             onclick="event.stopPropagation(); toggleEntryHabit(${entry.id}, '${habit.id}')">
                             <div class="text-xl">${habit.icon}</div>
                             ${completed ? '<div class="text-xs text-green-600 font-bold">✓</div>' : '<div class="text-xs text-gray-600">○</div>'}
                         </div>
@@ -956,8 +956,41 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
             if (entry) {
                 entry.habits[habitId] = !entry.habits[habitId];
                 saveToLocalStorage();
-                renderEntries();
+                
+                // Update just the habit icon without re-rendering
+                const habitElement = event.target.closest('[title]');
+                if (habitElement) {
+                    const completed = entry.habits[habitId];
+                    if (completed) {
+                        habitElement.classList.remove('opacity-30');
+                        habitElement.classList.add('opacity-100');
+                        habitElement.querySelector('.text-xs').innerHTML = '<div class="text-xs text-green-600 font-bold">✓</div>';
+                    } else {
+                        habitElement.classList.remove('opacity-100');
+                        habitElement.classList.add('opacity-30');
+                        habitElement.querySelector('.text-xs').innerHTML = '<div class="text-xs text-gray-600">○</div>';
+                    }
+                }
+                
+                // Update stats and the header line only
                 updateStats();
+                updateEntryHeaderStats(entryId);
+            }
+        }
+        
+        // Update just the header stats for a specific entry
+        function updateEntryHeaderStats(entryId) {
+            const entry = entries.find(e => e.id === entryId);
+            if (!entry) return;
+            
+            const totalCount = habits.length;
+            const completedCount = Object.values(entry.habits).filter(v => v).length;
+            const completionPercent = Math.round((completedCount / totalCount) * 100);
+            
+            const statsSpan = document.querySelector(`[data-entry="${entryId}"]`)?.closest('.entry-card')?.querySelector('.lavender-text')?.parentElement;
+            if (statsSpan) {
+                statsSpan.innerHTML = `<span class="font-semibold lavender-text">${completionPercent}%</span> 
+                                (${completedCount}/${totalCount})`;
             }
         }
 
