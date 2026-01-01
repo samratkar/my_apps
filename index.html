@@ -4,91 +4,202 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Apps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #f5f5f5;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        h1 { color: #333; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e9d5ff 0%, #ddd6fe 50%, #c4b5fd 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            color: #5b21b6;
+            margin: 0 auto 25px;
+            max-width: 1400px;
+            padding: 20px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(91, 33, 182, 0.15);
+            border: 1px solid rgba(196, 181, 253, 0.5);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-shadow: 2px 2px 4px rgba(91, 33, 182, 0.2);
+        }
+
+        .header .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            font-style: italic;
+            color: #6d28d9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+        }
+
+        .category-section {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(196, 181, 253, 0.4);
+            box-shadow: 0 4px 16px rgba(91, 33, 182, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .category-header {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #5b21b6;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(167, 139, 250, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .app-list {
             list-style: none;
             padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            flex: 1;
         }
+
         .app-list li {
-            margin: 15px 0;
+            margin: 0;
         }
+
         .app-list a {
-            display: block;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
             text-decoration: none;
             color: #333;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(91, 33, 182, 0.15);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(196, 181, 253, 0.4);
+            height: 100%;
+            min-height: 110px;
         }
+
         .app-list a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(91, 33, 182, 0.25);
+            background: rgba(255, 255, 255, 0.85);
+            border-color: #a78bfa;
         }
-        .app-name { font-weight: bold; font-size: 1.2em; }
-        .app-desc { color: #666; font-size: 0.9em; margin-top: 5px; }
+
+        .app-name { 
+            font-weight: 600; 
+            font-size: 1.05em;
+            color: #5b21b6;
+            margin-bottom: 4px;
+        }
+
+        .app-desc { 
+            color: #6b7280; 
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
-    <h1>🚀 My Apps</h1>
-    <ul class="app-list">
-        <li>
-            <a href="sams_canvas/">
-                <div class="app-name">🎨 Sam's Canvas</div>
-                <div class="app-desc">A creative canvas application</div>
-            </a>
-        </li>
-        <li>
-            <a href="journal-scout/">
-                <div class="app-name">📔 Journal Scout</div>
-                <div class="app-desc">Journal exploration and analysis tool</div>
-            </a>
-        </li>
-        <li>
-            <a href="mediscribeai/">
-                <div class="app-name">🏥 MediScribe AI</div>
-                <div class="app-desc">AI-powered medical transcription assistant</div>
-            </a>
-        </li>
-        <li>
-            <a href="enamor-manager/">
-                <div class="app-name">💖 Enamor Manager</div>
-                <div class="app-desc">Personal journal and memory index manager</div>
-            </a>
-        </li>
-        <li>
-            <a href="poem-cards/">
-                <div class="app-name">🖼️ Poem Cards</div>
-                <div class="app-desc">Create a poem photo album and export</div>
-            </a>
-        </li>
-        <li>
-            <a href="todo/">
-                <div class="app-name">📋 To-Do Manager</div>
-                <div class="app-desc">Professional task management with YML support</div>
-            </a>
-        </li>
-        <li>
-            <a href="jrnl/">
-                <div class="app-name">📔 Daily Journal & Habit Tracker</div>
-                <div class="app-desc">Track daily habits and reflect on life's meaningful moments</div>
-            </a>
-        </li>
-        <li>
-            <a href="gita/">
-                <div class="app-name">🕉️ Bhagavad Gita</div>
-                <div class="app-desc">Sacred wisdom and teachings with collapsible verses</div>
-            </a>
-        </li>
-    </ul>
+    <div class="header">
+        <h1>🚀 My Apps</h1>
+        <p class="subtitle">My personal collection of web applications</p>
+    </div>
+    
+    <div class="container" id="app-container">
+        <!-- Content will be dynamically loaded from YAML -->
+    </div>
+
+    <script>
+        // Load and parse YAML configuration
+        async function loadApps() {
+            try {
+                const response = await fetch('apps-config.yml');
+                const yamlText = await response.text();
+                const config = jsyaml.load(yamlText);
+                
+                renderCategories(config.categories);
+            } catch (error) {
+                console.error('Error loading apps configuration:', error);
+                document.getElementById('app-container').innerHTML = 
+                    '<div style="color: #dc2626; text-align: center; padding: 20px;">Error loading apps configuration. Please check apps-config.yml file.</div>';
+            }
+        }
+
+        function renderCategories(categories) {
+            const container = document.getElementById('app-container');
+            container.innerHTML = '';
+
+            categories.forEach(category => {
+                // Create category section
+                const section = document.createElement('div');
+                section.className = 'category-section';
+
+                // Create category header
+                const header = document.createElement('h2');
+                header.className = 'category-header';
+                header.textContent = `${category.emoji} ${category.name}`;
+                section.appendChild(header);
+
+                // Create app list
+                const appList = document.createElement('ul');
+                appList.className = 'app-list';
+
+                category.apps.forEach(app => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = app.url;
+
+                    const appName = document.createElement('div');
+                    appName.className = 'app-name';
+                    appName.textContent = `${app.emoji} ${app.name}`;
+
+                    const appDesc = document.createElement('div');
+                    appDesc.className = 'app-desc';
+                    appDesc.textContent = app.description;
+
+                    a.appendChild(appName);
+                    a.appendChild(appDesc);
+                    li.appendChild(a);
+                    appList.appendChild(li);
+                });
+
+                section.appendChild(appList);
+                container.appendChild(section);
+            });
+        }
+
+        // Load apps when page loads
+        document.addEventListener('DOMContentLoaded', loadApps);
+    </script>
 </body>
 </html>

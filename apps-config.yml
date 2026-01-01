@@ -1,0 +1,52 @@
+categories:
+  - name: Research
+    emoji: 🔬
+    apps:
+      - name: Journal Scout
+        emoji: 📔
+        url: journal-scout/
+        description: Journal exploration and analysis tool
+
+  - name: Personal & Journaling
+    emoji: 📝
+    apps:
+      - name: Enamor Manager
+        emoji: 💖
+        url: enamor-manager/
+        description: Personal journal and memory index manager
+      - name: Daily Journal & Habit Tracker
+        emoji: 📔
+        url: jrnl/
+        description: Track daily habits and reflect on life's meaningful moments
+
+  - name: Creative
+    emoji: 🎨
+    apps:
+      - name: Sam's Canvas
+        emoji: 🎨
+        url: sams_canvas/
+        description: A creative canvas application
+      - name: Poem Cards
+        emoji: 🖼️
+        url: poem-cards/
+        description: Create a poem photo album and export
+
+  - name: Productivity & Professional
+    emoji: 💼
+    apps:
+      - name: To-Do Manager
+        emoji: 📋
+        url: todo/
+        description: Professional task management with YML support
+      - name: MediScribe AI
+        emoji: 🏥
+        url: mediscribeai/
+        description: AI-powered medical transcription assistant
+
+  - name: Spiritual
+    emoji: 🕉️
+    apps:
+      - name: Bhagavad Gita
+        emoji: 🕉️
+        url: gita/
+        description: Sacred wisdom and teachings with collapsible verses
