@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhagavad Gita - Sacred Wisdom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 25px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-family: 'Crimson Text', serif;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            font-style: italic;
+            font-family: 'Crimson Text', serif;
+            font-weight: 400;
+        }
+
+        .search-container {
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-box input,
+        .search-box select {
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .search-box input:focus,
+        .search-box select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border: 2px solid #cbd5e1;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-item span {
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .stat-item strong {
+            color: #6366f1;
+            font-weight: 700;
+        }
+
+        .show-all-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .show-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        .grid-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .shloka-card {
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .shloka-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .shloka-card.expanded {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #6366f1 100%);
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .card-header:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #4f46e5 100%);
+        }
+
+        .card-header-left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        .card-header .sr-number {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+
+        .card-header-summary {
+            flex: 1;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+
+        .card-header-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .header-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .header-tag:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.05);
+        }
+
+        .expand-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+
+        .shloka-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .card-body {
+            display: none;
+            padding: 28px 24px;
+            gap: 28px;
+            background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .shloka-card.expanded .card-body {
+            display: flex;
+        }
+
+        .left-section {
+            flex: 0 0 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .shloka-visual {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+            height: 220px;
+        }
+
+        .quadrant {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.6;
+            color: #78350f;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            word-break: break-word;
+            overflow: hidden;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .quadrant.line1 {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #1e3a8a;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .quadrant.line2 {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #78350f;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .summary {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.6;
+            margin-bottom: 4px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .details {
+            font-size: 0.95rem;
+            color: #475569;
+            line-height: 1.7;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: lowercase;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        .notes-section {
+            display: none;
+            border-top: 1px solid #e2e8f0;
+            padding: 24px 28px;
+            background: #f8fafc;
+        }
+
+        .shloka-card.expanded .notes-section {
+            display: block;
+        }
+
+        .notes-label {
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 10px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        .notes-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .audio-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .audio-icon {
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        .audio-player {
+            flex: 1;
+        }
+
+        .audio-player audio {
+            width: 100%;
+            height: 35px;
+        }
+
+        .audio-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: white;
+        }
+
+        .audio-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .audio-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex: 1;
+        }
+
+        .audio-url-input {
+            flex: 1;
+            padding: 8px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-family: 'Crimson Text', serif;
+        }
+
+        .audio-url-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .save-audio-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .save-audio-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .no-results {
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .grid-container {
+                padding: 10px;
+            }
+
+            .card-body {
+                flex-direction: column;
+            }
+
+            .left-section {
+                flex: 0 0 auto;
+                width: 100%;
+            }
+
+            .card-header-summary {
+                white-space: normal;
+            }
+
+            .card-header-tags {
+                display: none;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            padding: 60px 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🕉️ Bhagavad Gita</h1>
+        <div class="subtitle">The Song of the Divine - Sacred Wisdom for Life</div>
+    </div>
+
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchText" placeholder="Search in details, summary, tags..." />
+            <select id="chapterFilter">
+                <option value="">All Chapters</option>
+            </select>
+            <select id="tagFilter">
+                <option value="">All Tags</option>
+            </select>
+            <input type="text" id="shlokaNumber" placeholder="Shloka number (e.g., 2-47)" />
+        </div>
+        <div class="stats">
+            <div class="stat-item">
+                <span>Total Shlokas:</span>
+                <strong id="totalCount">0</strong>
+            </div>
+            <div class="stat-item">
+                <span>Displayed:</span>
+                <strong id="displayedCount">0</strong>
+            </div>
+            <div class="stat-item">
+                <span>Chapters:</span>
+                <strong id="chapterCount">18</strong>
+            </div>
+            <button class="show-all-btn" onclick="clearAllFilters()">Show All</button>
+        </div>
+    </div>
+
+    <div id="loading" class="loading">Loading sacred wisdom...</div>
+    <div id="gridContainer" class="grid-container" style="display: none;"></div>
+    <div id="noResults" class="no-results" style="display: none;">
+        No shlokas found matching your search criteria. 🙏
+    </div>
+
+
+    </div>
+
+    <script>
+        let allShlokas = [];
+        let filteredShlokas = [];
+
+        // Load the JSON data
+        async function loadData() {
+            try {
+                const response = await fetch('gita.json');
+                const data = await response.json();
+                allShlokas = data.shlokas;
+                filteredShlokas = allShlokas;
+                
+                // Populate chapter filter
+                const chapters = [...new Set(allShlokas.map(s => s.chapter))].sort((a, b) => a - b);
+                const chapterFilter = document.getElementById('chapterFilter');
+                chapters.forEach(ch => {
+                    const option = document.createElement('option');
+                    option.value = ch;
+                    option.textContent = `Chapter ${ch}`;
+                    chapterFilter.appendChild(option);
+                });
+                
+                // Populate tag filter
+                const allTags = [...new Set(allShlokas.flatMap(s => s.tags))].sort();
+                const tagFilter = document.getElementById('tagFilter');
+                allTags.forEach(tag => {
+                    const option = document.createElement('option');
+                    option.value = tag;
+                    option.textContent = tag;
+                    tagFilter.appendChild(option);
+                });
+                
+                document.getElementById('totalCount').textContent = allShlokas.length;
+                document.getElementById('loading').style.display = 'none';
+                renderShlokas();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').textContent = 'Error loading data. Please refresh the page.';
+            }
+        }
+
+        // Split shloka into parts for quadrants
+        function splitShlokaText(shlokaText) {
+            // Remove speaker introductions like "धृतराष्ट्र उवाच।", "अर्जुन उवाच।", "श्री भगवान् उवाच।" etc.
+            let cleanedText = shlokaText.replace(/^[^।]*उवाच।\s*/u, '').trim();
+            
+            // Remove the verse number at the end (e.g., ॥२-४७॥)
+            cleanedText = cleanedText.replace(/॥.*?॥$/, '').trim();
+            
+            // Split into words, ignoring dandas
+            const allWords = cleanedText.replace(/।/g, ' ').split(/\s+/).filter(w => w.length > 0);
+            const totalWords = allWords.length;
+            
+            // Ensure minimum 2 words per quadrant
+            const minWordsPerQuadrant = 2;
+            
+            // If less than 8 words total, distribute what we have
+            if (totalWords < 8) {
+                const wordsPerQuadrant = Math.max(1, Math.floor(totalWords / 4));
+                const quadrants = [];
+                let startIdx = 0;
+                
+                for (let i = 0; i < 4; i++) {
+                    const endIdx = (i === 3) ? totalWords : Math.min(startIdx + wordsPerQuadrant, totalWords);
+                    quadrants.push(allWords.slice(startIdx, endIdx).join(' '));
+                    startIdx = endIdx;
+                }
+                
+                // Fill empty quadrants by redistributing
+                const nonEmpty = quadrants.filter(q => q.trim().length > 0);
+                if (nonEmpty.length < 4 && nonEmpty.length > 0) {
+                    // Redistribute all words evenly
+                    const perQuad = Math.ceil(totalWords / 4);
+                    return {
+                        quadrants: [
+                            allWords.slice(0, perQuad).join(' ') || allWords[0] || '',
+                            allWords.slice(perQuad, perQuad * 2).join(' ') || allWords[1] || '',
+                            allWords.slice(perQuad * 2, perQuad * 3).join(' ') || allWords[2] || '',
+                            allWords.slice(perQuad * 3).join(' ') || allWords[3] || ''
+                        ]
+                    };
+                }
+                
+                return { quadrants };
+            }
+            
+            // Calculate words per quadrant ensuring minimum of 2
+            const wordsPerQuadrant = Math.max(minWordsPerQuadrant, Math.floor(totalWords / 4));
+            
+            // Distribute words evenly across 4 quadrants
+            const q1End = wordsPerQuadrant;
+            const q2End = wordsPerQuadrant * 2;
+            const q3End = wordsPerQuadrant * 3;
+            
+            const quadrants = [
+                allWords.slice(0, q1End).join(' '),
+                allWords.slice(q1End, q2End).join(' '),
+                allWords.slice(q2End, q3End).join(' '),
+                allWords.slice(q3End).join(' ')
+            ];
+            
+            // Verify no quadrant is empty and redistribute if needed
+            const hasEmpty = quadrants.some(q => !q || q.trim().length === 0);
+            if (hasEmpty && totalWords >= 8) {
+                // Force even distribution
+                const perQuad = Math.floor(totalWords / 4);
+                const remainder = totalWords % 4;
+                
+                return {
+                    quadrants: [
+                        allWords.slice(0, perQuad + (remainder > 0 ? 1 : 0)).join(' '),
+                        allWords.slice(perQuad + (remainder > 0 ? 1 : 0), perQuad * 2 + (remainder > 1 ? 1 : 0)).join(' '),
+                        allWords.slice(perQuad * 2 + (remainder > 1 ? 1 : 0), perQuad * 3 + (remainder > 2 ? 1 : 0)).join(' '),
+                        allWords.slice(perQuad * 3 + (remainder > 2 ? 1 : 0)).join(' ')
+                    ]
+                };
+            }
+            
+            return { quadrants };
+        }
+
+        // Render shlokas
+        function renderShlokas() {
+            const container = document.getElementById('gridContainer');
+            const noResults = document.getElementById('noResults');
+            
+            container.innerHTML = '';
+            
+            if (filteredShlokas.length === 0) {
+                container.style.display = 'none';
+                noResults.style.display = 'block';
+                document.getElementById('displayedCount').textContent = '0';
+                return;
+            }
+            
+            container.style.display = 'flex';
+            noResults.style.display = 'none';
+            document.getElementById('displayedCount').textContent = filteredShlokas.length;
+            
+            filteredShlokas.forEach(shloka => {
+                const card = createShlokaCard(shloka);
+                container.appendChild(card);
+            });
+        }
+
+        // Create shloka card
+        function createShlokaCard(shloka) {
+            const card = document.createElement('div');
+            card.className = 'shloka-card';
+            
+            const { quadrants } = splitShlokaText(shloka.shloka);
+            
+            card.innerHTML = `
+                <div class="card-header" onclick="toggleCard(this)">
+                    <div class="card-header-left">
+                        <div class="sr-number">#${shloka['sr#']}</div>
+                        <div class="card-header-summary">${shloka.summary}</div>
+                        <div class="card-header-tags">
+                            ${shloka.tags.slice(0, 3).map(tag => `<span class="header-tag" onclick="event.stopPropagation(); filterByTag('${tag}')">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="expand-icon">▼</div>
+                </div>
+                <div class="card-body">
+                    <div class="left-section">
+                        <div class="shloka-visual">
+                            <div class="quadrant line1">${quadrants[0] || ''}</div>
+                            <div class="quadrant line1">${quadrants[1] || ''}</div>
+                            <div class="quadrant line2">${quadrants[2] || ''}</div>
+                            <div class="quadrant line2">${quadrants[3] || ''}</div>
+                        </div>
+                        <div class="tags">
+                            ${shloka.tags.map(tag => `<span class="tag" onclick="event.stopPropagation(); filterByTag('${tag}')">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="summary">${shloka.summary}</div>
+                        <div class="details">${shloka.details}</div>
+                    </div>
+                </div>
+                <div class="notes-section">
+                    <div class="notes-label">Personal Notes:</div>
+                    <textarea class="notes-input" placeholder="Add your personal reflections and insights here..." 
+                              data-sr="${shloka['sr#']}"
+                              onchange="saveNote(this)">${shloka.notes}</textarea>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Save audio URL
+        function saveAudio(srNumber) {
+            const input = document.querySelector(`.audio-url-input[data-sr="${srNumber}"]`);
+            const audioUrl = input.value.trim();
+            
+            // Find and update the shloka
+            const shloka = allShlokas.find(s => s['sr#'] === srNumber);
+            if (shloka) {
+                shloka.audio = audioUrl;
+                
+                // Save to localStorage
+                localStorage.setItem('gitaAudio', JSON.stringify(allShlokas));
+                
+                // Visual feedback
+                input.style.borderColor = '#4CAF50';
+                setTimeout(() => {
+                    input.style.borderColor = '#e0e0e0';
+                    // Re-render to show audio player
+                    renderShlokas();
+                }, 1000);
+            }
+        }
+
+        // Save note (this would typically save to localStorage or backend)
+        function saveNote(textarea) {
+            const srNumber = textarea.dataset.sr;
+            const note = textarea.value;
+            
+            // Find and update the shloka
+            const shloka = allShlokas.find(s => s['sr#'] === srNumber);
+            if (shloka) {
+                shloka.notes = note;
+                
+                // Save to localStorage
+                localStorage.setItem('gitaNotes', JSON.stringify(allShlokas));
+                
+                // Visual feedback
+                textarea.style.borderColor = '#4CAF50';
+                setTimeout(() => {
+                    textarea.style.borderColor = '#e0e0e0';
+                }, 1000);
+            }
+        }
+
+        // Toggle card expand/collapse
+        function toggleCard(headerElement) {
+            const card = headerElement.closest('.shloka-card');
+            card.classList.toggle('expanded');
+        }
+
+        // Filter by tag from dropdown or click
+        function filterByTag(tag) {
+            document.getElementById('tagFilter').value = tag;
+            filterShlokas();
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Clear all filters
+        function clearAllFilters() {
+            document.getElementById('searchText').value = '';
+            document.getElementById('chapterFilter').value = '';
+            document.getElementById('tagFilter').value = '';
+            document.getElementById('shlokaNumber').value = '';
+            filterShlokas();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Filter shlokas
+        function filterShlokas() {
+            const searchText = document.getElementById('searchText').value.toLowerCase();
+            const chapterFilter = document.getElementById('chapterFilter').value;
+            const shlokaNumber = document.getElementById('shlokaNumber').value.toLowerCase();
+            const tagFilter = document.getElementById('tagFilter').value.toLowerCase();
+            
+            filteredShlokas = allShlokas.filter(shloka => {
+                // Text search
+                const matchesText = !searchText || 
+                    shloka.summary.toLowerCase().includes(searchText) ||
+                    shloka.details.toLowerCase().includes(searchText) ||
+                    shloka.tags.some(tag => tag.toLowerCase().includes(searchText));
+                
+                // Chapter filter
+                const matchesChapter = !chapterFilter || shloka.chapter == chapterFilter;
+                
+                // Shloka number search
+                const matchesShloka = !shlokaNumber || shloka.shloka.toLowerCase().includes(shlokaNumber);
+                
+                // Tag dropdown filter
+                const matchesTag = !tagFilter || 
+                    shloka.tags.some(tag => tag.toLowerCase() === tagFilter);
+                
+                return matchesText && matchesChapter && matchesShloka && matchesTag;
+            });
+            
+            renderShlokas();
+        }
+
+        // Event listeners
+        document.getElementById('searchText').addEventListener('input', filterShlokas);
+        document.getElementById('chapterFilter').addEventListener('change', filterShlokas);
+        document.getElementById('shlokaNumber').addEventListener('input', filterShlokas);
+        document.getElementById('tagFilter').addEventListener('change', filterShlokas);
+
+        // Load saved notes from localStorage
+        function loadSavedNotes() {
+            const saved = localStorage.getItem('gitaNotes');
+            if (saved) {
+                const savedShlokas = JSON.parse(saved);
+                savedShlokas.forEach(saved => {
+                    const shloka = allShlokas.find(s => s['sr#'] === saved['sr#']);
+                    if (shloka && saved.notes) {
+                        shloka.notes = saved.notes;
+                    }
+                });
+            }
+        }
+
+        // Load saved audio URLs from localStorage
+        function loadSavedAudio() {
+            const saved = localStorage.getItem('gitaAudio');
+            if (saved) {
+                const savedShlokas = JSON.parse(saved);
+                savedShlokas.forEach(saved => {
+                    const shloka = allShlokas.find(s => s['sr#'] === saved['sr#']);
+                    if (shloka && saved.audio) {
+                        shloka.audio = saved.audio;
+                    }
+                });
+            }
+        }
+
+        // Initialize
+        loadData().then(() => {
+            loadSavedNotes();
+            loadSavedAudio();
+            renderShlokas();
+        });
+    </script>
+</body>
+</html>

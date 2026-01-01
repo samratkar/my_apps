@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gita Debug</title>
+</head>
+<body>
+    <h1>Debug Page</h1>
+    <div id="status">Loading...</div>
+    <div id="data"></div>
+    
+    <script>
+        async function test() {
+            try {
+                const response = await fetch('gita.json');
+                const data = await response.json();
+                document.getElementById('status').textContent = `Success! Found ${data.shlokas.length} shlokas`;
+                document.getElementById('data').innerHTML = `<pre>${JSON.stringify(data.shlokas[0], null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('status').textContent = `Error: ${error.message}`;
+                console.error('Full error:', error);
+            }
+        }
+        test();
+    </script>
+</body>
+</html>
