@@ -80,6 +80,7 @@ jobs:
           mkdir -p _site/poem-cards
           mkdir -p _site/todo
           mkdir -p _site/jrnl
+          mkdir -p _site/gita
           cp -r sams_canvas/dist/* _site/sams_canvas/
           cp -r journal-scout/dist/* _site/journal-scout/
           cp -r mediscribeai/dist/* _site/mediscribeai/
@@ -87,6 +88,7 @@ jobs:
           cp -r poem-cards/* _site/poem-cards/
           cp -r todo/* _site/todo/
           cp -r jrnl/* _site/jrnl/
+          cp -r gita/* _site/gita/
           cp index.html _site/
 
       - name: Upload artifact
