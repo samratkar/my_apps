@@ -138,6 +138,48 @@
             color: white;
         }
 
+        .download-btn {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
         .grid-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -549,6 +591,9 @@
                 <strong id="chapterCount">18</strong>
             </div>
             <button class="show-all-btn" onclick="clearAllFilters()">Show All</button>
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()" title="Upload JSON file">📤 Upload</button>
+            <button class="download-btn" onclick="downloadJSON()" title="Download JSON with your notes">💾 Download</button>
+            <input type="file" id="fileInput" accept=".json" onchange="uploadJSON(event)">
         </div>
     </div>
 
@@ -592,6 +637,9 @@
                     option.textContent = tag;
                     tagFilter.appendChild(option);
                 });
+                
+                // Load saved notes from localStorage
+                loadSavedNotes();
                 
                 document.getElementById('totalCount').textContent = allShlokas.length;
                 document.getElementById('loading').style.display = 'none';
@@ -775,7 +823,7 @@
             }
         }
 
-        // Save note (this would typically save to localStorage or backend)
+        // Save note
         function saveNote(textarea) {
             const srNumber = textarea.dataset.sr;
             const note = textarea.value;
@@ -785,15 +833,81 @@
             if (shloka) {
                 shloka.notes = note;
                 
-                // Save to localStorage
-                localStorage.setItem('gitaNotes', JSON.stringify(allShlokas));
+                // Save all data to localStorage
+                localStorage.setItem('gitaData', JSON.stringify({ shlokas: allShlokas }));
                 
                 // Visual feedback
-                textarea.style.borderColor = '#4CAF50';
+                textarea.style.borderColor = '#a78bfa';
                 setTimeout(() => {
                     textarea.style.borderColor = '#e0e0e0';
-                }, 1000);
+                }, 800);
             }
+        }
+
+        // Load saved notes from localStorage
+        function loadSavedNotes() {
+            const savedData = localStorage.getItem('gitaData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    // Merge saved notes into current data
+                    data.shlokas.forEach(savedShloka => {
+                        const shloka = allShlokas.find(s => s['sr#'] === savedShloka['sr#']);
+                        if (shloka && savedShloka.notes) {
+                            shloka.notes = savedShloka.notes;
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error loading saved notes:', e);
+                }
+            }
+        }
+
+        // Download JSON with notes
+        function downloadJSON() {
+            const dataStr = JSON.stringify({ shlokas: allShlokas }, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'gita-with-notes.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Upload JSON file
+        function uploadJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.shlokas && Array.isArray(data.shlokas)) {
+                        allShlokas = data.shlokas;
+                        
+                        // Save to localStorage
+                        localStorage.setItem('gitaData', JSON.stringify(data));
+                        
+                        // Re-render the page
+                        renderShlokas();
+                        
+                        // Show success message
+                        alert('✅ JSON uploaded successfully! Your notes have been restored.');
+                    } else {
+                        alert('❌ Invalid JSON format. Please upload a valid gita.json file.');
+                    }
+                } catch (error) {
+                    alert('❌ Error reading JSON file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset input so same file can be uploaded again
+            event.target.value = '';
         }
 
         // Toggle card expand/collapse
