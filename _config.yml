@@ -1,0 +1,4 @@
+# Jekyll configuration for GitHub Pages
+# Include the apps-config.yml file in the build
+include:
+  - apps-config.yml
