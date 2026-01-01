@@ -181,12 +181,52 @@
         }
 
         .grid-container {
-            max-width: 1200px;
+            max-width: 1600px;
             margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
             padding: 20px;
+        }
+
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chapter-section {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(196, 181, 253, 0.5);
+            box-shadow: 0 4px 20px rgba(91, 33, 182, 0.15);
+        }
+
+        .chapter-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #5b21b6;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(167, 139, 250, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chapter-count {
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: rgba(167, 139, 250, 0.2);
+            padding: 4px 12px;
+            border-radius: 15px;
+            color: #6d28d9;
+        }
+
+        .shlokas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
         }
 
         .shloka-card {
@@ -196,6 +236,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid #e2e8f0;
+            height: fit-content;
         }
 
         .shloka-card:hover {
@@ -287,10 +328,11 @@
 
         .card-body {
             display: none;
-            padding: 28px 24px;
-            gap: 28px;
+            padding: 20px 16px;
+            gap: 16px;
             background: linear-gradient(to bottom, #ffffff 0%, #faf5ff 100%);
             border-top: 2px solid #e9d5ff;
+            flex-direction: column;
         }
 
         .shloka-card.expanded .card-body {
@@ -298,37 +340,38 @@
         }
 
         .left-section {
-            flex: 0 0 220px;
             display: flex;
             flex-direction: column;
             gap: 12px;
+            width: 100%;
         }
 
         .shloka-visual {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 10px;
-            height: 220px;
+            grid-template-rows: auto auto;
+            gap: 8px;
+            width: 100%;
         }
 
         .quadrant {
             background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 12px;
+            padding: 10px;
             font-family: 'Noto Sans Devanagari', sans-serif;
-            font-size: 1rem;
+            font-size: 0.85rem;
             font-weight: 600;
             text-align: center;
-            line-height: 1.6;
+            line-height: 1.5;
             color: #78350f;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
             word-break: break-word;
             overflow: hidden;
             border: 1px solid rgba(251, 191, 36, 0.2);
+            min-height: 60px;
         }
 
         .quadrant.line1 {
@@ -344,25 +387,25 @@
         }
 
         .card-content {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+            width: 100%;
         }
 
         .summary {
-            font-size: 1.05rem;
+            font-size: 0.85rem;
             font-weight: 700;
             color: #1e293b;
             line-height: 1.6;
             margin-bottom: 4px;
-            font-family: 'Playfair Display', serif;
+            font-family: 'Inter', sans-serif;
         }
 
         .details {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: #475569;
-            line-height: 1.7;
+            line-height: 1.6;
             text-align: left;
             font-family: 'Inter', sans-serif;
         }
@@ -744,14 +787,54 @@
                 return;
             }
             
-            container.style.display = 'flex';
+            container.style.display = 'block';
             noResults.style.display = 'none';
             document.getElementById('displayedCount').textContent = filteredShlokas.length;
             
+            // Group shlokas by chapter
+            const chapterMap = new Map();
             filteredShlokas.forEach(shloka => {
-                const card = createShlokaCard(shloka);
-                container.appendChild(card);
+                if (!chapterMap.has(shloka.chapter)) {
+                    chapterMap.set(shloka.chapter, []);
+                }
+                chapterMap.get(shloka.chapter).push(shloka);
             });
+            
+            // Create chapters grid container
+            const chaptersGrid = document.createElement('div');
+            chaptersGrid.className = 'chapters-grid';
+            
+            // Sort chapters and render each
+            Array.from(chapterMap.keys()).sort((a, b) => a - b).forEach(chapterNum => {
+                const shlokas = chapterMap.get(chapterNum);
+                
+                // Create chapter section
+                const chapterSection = document.createElement('div');
+                chapterSection.className = 'chapter-section';
+                
+                // Create chapter header
+                const chapterHeader = document.createElement('div');
+                chapterHeader.className = 'chapter-header';
+                chapterHeader.innerHTML = `
+                    <span>Chapter ${chapterNum}</span>
+                    <span class="chapter-count">${shlokas.length} shlokas</span>
+                `;
+                chapterSection.appendChild(chapterHeader);
+                
+                // Create shlokas grid
+                const shlokasGrid = document.createElement('div');
+                shlokasGrid.className = 'shlokas-grid';
+                
+                shlokas.forEach(shloka => {
+                    const card = createShlokaCard(shloka);
+                    shlokasGrid.appendChild(card);
+                });
+                
+                chapterSection.appendChild(shlokasGrid);
+                chaptersGrid.appendChild(chapterSection);
+            });
+            
+            container.appendChild(chaptersGrid);
         }
 
         // Create shloka card
