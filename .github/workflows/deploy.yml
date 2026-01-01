@@ -90,6 +90,7 @@ jobs:
           cp -r jrnl/* _site/jrnl/
           cp -r gita/* _site/gita/
           cp index.html _site/
+          cp apps-config.yml _site/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
