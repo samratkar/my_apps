@@ -144,14 +144,29 @@
         async function loadApps() {
             try {
                 const response = await fetch('apps-config.yml');
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load apps-config.yml (Status: ${response.status}). Make sure the file is committed to your repository.`);
+                }
+                
                 const yamlText = await response.text();
                 const config = jsyaml.load(yamlText);
+                
+                if (!config || !config.categories) {
+                    throw new Error('Invalid YAML structure. Expected "categories" key.');
+                }
                 
                 renderCategories(config.categories);
             } catch (error) {
                 console.error('Error loading apps configuration:', error);
                 document.getElementById('app-container').innerHTML = 
-                    '<div style="color: #dc2626; text-align: center; padding: 20px;">Error loading apps configuration. Please check apps-config.yml file.</div>';
+                    `<div style="color: #dc2626; text-align: center; padding: 20px; background: rgba(255,255,255,0.7); border-radius: 15px;">
+                        <h3 style="margin-bottom: 10px;">⚠️ Error Loading Configuration</h3>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 10px; font-size: 0.9rem; color: #6b7280;">
+                            Please ensure apps-config.yml is committed and pushed to your GitHub repository.
+                        </p>
+                    </div>`;
             }
         }
 
