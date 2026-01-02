@@ -109,6 +109,13 @@ tags:
     icon: 🎯
     color: "#f97316"
 
+# Task configuration
+task_fields:
+  - id: name
+    label: Task Name
+    type: text
+    required: true
+
 # Reflection fields - add or modify as needed
 reflections:
   - id: gratitude

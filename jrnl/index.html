@@ -12,11 +12,11 @@
             --color-primary: #4a1a4a;
             --color-secondary: #6b2d6b;
             --color-accent: #8b4789;
-            --color-text: #e0e0e0;
-            --color-text-dim: #808090;
-            --color-bg: #1a1a2e;
-            --color-bg-card: #2a2a3e;
-            --color-bg-input: #2a2a3e;
+            --color-text: #3d2647;
+            --color-text-dim: #7f6f8f;
+            --color-bg: #f3e8ff;
+            --color-bg-card: #faf5ff;
+            --color-bg-input: #ffffff;
         }
         
         body {
@@ -41,19 +41,21 @@
         .glass-effect {
             background: var(--color-bg-card);
             backdrop-filter: blur(10px);
-            border: 1px solid var(--color-accent);
-            transition: background-color 0.3s ease;
+            border: 1px solid #d8b4fe;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
         .habit-checkbox {
             appearance: none;
             width: 24px;
             height: 24px;
-            border: 2px solid var(--color-accent);
+            border: 2px solid #c084fc;
             border-radius: 6px;
             cursor: pointer;
             position: relative;
             transition: all 0.3s ease;
             background-color: var(--color-bg-input);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.5);
         }
         .habit-checkbox:checked {
             background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-secondary) 100%);
@@ -72,21 +74,24 @@
         .habit-card {
             transition: all 0.3s ease;
             background: var(--color-bg-card);
-            border: 1px solid var(--color-accent);
+            border: 1px solid #d8b4fe;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
         }
         .habit-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(147, 112, 219, 0.4);
-            border-color: var(--color-accent);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            border-color: #c084fc;
         }
         .entry-card {
             transition: all 0.3s ease;
-            border-left: 4px solid var(--color-accent);
+            border: 1px solid #d8b4fe;
+            border-left: 3px solid #a855f7;
             background: var(--color-bg-card);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5);
         }
         .entry-card:hover {
             transform: translateX(4px);
-            box-shadow: 0 8px 16px rgba(147, 112, 219, 0.3);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
         }
         .modal {
             display: none;
@@ -138,10 +143,11 @@
         }
         .reflection-field {
             background: var(--color-bg-card);
-            border: 1px solid var(--color-accent);
+            border: 1px solid #d8b4fe;
             border-radius: 8px;
             padding: 1rem;
             margin-bottom: 1rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
         }
         .reflection-label {
             color: var(--color-accent);
@@ -189,7 +195,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-900">
+<body>
     <!-- Header -->
     <header class="lavender-gradient text-white shadow-lg">
         <div class="container mx-auto px-4 py-3 max-w-7xl">
@@ -207,25 +213,25 @@
     </header>
 
     <!-- Status Bar -->
-    <div class="bg-gray-800 border-b border-gray-700 shadow-md">
+    <div class="bg-white border-b border-purple-200 shadow-md">
         <div class="container mx-auto px-4 py-3 max-w-7xl">
             <div class="flex justify-between items-center gap-3 text-sm">
                 <label class="cursor-pointer" title="Click to load config">
-                    <div class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition">
+                    <div class="flex items-center gap-2 px-3 py-2 bg-purple-100 rounded-lg hover:bg-purple-200 transition">
                         <svg class="w-4 h-4 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        <span id="configPath" class="text-purple-300 font-mono text-xs">jrnl_config.yml (default)</span>
+                        <span id="configPath" class="text-purple-700 font-mono text-xs font-semibold">jrnl_config.yml (default)</span>
                     </div>
                     <input type="file" id="loadConfigInput" accept=".yml,.yaml" class="hidden" onchange="handleConfigLoad(event)">
                 </label>
                 <label class="cursor-pointer" title="Click to import data">
-                    <div class="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition">
+                    <div class="flex items-center gap-2 px-3 py-2 bg-purple-100 rounded-lg hover:bg-purple-200 transition">
                         <svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
                         </svg>
-                        <span id="dataPath" class="text-green-300 font-mono text-xs">LocalStorage</span>
+                        <span id="dataPath" class="text-green-700 font-mono text-xs font-semibold">LocalStorage</span>
                     </div>
                     <input type="file" id="loadDataInput" accept=".json" class="hidden" onchange="handleDataImport(event)">
                 </label>
@@ -239,28 +245,22 @@
         <!-- Action Bar -->
         <div class="glass-effect rounded-lg shadow-md p-4 mb-6 fade-in">
             <div class="flex items-center gap-3 flex-wrap">
-                <button onclick="showNewEntryModal()" title="New Entry" class="p-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-md">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                </button>
-
                 <input 
                     type="date" 
                     id="dateFilter" 
-                    class="px-3 py-2 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                    class="px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm bg-white"
                     onchange="filterEntries()"
                 >
 
-                <select id="tagFilter" onchange="filterEntries()" class="px-3 py-2 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 bg-gray-800 text-gray-200 cursor-pointer text-sm">
+                <select id="tagFilter" onchange="filterEntries()" class="px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white text-gray-800 cursor-pointer text-sm">
                     <option value="">🏷️ All Tags</option>
                 </select>
 
-                <select id="reflectionFilter" onchange="filterEntries()" class="px-3 py-2 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 bg-gray-800 text-gray-200 cursor-pointer text-sm">
+                <select id="reflectionFilter" onchange="filterEntries()" class="px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white text-gray-800 cursor-pointer text-sm">
                     <option value="">📝 All Fields</option>
                 </select>
 
-                <button onclick="showAll()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition flex items-center gap-2 font-semibold shadow-md">
+                <button onclick="showAll()" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition flex items-center gap-2 font-semibold shadow-md">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -272,10 +272,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </svg>
                 </button>
-
-                <select id="themeSelector" onchange="changeTheme(this.value)" title="Change Theme" class="px-3 py-2 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 bg-gray-800 text-gray-200 cursor-pointer text-sm">
-                    <option value="">🎨</option>
-                </select>
 
                 <button onclick="exportData()" class="ml-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2 font-semibold shadow-md">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,8 +290,8 @@
         <!-- Empty State -->
         <div id="emptyState" class="text-center py-16 hidden">
             <div class="text-6xl mb-4">📔</div>
-            <h3 class="text-2xl font-semibold text-gray-300 mb-2">No entries yet</h3>
-            <p class="text-gray-400 mb-6">Start your journey by creating your first entry</p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-2">No entries yet</h3>
+            <p class="text-gray-600 mb-6">Start your journey by creating your first entry</p>
             <button onclick="showNewEntryModal()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold">
                 Create First Entry
             </button>
@@ -307,7 +303,7 @@
         <div class="glass-effect rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold lavender-text">✨ New Journal Entry</h2>
-                <button onclick="closeNewEntryModal()" class="text-gray-400 hover:text-gray-200 text-2xl">×</button>
+                <button onclick="closeNewEntryModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
             </div>
 
             <form id="entryForm" onsubmit="saveEntry(event)">
@@ -322,16 +318,45 @@
                 </div>
 
                 <div class="mb-6">
+                    <label class="block lavender-text font-semibold mb-2">📌 Type</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="entryType" value="journal" id="typeJournal" checked class="w-4 h-4 text-purple-600">
+                            <span class="text-gray-700">📔 Journal</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="entryType" value="task" id="typeTask" class="w-4 h-4 text-purple-600">
+                            <span class="text-gray-700">✅ Task</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
                     <h3 class="text-xl font-bold lavender-text mb-4">📊 Habit Tracker</h3>
-                    <div id="habitsContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div id="habitsContainer" class="flex gap-2 overflow-x-auto pb-2">
                         <!-- Habits will be dynamically inserted here -->
                     </div>
                 </div>
 
                 <div class="mb-6">
                     <h3 class="text-xl font-bold lavender-text mb-4">🏷️ Tags</h3>
-                    <div id="tagsContainer" class="flex flex-wrap gap-2">
+                    <div id="tagsContainer" class="flex flex-wrap gap-2 mb-3">
                         <!-- Tags will be dynamically inserted here -->
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <input 
+                            type="text" 
+                            id="newTagInput" 
+                            placeholder="Add new tag (e.g., 🎯 Focus)"
+                            class="flex-1 px-3 py-2 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        >
+                        <button 
+                            type="button" 
+                            onclick="addNewTag()" 
+                            class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition font-semibold text-sm"
+                        >
+                            + Add Tag
+                        </button>
                     </div>
                 </div>
 
@@ -346,7 +371,7 @@
                     <button 
                         type="button" 
                         onclick="closeNewEntryModal()" 
-                        class="px-6 py-3 bg-gray-600 text-gray-200 rounded-lg hover:bg-gray-700 transition font-semibold"
+                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold"
                     >
                         Cancel
                     </button>
@@ -366,7 +391,7 @@
         <div class="glass-effect rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold lavender-text">📊 Habit Statistics</h2>
-                <button onclick="closeStatsModal()" class="text-gray-400 hover:text-gray-200 text-2xl">×</button>
+                <button onclick="closeStatsModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
             </div>
             <div id="statsContent">
                 <!-- Stats will be dynamically inserted here -->
@@ -381,9 +406,10 @@
         let tags = [];
         let entries = [];
         let colorSchemes = [];
+        let taskFields = [];
+        let projects = [];
         let activeConfigPath = 'jrnl_config.yml (default)';
         let activeDataPath = 'LocalStorage';
-        let currentTheme = 'lavender';
         let appConfig = {
             app_title: "Daily Journal & Habit Tracker",
             app_subtitle: "Track your daily habits and reflect on what makes life worth living"
@@ -493,6 +519,8 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                 reflections = config.reflections || [];
                 tags = config.tags || [];
                 colorSchemes = config.color_schemes || [];
+                taskFields = config.task_fields || [];
+                projects = config.projects || [];
                 appConfig = {
                     app_title: config.app_title || appConfig.app_title,
                     app_subtitle: config.app_subtitle || appConfig.app_subtitle
@@ -501,14 +529,6 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                 // Update config path display
                 activeConfigPath = 'jrnl_config.yml (default)';
                 updateStatusBar();
-                
-                // Load saved theme or default
-                const savedTheme = localStorage.getItem('journal_theme') || config.default_theme || 'lavender';
-                currentTheme = savedTheme;
-                
-                // Populate theme selector
-                populateThemeSelector();
-                applyTheme(currentTheme);
                 
                 console.log('Config loaded from jrnl_config.yml');
             } catch (error) {
@@ -568,7 +588,6 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                     populateReflectionFilter();
                     renderEntries();
                     updateStats();
-                    populateThemeSelector();
                     showToast('Configuration loaded successfully! ✨');
                 } catch (error) {
                     console.error('Error parsing YAML:', error);
@@ -578,77 +597,48 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
             reader.readAsText(file);
         }
 
-        // Populate theme selector
-        function populateThemeSelector() {
-            const selector = document.getElementById('themeSelector');
-            selector.innerHTML = '<option value="">🎨 Theme</option>';
-            
-            colorSchemes.forEach(scheme => {
-                const option = document.createElement('option');
-                option.value = scheme.id;
-                option.textContent = scheme.name;
-                if (scheme.id === currentTheme) {
-                    option.selected = true;
-                }
-                selector.appendChild(option);
-            });
-        }
-
-        // Change theme
-        function changeTheme(themeId) {
-            if (!themeId) return;
-            currentTheme = themeId;
-            localStorage.setItem('journal_theme', themeId);
-            applyTheme(themeId);
-            showToast(`Theme changed to ${colorSchemes.find(s => s.id === themeId)?.name || themeId} 🎨`);
-        }
-
-        // Apply theme
-        function applyTheme(themeId) {
-            const theme = colorSchemes.find(s => s.id === themeId);
-            if (!theme) return;
-
-            const root = document.documentElement;
-            root.style.setProperty('--color-primary', theme.primary);
-            root.style.setProperty('--color-secondary', theme.secondary);
-            root.style.setProperty('--color-accent', theme.accent);
-            root.style.setProperty('--color-text', theme.text);
-            root.style.setProperty('--color-text-dim', theme.textDim);
-            root.style.setProperty('--color-bg', theme.bg);
-            root.style.setProperty('--color-bg-card', theme.bgCard);
-            root.style.setProperty('--color-bg-input', theme.bgInput);
-
-            // Update body background
-            document.body.style.backgroundColor = theme.bg;
-            document.body.style.color = theme.text;
-        }
-
         // Render habits in the form
         function renderHabits() {
             const container = document.getElementById('habitsContainer');
             container.innerHTML = '';
             
             habits.forEach(habit => {
-                const habitCard = document.createElement('div');
-                habitCard.className = 'habit-card glass-effect rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer';
-                habitCard.innerHTML = `
-                    <div class="text-3xl">${habit.icon}</div>
-                    <div class="text-sm font-semibold text-gray-300 text-center">${habit.label}</div>
+                const habitDiv = document.createElement('div');
+                habitDiv.className = 'flex flex-col items-center opacity-30 cursor-pointer hover:scale-110 transition-all flex-shrink-0';
+                habitDiv.title = habit.label;
+                habitDiv.setAttribute('data-habit-id', habit.id);
+                habitDiv.innerHTML = `
+                    <div class="text-xl">${habit.icon}</div>
+                    <div class="text-xs text-gray-600">○</div>
                     <input 
                         type="checkbox" 
                         id="habit_${habit.id}" 
-                        class="habit-checkbox"
+                        class="hidden"
                     >
                 `;
-                container.appendChild(habitCard);
                 
-                // Make card clickable to toggle checkbox
-                habitCard.addEventListener('click', (e) => {
-                    if (e.target.type !== 'checkbox') {
-                        const checkbox = habitCard.querySelector('input[type="checkbox"]');
-                        checkbox.checked = !checkbox.checked;
+                // Make clickable to toggle
+                habitDiv.addEventListener('click', (e) => {
+                    const checkbox = habitDiv.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                    const indicator = habitDiv.querySelector('.text-xs');
+                    
+                    if (checkbox.checked) {
+                        habitDiv.classList.remove('opacity-30');
+                        habitDiv.classList.add('opacity-100');
+                        indicator.innerHTML = '✓';
+                        indicator.classList.remove('text-gray-600');
+                        indicator.classList.add('text-green-600', 'font-bold');
+                    } else {
+                        habitDiv.classList.remove('opacity-100');
+                        habitDiv.classList.add('opacity-30');
+                        indicator.innerHTML = '○';
+                        indicator.classList.remove('text-green-600', 'font-bold');
+                        indicator.classList.add('text-gray-600');
                     }
                 });
+                
+                container.appendChild(habitDiv);
             });
         }
 
@@ -657,23 +647,100 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
             const container = document.getElementById('tagsContainer');
             container.innerHTML = '';
             
+            if (tags.length === 0) {
+                container.innerHTML = '<p class="text-gray-600 text-sm">No tags configured</p>';
+            }
+            
             tags.forEach(tag => {
                 const tagBadge = document.createElement('div');
                 tagBadge.className = 'tag-badge';
-                tagBadge.style.backgroundColor = tag.color;
+                // Ensure the color is darker and more visible
+                const bgColor = tag.color || '#8b4789';
+                tagBadge.style.backgroundColor = bgColor;
                 tagBadge.style.color = '#ffffff';
+                tagBadge.style.border = '2px solid #c084fc';
+                tagBadge.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
+                tagBadge.style.fontWeight = '700';
+                tagBadge.style.minWidth = '90px';
+                tagBadge.style.textAlign = 'center';
+                tagBadge.style.cursor = 'pointer';
+                tagBadge.style.display = 'inline-flex';
+                tagBadge.style.transition = 'all 0.2s ease';
                 tagBadge.setAttribute('data-tag-id', tag.id);
                 tagBadge.innerHTML = `
-                    <span>${tag.icon}</span>
+                    <span style="margin-right: 4px;">${tag.icon}</span>
                     <span>${tag.label}</span>
                 `;
                 
                 tagBadge.addEventListener('click', () => {
                     tagBadge.classList.toggle('selected');
+                    if (tagBadge.classList.contains('selected')) {
+                        tagBadge.style.transform = 'scale(1.05)';
+                        tagBadge.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 3px #e9d5ff';
+                    } else {
+                        tagBadge.style.transform = 'scale(1)';
+                        tagBadge.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
+                    }
                 });
                 
                 container.appendChild(tagBadge);
             });
+        }
+
+        // Add new tag
+        function addNewTag() {
+            const input = document.getElementById('newTagInput');
+            const value = input.value.trim();
+            
+            if (!value) {
+                showToast('Please enter a tag name ⚠️');
+                return;
+            }
+            
+            // Parse input - can be "emoji label" or just "label"
+            let icon = '🏷️'; // default icon
+            let label = value;
+            
+            // Check if first character is an emoji
+            const firstChar = value.charAt(0);
+            const isEmoji = /\p{Emoji}/u.test(firstChar);
+            if (isEmoji) {
+                icon = firstChar;
+                label = value.slice(1).trim();
+            }
+            
+            if (!label) {
+                showToast('Please enter a label after the emoji ⚠️');
+                return;
+            }
+            
+            // Generate a simple ID from the label
+            const id = label.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+            
+            // Check if tag already exists
+            if (tags.find(t => t.id === id)) {
+                showToast('A tag with this name already exists ⚠️');
+                return;
+            }
+            
+            // Generate a random color
+            const colors = ['#22c55e', '#60a5fa', '#f59e0b', '#ec4899', '#a855f7', '#6366f1', '#ef4444', '#fbbf24'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Add new tag
+            const newTag = { id, label, icon, color };
+            tags.push(newTag);
+            
+            // Save to localStorage
+            saveToLocalStorage();
+            
+            // Re-render tags
+            renderTags();
+            populateTagFilter();
+            
+            // Clear input
+            input.value = '';
+            input.focus();
         }
 
         // Populate tag filter dropdown
@@ -719,7 +786,8 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                         id="reflection_${reflection.id}" 
                         rows="${reflection.rows || 3}" 
                         placeholder="${reflection.placeholder || ''}"
-                        class="w-full px-4 py-3 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                        class="w-full px-3 py-2 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-xs"
+                        style="font-family: Consolas, monospace;"
                     ></textarea>
                 `;
                 container.appendChild(fieldDiv);
@@ -744,6 +812,7 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
             event.preventDefault();
             
             const date = document.getElementById('entryDate').value;
+            const entryType = document.querySelector('input[name="entryType"]:checked').value;
             
             // Collect habit data
             const habitData = {};
@@ -769,6 +838,8 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
             const entry = {
                 id: Date.now(),
                 date: date,
+                type: entryType,
+                completed: false,
                 habits: habitData,
                 reflections: reflectionData,
                 tags: selectedTags,
@@ -822,20 +893,74 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                 );
             }
             
-            if (filteredEntries.length === 0) {
-                container.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-            
             emptyState.classList.add('hidden');
             container.innerHTML = '';
             
+            // Create 12 month grids for current year
+            const currentYear = new Date().getFullYear();
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            // Group filtered entries by month
+            const entriesByMonth = {};
             filteredEntries.forEach(entry => {
-                const entryCard = document.createElement('div');
-                entryCard.className = 'entry-card glass-effect rounded-lg p-3 shadow-md fade-in';
-                entryCard.setAttribute('data-entry-id', entry.id);
+                const date = new Date(entry.date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
                 
+                if (!entriesByMonth[monthKey]) {
+                    entriesByMonth[monthKey] = [];
+                }
+                entriesByMonth[monthKey].push(entry);
+            });
+            
+            // Create grid container
+            const gridContainer = document.createElement('div');
+            gridContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+            
+            // Create a card for each month of current year
+            for (let month = 0; month < 12; month++) {
+                const monthKey = `${currentYear}-${String(month + 1).padStart(2, '0')}`;
+                const monthLabel = `${monthNames[month]} ${currentYear}`;
+                const monthEntries = entriesByMonth[monthKey] || [];
+                
+                const monthCard = document.createElement('div');
+                monthCard.className = 'glass-effect rounded-lg p-4 shadow-lg';
+                
+                // Month header with + button
+                const monthHeader = document.createElement('div');
+                monthHeader.className = 'flex items-center justify-between mb-4 pb-3 border-b-2 border-purple-200';
+                monthHeader.innerHTML = `
+                    <h3 class="text-lg font-bold lavender-text">📅 ${monthLabel}</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-600 font-semibold">${monthEntries.length} entries</span>
+                        <button onclick="addTaskInline('${monthKey}')" 
+                                class="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition shadow-md flex items-center gap-1" 
+                                title="Add task for ${monthLabel}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <span class="text-xs">✅</span>
+                        </button>
+                        <button onclick="showNewEntryModalForMonth(${currentYear}, ${month + 1})" 
+                                class="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition shadow-md flex items-center gap-1" 
+                                title="Add journal for ${monthLabel}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <span class="text-xs">📔</span>
+                        </button>
+                    </div>
+                `;
+                monthCard.appendChild(monthHeader);
+                
+                // Entries container
+                const entriesContainer = document.createElement('div');
+                entriesContainer.className = 'space-y-3 max-h-96 overflow-y-auto';
+                
+                if (monthEntries.length === 0) {
+                    entriesContainer.innerHTML = '<p class="text-gray-500 text-sm text-center py-8">No entries yet</p>';
+                } else {
+                    monthEntries.forEach(entry => {
                 const date = new Date(entry.date);
                 const formattedDate = date.toLocaleDateString('en-US', { 
                     weekday: 'long', 
@@ -868,7 +993,7 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                 // Build reflections display
                 let reflectionsHTML = '';
                 if (entry.reflections && reflections.length > 0) {
-                    reflectionsHTML = '<div class="mt-4 pt-4 border-t-2 lavender-border space-y-4">';
+                    reflectionsHTML = '<div class="mt-4 pt-4 space-y-4">';
                     reflections.forEach(reflection => {
                         const value = entry.reflections[reflection.id] || '';
                         reflectionsHTML += `
@@ -878,7 +1003,7 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                                     <span>${reflection.label}</span>
                                 </label>
                                 <textarea 
-                                    class="w-full px-3 py-2 bg-gray-800 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 text-gray-200 resize-none text-xs"
+                                    class="w-full px-3 py-2 bg-white rounded-lg focus:ring-2 focus:ring-purple-500 text-gray-800 resize-none text-xs"
                                     style="font-family: Consolas, monospace;"
                                     rows="${reflection.rows || 3}"
                                     placeholder="${reflection.placeholder || ''}"
@@ -898,7 +1023,7 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                         const tag = tags.find(t => t.id === tagId);
                         if (tag) {
                             tagsHTML += `
-                                <span class="tag-badge" style="background-color: ${tag.color}; color: white;">
+                                <span class="tag-badge" style="background-color: ${tag.color}; color: white; border: 2px solid #c084fc; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2); font-weight: 700;">
                                     <span>${tag.icon}</span>
                                     <span>${tag.label}</span>
                                 </span>
@@ -908,34 +1033,180 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                     tagsHTML += '</div>';
                 }
                 
+                const entryCard = document.createElement('div');
+                entryCard.className = `entry-card glass-effect rounded-lg p-3 shadow-md fade-in mb-3 ${entry.completed ? 'opacity-60' : ''}`;
+                entryCard.setAttribute('data-entry-id', entry.id);
+                
+                const typeIcon = entry.type === 'task' ? '✅' : '📔';
+                const typeLabel = entry.type === 'task' ? 'Task' : 'Journal';
+                
+                // Build task-specific content (empty for now since checkbox shows status)
+                let taskContentHTML = '';
+                
+                const taskCheckbox = entry.type === 'task' ? `
+                    <input type="checkbox" ${entry.completed ? 'checked' : ''} 
+                           onchange="toggleComplete(${entry.id})" 
+                           class="w-5 h-5 rounded border-purple-300 cursor-pointer" 
+                           title="${entry.completed ? 'Mark incomplete' : 'Mark complete'}">
+                ` : '';
+                
+                const isTask = entry.type === 'task';
+                const clickHandler = isTask ? '' : `onclick="toggleEntryCollapse(${entry.id})"`;
+                const cursorClass = isTask ? '' : 'cursor-pointer';
+                
                 entryCard.innerHTML = `
-                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleEntryCollapse(${entry.id})">
+                    <div class="flex justify-between items-center ${cursorClass}" ${clickHandler}>
                         <div class="flex items-center gap-3 flex-1">
-                            <svg class="w-4 h-4 text-gray-400 transition-transform entry-collapse-icon collapsed" data-entry="${entry.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            ${taskCheckbox}
+                            ${isTask ? '' : `<svg class="w-4 h-4 text-gray-500 transition-transform entry-collapse-icon collapsed" data-entry="${entry.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
-                            <h3 class="text-sm font-bold text-gray-200">${formattedDate}</h3>
-                            <span class="text-xs text-gray-400">|
+                            <span class="text-lg" title="${typeLabel}">${typeIcon}</span>`}
+                            <h3 class="text-sm font-bold text-gray-800 ${entry.completed ? 'line-through' : ''}" data-task-title="${entry.id}">${entry.taskName || formattedDate}</h3>
+                            ${taskContentHTML}
+                            ${isTask ? '' : `<span class="text-xs text-gray-600">|
                                 <span class="font-semibold lavender-text">${completionPercent}%</span> 
                                 (${completedCount}/${totalCount})
-                            </span>
+                            </span>`}
                         </div>
-                        <button onclick="event.stopPropagation(); deleteEntry(${entry.id})" class="text-red-400 hover:text-red-300 transition" title="Delete Entry">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="${isTask ? '' : 'event.stopPropagation(); '}deleteEntry(${entry.id})" class="text-red-400 hover:text-red-300 transition" title="Delete Entry">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     
-                    <div class="entry-content collapsed" data-entry="${entry.id}">
+                    ${isTask ? '' : `<div class="entry-content collapsed" data-entry="${entry.id}">
                         ${tagsHTML}
                         ${habitsHTML}
                         ${reflectionsHTML}
-                    </div>
+                    </div>`}
                 `;
                 
-                container.appendChild(entryCard);
+                entriesContainer.appendChild(entryCard);
+                    });
+                }
+                
+                monthCard.appendChild(entriesContainer);
+                gridContainer.appendChild(monthCard);
+            }
+            
+            container.appendChild(gridContainer);
+        }
+
+        // Show new entry modal for specific month
+        function showNewEntryModalForMonth(year, month) {
+            showNewEntryModal();
+            // Set date to first day of the month
+            const dateStr = `${year}-${String(month).padStart(2, '0')}-01`;
+            document.getElementById('entryDate').value = dateStr;
+        }
+
+        // Add task inline
+        function addTaskInline(monthKey) {
+            const [year, month] = monthKey.split('-');
+            const date = `${year}-${month}-${new Date().getDate().toString().padStart(2, '0')}`;
+            
+            const taskId = Date.now();
+            const taskHTML = `
+                <div class="entry-card glass-effect rounded-lg p-3 shadow-md fade-in mb-3" id="new-task-${taskId}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" id="task-complete-${taskId}" class="w-5 h-5 rounded border-purple-300">
+                        <input type="text" id="task-name-${taskId}" placeholder="Task name..." 
+                               class="flex-1 px-3 py-2 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
+                    </div>
+                    <div class="flex gap-2 justify-end">
+                        <button onclick="cancelTaskInline('${taskId}')" class="px-3 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition text-sm">
+                            Cancel
+                        </button>
+                        <button onclick="saveTaskInline('${taskId}', '${date}')" class="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-sm">
+                            Save Task
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Find the month card and prepend the task form
+            const monthCards = document.querySelectorAll('#entriesList > div > .glass-effect');
+            for (let i = 0; i < monthCards.length; i++) {
+                const card = monthCards[i];
+                const container = card.querySelector('.space-y-3');
+                if (container) {
+                    // Check if this is the right month by checking the button's monthKey
+                    const addButton = card.querySelector(`button[onclick*="'${monthKey}'"]`);
+                    if (addButton) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = taskHTML;
+                        container.prepend(tempDiv.firstElementChild);
+                        document.getElementById(`task-name-${taskId}`).focus();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Save task inline
+        function saveTaskInline(taskId, date) {
+            const taskName = document.getElementById(`task-name-${taskId}`).value.trim();
+            const completed = document.getElementById(`task-complete-${taskId}`).checked;
+            
+            if (!taskName) {
+                showToast('Please enter a task name ⚠️');
+                return;
+            }
+            
+            const entry = {
+                id: parseInt(taskId),
+                date: date,
+                type: 'task',
+                taskName: taskName,
+                completed: completed,
+                habits: {},
+                reflections: {},
+                tags: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            // Initialize empty habits
+            habits.forEach(habit => {
+                entry.habits[habit.id] = false;
             });
+            
+            entries.unshift(entry);
+            saveToLocalStorage();
+            renderEntries();
+            showToast('Task added! ✓');
+        }
+
+        // Cancel task inline
+        function cancelTaskInline(taskId) {
+            const taskElement = document.getElementById(`new-task-${taskId}`);
+            if (taskElement) {
+                taskElement.remove();
+            }
+        }
+
+        // Toggle task completion
+        function toggleComplete(entryId) {
+            const entry = entries.find(e => e.id === entryId);
+            if (entry && entry.type === 'task') {
+                entry.completed = !entry.completed;
+                saveToLocalStorage();
+                
+                // Update just the task title's line-through style without re-rendering
+                const taskTitle = document.querySelector(`h3[data-task-title="${entryId}"]`);
+                if (taskTitle) {
+                    if (entry.completed) {
+                        taskTitle.classList.add('line-through');
+                    } else {
+                        taskTitle.classList.remove('line-through');
+                    }
+                }
+                
+                showToast(entry.completed ? 'Task completed! ✓' : 'Task marked incomplete');
+            }
         }
 
         // Update entry reflection inline
@@ -1107,14 +1378,14 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-3">
                                 <span class="text-3xl">${stat.habit.icon}</span>
-                                <span class="font-semibold text-gray-300">${stat.habit.label}</span>
+                                <span class="font-semibold text-gray-700">${stat.habit.label}</span>
                             </div>
                             <span class="text-xl font-bold lavender-text">${stat.percentage}%</span>
                         </div>
-                        <div class="w-full bg-gray-700 rounded-full h-3">
+                        <div class="w-full bg-purple-200 rounded-full h-3">
                             <div class="lavender-gradient h-3 rounded-full transition-all duration-500" style="width: ${stat.percentage}%"></div>
                         </div>
-                        <div class="text-sm text-gray-400 mt-1 text-right">${stat.completed} / ${stat.total} days</div>
+                        <div class="text-sm text-gray-600 mt-1 text-right">${stat.completed} / ${stat.total} days</div>
                     </div>
                 `;
             });
@@ -1181,20 +1452,21 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                     }
                     
                     if (data.entries) {
-                        if (confirm('This will replace all existing entries. Continue?')) {
-                            entries = data.entries;
-                            saveToLocalStorage();
-                            
-                            // Update data path display
-                            activeDataPath = file.name;
-                            updateStatusBar();
-                            
-                            renderHabits();
-                            renderReflections();
-                            renderEntries();
-                            updateStats();
-                            showToast('Data imported successfully! 🎉');
-                        }
+                        entries = data.entries;
+                        saveToLocalStorage();
+                        
+                        // Update data path display
+                        activeDataPath = file.name;
+                        updateStatusBar();
+                        
+                        renderHabits();
+                        renderReflections();
+                        renderTags();
+                        populateTagFilter();
+                        populateReflectionFilter();
+                        renderEntries();
+                        updateStats();
+                        showToast('Data imported successfully! 🎉');
                     }
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
