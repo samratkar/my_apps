@@ -222,7 +222,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        <span id="configPath" class="text-purple-700 font-mono text-xs font-semibold">jrnl_config.yml (default)</span>
+                        <span id="configPath" class="text-purple-700 text-xs font-semibold">Import journal configuration</span>
                     </div>
                     <input type="file" id="loadConfigInput" accept=".yml,.yaml" class="hidden" onchange="handleConfigLoad(event)">
                 </label>
@@ -287,6 +287,32 @@
             <!-- Entries will be dynamically inserted here -->
         </div>
 
+        <!-- Startup Instructions -->
+        <div id="startupMessage" class="text-center py-16">
+            <div class="glass-effect rounded-lg p-8 max-w-2xl mx-auto shadow-lg">
+                <div class="text-6xl mb-4">🚀</div>
+                <h3 class="text-3xl font-bold lavender-text mb-4">Welcome to Your Journal!</h3>
+                <p class="text-gray-700 mb-6 text-lg">Get started by loading your configuration and data:</p>
+                <div class="space-y-4 text-left max-w-md mx-auto">
+                    <div class="flex items-start gap-3 p-4 bg-purple-50 rounded-lg">
+                        <div class="text-2xl">1️⃣</div>
+                        <div>
+                            <div class="font-bold text-purple-700">Load Configuration</div>
+                            <div class="text-sm text-gray-600">Click on <span class="bg-white px-2 py-1 rounded">Import journal configuration</span> in the status bar above to load your habits and settings</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
+                        <div class="text-2xl">2️⃣</div>
+                        <div>
+                            <div class="font-bold text-green-700">Import Data (Optional)</div>
+                            <div class="text-sm text-gray-600">Click on the database button to import existing journal data from a JSON file</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-500 text-sm mt-6">💡 Start fresh? Just load the config file and begin journaling!</p>
+            </div>
+        </div>
+
         <!-- Empty State -->
         <div id="emptyState" class="text-center py-16 hidden">
             <div class="text-6xl mb-4">📔</div>
@@ -315,20 +341,6 @@
                         required 
                         class="w-full px-4 py-2 border-2 lavender-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     >
-                </div>
-
-                <div class="mb-6">
-                    <label class="block lavender-text font-semibold mb-2">📌 Type</label>
-                    <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="entryType" value="journal" id="typeJournal" checked class="w-4 h-4 text-purple-600">
-                            <span class="text-gray-700">📔 Journal</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="entryType" value="task" id="typeTask" class="w-4 h-4 text-purple-600">
-                            <span class="text-gray-700">✅ Task</span>
-                        </label>
-                    </div>
                 </div>
 
                 <div class="mb-6">
@@ -408,8 +420,8 @@
         let colorSchemes = [];
         let taskFields = [];
         let projects = [];
-        let activeConfigPath = 'jrnl_config.yml (default)';
-        let activeDataPath = 'LocalStorage';
+        let activeConfigPath = 'Import journal configuration';
+        let activeDataPath = 'Not loaded - Click to import';
         let appConfig = {
             app_title: "Daily Journal & Habit Tracker",
             app_subtitle: "Track your daily habits and reflect on what makes life worth living"
@@ -490,22 +502,6 @@
 app_title: "Daily Journal & Habit Tracker"
 app_subtitle: "Track your daily habits and reflect on what makes life worth living"`;
 
-        // Initialize app
-        async function init() {
-            await loadConfigFromFile();
-            loadFromLocalStorage();
-            renderHabits();
-            renderReflections();
-            renderTags();
-            populateTagFilter();
-            populateReflectionFilter();
-            renderEntries();
-            updateStats();
-            
-            // Set today's date as default
-            document.getElementById('entryDate').valueAsDate = new Date();
-        }
-
         // Load config from jrnl_config.yml file
         async function loadConfigFromFile() {
             try {
@@ -580,6 +576,9 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                     activeConfigPath = file.name;
                     updateStatusBar();
                     
+                    // Hide startup message and show main UI
+                    document.getElementById('startupMessage').style.display = 'none';
+                    
                     saveToLocalStorage();
                     renderHabits();
                     renderReflections();
@@ -588,6 +587,10 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                     populateReflectionFilter();
                     renderEntries();
                     updateStats();
+                    
+                    // Set today's date as default
+                    document.getElementById('entryDate').valueAsDate = new Date();
+                    
                     showToast('Configuration loaded successfully! ✨');
                 } catch (error) {
                     console.error('Error parsing YAML:', error);
@@ -812,7 +815,6 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
             event.preventDefault();
             
             const date = document.getElementById('entryDate').value;
-            const entryType = document.querySelector('input[name="entryType"]:checked').value;
             
             // Collect habit data
             const habitData = {};
@@ -834,11 +836,11 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                 selectedTags.push(badge.getAttribute('data-tag-id'));
             });
             
-            // Create entry object
+            // Create entry object (always journal type from modal)
             const entry = {
                 id: Date.now(),
                 date: date,
-                type: entryType,
+                type: 'journal',
                 completed: false,
                 habits: habitData,
                 reflections: reflectionData,
@@ -1309,22 +1311,12 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
             if (configElement) {
                 configElement.textContent = activeConfigPath;
                 configElement.title = activeConfigPath;
-            }
-            
-            if (dataElement) {
-                dataElement.textContent = activeDataPath;
-                dataElement.title = activeDataPath;
-            }
-        }
-
-        // Update status bar with current paths
-        function updateStatusBar() {
-            const configElement = document.getElementById('configPath');
-            const dataElement = document.getElementById('dataPath');
-            
-            if (configElement) {
-                configElement.textContent = activeConfigPath;
-                configElement.title = activeConfigPath;
+                // Add font-mono class when config is loaded (not the initial instruction)
+                if (activeConfigPath !== 'Import journal configuration') {
+                    configElement.classList.add('font-mono');
+                } else {
+                    configElement.classList.remove('font-mono');
+                }
             }
             
             if (dataElement) {
@@ -1459,6 +1451,9 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                         activeDataPath = file.name;
                         updateStatusBar();
                         
+                        // Hide startup message
+                        document.getElementById('startupMessage').style.display = 'none';
+                        
                         renderHabits();
                         renderReflections();
                         renderTags();
@@ -1527,9 +1522,6 @@ app_subtitle: "Track your daily habits and reflect on what makes life worth livi
                 setTimeout(() => document.body.removeChild(toast), 300);
             }, 3000);
         }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
