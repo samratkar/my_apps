@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional To-Do Manager</title>
+    <title>To-Do Manager</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -15,7 +15,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #f3e8ff 0%, #faf5ff 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -23,15 +23,17 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: #0f1419;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(216, 180, 254, 0.5);
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.15);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #2d3561 0%, #1f2544 100%);
-            color: #e8eaf6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
             padding: 30px;
             text-align: center;
         }
@@ -48,8 +50,8 @@
 
         .controls {
             padding: 20px 30px;
-            background: #1a1f2e;
-            border-bottom: 1px solid #2d3561;
+            background: #faf5ff;
+            border-bottom: 1px solid #d8b4fe;
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
@@ -61,9 +63,9 @@
             align-items: center;
             gap: 8px;
             padding: 10px 15px;
-            background: #0f1419;
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 8px;
-            border: 2px solid #2d3561;
+            border: 2px solid #d8b4fe;
         }
 
         .filter-group input[type="checkbox"] {
@@ -75,7 +77,7 @@
         .filter-group label {
             cursor: pointer;
             font-weight: 600;
-            color: #c5cae9;
+            color: #6b2d6b;
             user-select: none;
         }
 
@@ -93,45 +95,45 @@
         }
 
         .btn-primary {
-            background: #5568d3;
-            color: #e8eaf6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
         }
 
         .btn-primary:hover {
-            background: #4557c2;
+            background: linear-gradient(135deg, #7c8ff0 0%, #8b5bb8 100%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(85, 104, 211, 0.5);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
         .btn-success {
-            background: #2e7d32;
-            color: #e8f5e9;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
         }
 
         .btn-success:hover {
-            background: #256728;
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.5);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
 
         .btn-info {
-            background: #0277bd;
-            color: #e1f5fe;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #ffffff;
         }
 
         .btn-info:hover {
-            background: #01579b;
+            background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(2, 119, 189, 0.5);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
 
         .btn-secondary {
-            background: #455a64;
-            color: #e0e0e0;
+            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+            color: #ffffff;
         }
 
         .btn-secondary:hover {
-            background: #37474f;
+            background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
         }
 
         input[type="file"] {
@@ -146,39 +148,41 @@
 
         .sidebar {
             flex: 0 0 250px;
-            background: #1a1f2e;
+            background: rgba(250, 245, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #d8b4fe;
             border-radius: 12px;
             padding: 20px;
             height: fit-content;
             position: sticky;
             top: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
         }
 
         .sidebar h3 {
             margin-top: 0;
             margin-bottom: 15px;
-            color: #c5cae9;
+            color: #6b2d6b;
             font-size: 1.1em;
-            border-bottom: 2px solid #5568d3;
+            border-bottom: 2px solid #a855f7;
             padding-bottom: 10px;
         }
 
         .tag-search {
             width: 100%;
             padding: 10px;
-            border: 2px solid #2d3561;
+            border: 2px solid #d8b4fe;
             border-radius: 8px;
             font-size: 0.9em;
             margin-bottom: 15px;
             transition: border-color 0.3s;
-            background: #0f1419;
-            color: #e8eaf6;
+            background: rgba(255, 255, 255, 0.9);
+            color: #4a1a4a;
         }
 
         .tag-search:focus {
             outline: none;
-            border-color: #5568d3;
+            border-color: #a855f7;
         }
 
         .tag-list {
@@ -189,7 +193,7 @@
 
         .tag-filter {
             padding: 8px 12px;
-            background: #0f1419;
+            background: rgba(255, 255, 255, 0.9);
             border: 2px solid transparent;
             border-radius: 6px;
             cursor: pointer;
@@ -200,19 +204,19 @@
         }
 
         .tag-filter:hover {
-            background: #2d3561;
+            background: #f3e8ff;
         }
 
         .tag-filter.active {
-            background: #5568d3;
-            color: #e8eaf6;
-            border-color: #5568d3;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            border-color: transparent;
         }
 
         .tag-filter-name {
             font-weight: 600;
             font-size: 0.9em;
-            color: #c5cae9;
+            color: #6b2d6b;
         }
 
         .tag-filter-count {
@@ -239,27 +243,27 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #3949ab 0%, #283593 100%);
-            color: #e8eaf6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
             padding: 12px 15px;
             border-radius: 10px;
             text-align: center;
-            border: 1px solid #5568d3;
+            border: 2px solid #a855f7;
         }
 
         .stat-card.pending {
-            background: linear-gradient(135deg, #d81b60 0%, #ad1457 100%);
-            border-color: #f06292;
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            border-color: #f43f5e;
         }
 
         .stat-card.in-progress {
-            background: linear-gradient(135deg, #0277bd 0%, #01579b 100%);
-            border-color: #4fc3f7;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            border-color: #8b5cf6;
         }
 
         .stat-card.completed {
-            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
-            border-color: #66bb6a;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
         }
 
         .stat-card h3 {
@@ -281,11 +285,12 @@
         }
 
         .project {
-            background: #1a1f2e;
-            border: 1px solid #2d3561;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #d8b4fe;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -294,13 +299,13 @@
 
         .project:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-            border-color: #5568d3;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+            border-color: #a855f7;
         }
 
         .project-header {
-            background: linear-gradient(135deg, #3949ab 0%, #283593 100%);
-            color: #e8eaf6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
             padding: 20px;
             display: flex;
             justify-content: space-between;
@@ -321,11 +326,11 @@
 
         .project-description {
             padding: 12px 15px;
-            background: #0f1419;
+            background: #faf5ff;
             font-style: italic;
-            color: #9fa8da;
+            color: #7f6f8f;
             font-size: 0.9em;
-            border-bottom: 1px solid #2d3561;
+            border-bottom: 1px solid #d8b4fe;
         }
 
         .todos {
@@ -340,21 +345,21 @@
         }
 
         .todos::-webkit-scrollbar-track {
-            background: #0f1419;
+            background: #f3e8ff;
         }
 
         .todos::-webkit-scrollbar-thumb {
-            background: #5568d3;
+            background: #c084fc;
             border-radius: 3px;
         }
 
         .todos::-webkit-scrollbar-thumb:hover {
-            background: #4557c2;
+            background: #a855f7;
         }
 
         .todo-item {
-            background: #0f1419;
-            border: 1px solid #2d3561;
+            background: rgba(250, 245, 255, 0.95);
+            border: 1px solid #d8b4fe;
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 10px;
@@ -362,9 +367,9 @@
         }
 
         .todo-item:hover {
-            background: #1a1f2e;
-            border-color: #5568d3;
-            box-shadow: 0 2px 8px rgba(85, 104, 211, 0.3);
+            background: rgba(255, 255, 255, 0.98);
+            border-color: #a855f7;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
         }
 
         .todo-header {
@@ -377,13 +382,13 @@
         .todo-title {
             font-size: 1em;
             font-weight: 600;
-            color: #e8eaf6;
+            color: #4a1a4a;
             flex: 1;
             margin-bottom: 6px;
         }
 
         .todo-description {
-            color: #9fa8da;
+            color: #7f6f8f;
             margin: 8px 0;
             line-height: 1.5;
             font-size: 0.85em;
@@ -405,13 +410,13 @@
         }
 
         .task-tag {
-            background: #2d3561;
-            color: #c5cae9;
+            background: #f3e8ff;
+            color: #7c3aed;
             padding: 3px 10px;
             border-radius: 12px;
             font-size: 0.7em;
             font-weight: 600;
-            border: 1px solid #5568d3;
+            border: 1px solid #c084fc;
         }
 
         .priority-badge {
@@ -422,64 +427,64 @@
         }
 
         .priority-high {
-            background: #b71c1c;
-            color: #ffcdd2;
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            color: #ffffff;
         }
 
         .priority-medium {
-            background: #e65100;
-            color: #ffe0b2;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #ffffff;
         }
 
         .priority-low {
-            background: #1b5e20;
-            color: #c8e6c9;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
         }
 
         .due-date {
-            color: #9fa8da;
+            color: #8b4789;
             font-size: 0.75em;
         }
 
         .status-selector {
             padding: 5px 10px;
-            border: 1px solid #2d3561;
+            border: 2px solid #d8b4fe;
             border-radius: 6px;
             font-size: 0.75em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: #0f1419;
-            color: #e8eaf6;
+            background: rgba(255, 255, 255, 0.9);
+            color: #4a1a4a;
         }
 
         .status-selector:focus {
             outline: none;
-            border-color: #5568d3;
+            border-color: #a855f7;
         }
 
         .status-pending {
-            background: #b71c1c;
-            color: #ffcdd2;
-            border-color: #e57373;
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            color: #ffffff;
+            border-color: transparent;
         }
 
         .status-in-progress {
-            background: #01579b;
-            color: #b3e5fc;
-            border-color: #4fc3f7;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: #ffffff;
+            border-color: transparent;
         }
 
         .status-completed {
-            background: #1b5e20;
-            color: #c8e6c9;
-            border-color: #66bb6a;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            border-color: transparent;
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #9fa8da;
+            color: #8b4789;
         }
 
         .empty-state svg {
@@ -492,6 +497,43 @@
         .empty-state h3 {
             font-size: 1.5em;
             margin-bottom: 10px;
+        }
+
+        .welcome-panel {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 2px solid #a855f7;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .welcome-panel h2 {
+            color: #6b2d6b;
+            font-size: 2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .welcome-panel p {
+            color: #7f6f8f;
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .welcome-panel .highlight {
+            color: #764ba2;
+            font-weight: 600;
+        }
+
+        .welcome-panel .icon {
+            font-size: 2.5em;
         }
 
         @media (max-width: 768px) {
@@ -535,11 +577,13 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #1a1f2e;
-            color: #e8eaf6;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #d8b4fe;
+            color: #4a1a4a;
             padding: 15px 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
             display: none;
             z-index: 1000;
             animation: slideIn 0.3s ease;
@@ -550,11 +594,11 @@
         }
 
         .notification.success {
-            border-left: 4px solid #66bb6a;
+            border-left: 4px solid #10b981;
         }
 
         .notification.error {
-            border-left: 4px solid #ef5350;
+            border-left: 4px solid #f43f5e;
         }
 
         @keyframes slideIn {
@@ -587,16 +631,17 @@
         }
 
         .modal-content {
-            background: #1a1f2e;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
             padding: 30px;
             border-radius: 15px;
             max-width: 500px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.25);
             animation: slideUp 0.3s ease;
-            border: 1px solid #2d3561;
+            border: 1px solid #d8b4fe;
         }
 
         .modal-header {
@@ -906,7 +951,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📋 Professional To-Do Manager</h1>
+            <h1>📋 To-Do Manager</h1>
             <p>Organize your tasks with style and efficiency</p>
         </div>
 
@@ -946,6 +991,25 @@
                 </div>
             </div>
             <div class="main-content">
+                <!-- Welcome Panel -->
+                <div class="welcome-panel" id="welcomePanel">
+                    <h2>
+                        <span class="icon">📋</span>
+                        Welcome to To-Do Manager
+                    </h2>
+                    <p>
+                        Get started by loading your <span class="highlight">todos.yml</span> configuration file.
+                    </p>
+                    <p>
+                        Click the <span class="highlight">📁 Load YML File</span> button in the control bar above to:
+                    </p>
+                    <p>
+                        ✨ Load your existing todos<br>
+                        📝 Import sample data to explore features<br>
+                        🚀 Start managing your tasks efficiently
+                    </p>
+                </div>
+
                 <div class="stats" id="stats">
                 <div class="stat-card">
                     <h3 id="totalTasks">0</h3>
@@ -966,14 +1030,6 @@
             </div>
 
             <div id="projects"></div>
-
-            <div class="empty-state" id="emptyState">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <h3>No To-Dos Yet</h3>
-                <p>Load a YML file or sample data to get started</p>
-            </div>
             </div>
         </div>
     </div>
@@ -1144,8 +1200,8 @@
 
         // Render todos
         function renderTodos() {
-            if (!todoData || !todoData.projects) {
-                document.getElementById('emptyState').style.display = 'block';
+            if (!todoData || !todoData.projects || todoData.projects.length === 0) {
+                document.getElementById('welcomePanel').style.display = 'block';
                 document.getElementById('projects').innerHTML = '';
                 document.getElementById('tagList').innerHTML = `
                     <div class="tag-filter active" onclick="filterByTag(null)">
@@ -1153,10 +1209,13 @@
                         <span class="tag-filter-count" id="allTagCount">0</span>
                     </div>
                 `;
+                // Hide stats when no data
+                document.getElementById('stats').style.display = 'none';
                 return;
             }
 
-            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('welcomePanel').style.display = 'none';
+            document.getElementById('stats').style.display = 'grid';
             
             // Update stats
             updateStats();
@@ -1654,28 +1713,12 @@
         window.saveTask = saveTask;
         window.filterByTag = filterByTag;
 
-        // Auto-load todos.yml on page load
-        window.addEventListener('DOMContentLoaded', async () => {
-            console.log('Attempting to load todos.yml...');
-            try {
-                const response = await fetch('todos.yml');
-                console.log('Fetch response:', response.status, response.ok);
-                if (response.ok) {
-                    const text = await response.text();
-                    console.log('YML content loaded, length:', text.length);
-                    todoData = jsyaml.load(text);
-                    console.log('YML parsed successfully, projects:', todoData.projects?.length);
-                    renderTodos();
-                    showNotification('todos.yml loaded successfully!', 'success');
-                } else {
-                    console.log('Response not OK:', response.status, response.statusText);
-                    loadSampleData();
-                }
-            } catch (error) {
-                console.error('Error loading todos.yml:', error);
-                console.log('Could not load default data, loading sample data');
-                loadSampleData();
-            }
+        // Show empty state on page load - user must load a file
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Todo Manager loaded. Please load a YML file to get started.');
+            // Initialize with empty data structure
+            todoData = { projects: [] };
+            renderTodos();
         });
 
         // Load sample data if no YML file is available
