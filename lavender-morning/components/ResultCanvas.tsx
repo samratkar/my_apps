@@ -73,7 +73,7 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
       // "Good Morning"
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = 'italic 900 120px "Playfair Display"';
+      ctx.font = '700 100px "Cinzel"';
       ctx.fillStyle = '#581c87'; 
       ctx.fillText('Good Morning', canvasWidth / 2, textStartY);
 
@@ -113,7 +113,7 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
         quoteY, 
         920, 
         70, 
-        'italic 45px "Playfair Display"', 
+        'italic 600 48px "Crimson Text"', 
         '#4a044e' 
       );
 
