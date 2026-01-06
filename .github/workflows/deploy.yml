@@ -68,6 +68,15 @@ jobs:
         working-directory: ./mediscribeai
         run: npm run build
 
+      # Build lavender-morning
+      - name: Install dependencies (lavender-morning)
+        working-directory: ./lavender-morning
+        run: npm install
+
+      - name: Build (lavender-morning)
+        working-directory: ./lavender-morning
+        run: npm run build
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
@@ -76,6 +85,7 @@ jobs:
           mkdir -p _site/sams_canvas
           mkdir -p _site/journal-scout
           mkdir -p _site/mediscribeai
+          mkdir -p _site/lavender-morning
           mkdir -p _site/enamor-manager
           mkdir -p _site/poem-cards
           mkdir -p _site/todo
@@ -84,6 +94,7 @@ jobs:
           cp -r sams_canvas/dist/* _site/sams_canvas/
           cp -r journal-scout/dist/* _site/journal-scout/
           cp -r mediscribeai/dist/* _site/mediscribeai/
+          cp -r lavender-morning/dist/* _site/lavender-morning/
           cp -r enamor-manager/* _site/enamor-manager/
           cp -r poem-cards/* _site/poem-cards/
           cp -r todo/* _site/todo/

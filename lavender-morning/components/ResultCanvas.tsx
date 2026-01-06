@@ -1,0 +1,186 @@
+import React, { useRef, useEffect, useState } from 'react';
+import { GeneratedContent } from '../types';
+import { DownloadIcon } from './Icons';
+
+interface ResultCanvasProps {
+  content: GeneratedContent;
+}
+
+const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    
+    // Handle Offline (URL) vs Online (Base64)
+    if (content.isOffline) {
+       img.src = content.imageSource;
+    } else {
+       const mimeType = content.imageMimeType || 'image/jpeg';
+       img.src = `data:${mimeType};base64,${content.imageSource}`;
+    }
+    
+    img.onload = () => {
+      const canvasWidth = 1080;
+      const canvasHeight = 1680;
+      
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+
+      // 1. Draw Background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Frame
+      const frameWidth = 20;
+      ctx.strokeStyle = '#f3e8ff'; // Lavender 100
+      ctx.lineWidth = frameWidth;
+      ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
+
+      // 2. Draw Image 
+      const imgMargin = 40;
+      const imgSize = 1000; 
+      
+      // Shadow
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.15)";
+      ctx.shadowBlur = 30;
+      ctx.shadowOffsetY = 15;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(imgMargin, imgMargin, imgSize, imgSize);
+      ctx.restore();
+
+      // Draw the actual image (Scale to cover if aspect ratio differs)
+      const sWidth = img.naturalWidth;
+      const sHeight = img.naturalHeight;
+      const size = Math.min(sWidth, sHeight);
+      const sx = (sWidth - size) / 2;
+      const sy = (sHeight - size) / 2;
+
+      ctx.drawImage(img, sx, sy, size, size, imgMargin, imgMargin, imgSize, imgSize);
+
+      // 3. Typography Section
+      const textStartY = imgMargin + imgSize + 100;
+
+      // "Good Morning"
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'italic 900 120px "Playfair Display"';
+      ctx.fillStyle = '#581c87'; 
+      ctx.fillText('Good Morning', canvasWidth / 2, textStartY);
+
+      // Quote
+      const quoteY = textStartY + 100;
+      
+      const drawWrappedText = (text: string, x: number, y: number, maxWidth: number, lineHeight: number, font: string, color: string) => {
+        ctx.font = font;
+        ctx.fillStyle = color;
+        const words = text.split(' ');
+        let line = '';
+        const lines = [];
+
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          const metrics = ctx.measureText(testLine);
+          const testWidth = metrics.width;
+          if (testWidth > maxWidth && n > 0) {
+            lines.push(line);
+            line = words[n] + ' ';
+          } else {
+            line = testLine;
+          }
+        }
+        lines.push(line);
+
+        for (let k = 0; k < lines.length; k++) {
+          ctx.fillText(lines[k], x, y + (k * lineHeight));
+        }
+        return lines.length * lineHeight;
+      };
+
+      // Quote: Elegant italic (reverted to lighter weight as requested)
+      const quoteHeight = drawWrappedText(
+        `"${content.quote}"`, 
+        canvasWidth / 2, 
+        quoteY, 
+        920, 
+        70, 
+        'italic 45px "Playfair Display"', 
+        '#4a044e' 
+      );
+
+      // Author & Book Name Combined on One Line
+      const authorY = quoteY + quoteHeight + 50;
+      ctx.font = '300 35px "Lato"'; // Light weight
+      ctx.fillStyle = '#7e22ce';
+      
+      let authorLine = `— ${content.author}`;
+      if (content.book) {
+        authorLine += ` (${content.book})`;
+      }
+      ctx.fillText(authorLine, canvasWidth / 2, authorY);
+
+      // Divider Line
+      const dividerY = canvasHeight - 150;
+      ctx.beginPath();
+      ctx.moveTo(300, dividerY);
+      ctx.lineTo(canvasWidth - 300, dividerY);
+      ctx.strokeStyle = '#d8b4fe';
+      ctx.lineWidth = 3; 
+      ctx.stroke();
+
+      // Date
+      const dateY = canvasHeight - 80;
+      const dateText = `${content.englishDate}  •  ${content.hinduDate}`;
+      ctx.font = 'bold 36px "Lato"'; 
+      ctx.fillStyle = '#581c87'; 
+      ctx.fillText(dateText, canvasWidth / 2, dateY);
+
+      setIsReady(true);
+    };
+
+    img.onerror = () => {
+        console.error("Failed to load image for canvas");
+    }
+
+  }, [content]);
+
+  const handleDownload = () => {
+    if (!canvasRef.current) return;
+    const link = document.createElement('a');
+    link.download = `morning-greeting-${Date.now()}.jpg`;
+    link.href = canvasRef.current.toDataURL('image/jpeg', 0.9);
+    link.click();
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-6 animate-in fade-in duration-700">
+      <div className="relative rounded-xl overflow-hidden shadow-2xl border-4 border-white bg-white">
+        <canvas 
+          ref={canvasRef} 
+          className="max-w-full h-auto max-h-[70vh] w-auto"
+          style={{ width: '100%', height: 'auto' }}
+        />
+      </div>
+      
+      <button
+        onClick={handleDownload}
+        disabled={!isReady}
+        className="flex items-center gap-2 px-8 py-3 bg-lavender-600 hover:bg-lavender-700 text-white rounded-full font-bold shadow-lg transform transition hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <DownloadIcon className="w-5 h-5" />
+        Export as JPG
+      </button>
+    </div>
+  );
+};
+
+export default ResultCanvas;

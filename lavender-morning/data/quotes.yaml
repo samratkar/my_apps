@@ -1,0 +1,61 @@
+authors:
+  - name: "Jane Austen"
+    book: "Pride and Prejudice"
+    image: "https://upload.wikimedia.org/wikipedia/commons/c/cc/Jane_Austen_coloured_version.jpg"
+    quotes:
+      - "I declare after all there is no enjoyment like reading!"
+      - "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife."
+      - "My courage always rises at every attempt to intimidate me."
+
+  - name: "Rumi"
+    book: "The Masnavi"
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Mevlana_Statue%2C_Buca.jpg/600px-Mevlana_Statue%2C_Buca.jpg"
+    quotes:
+      - "Stop acting so small. You are the universe in ecstatic motion."
+      - "The wound is the place where the Light enters you."
+      - "Let the beauty of what you love be what you do."
+
+  - name: "Rabindranath Tagore"
+    book: "Gitanjali"
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Rabindranath_Tagore_in_1909.jpg/600px-Rabindranath_Tagore_in_1909.jpg"
+    quotes:
+      - "Faith is the bird that feels the light when the dawn is still dark."
+      - "Clouds come floating into my life, no longer to carry rain or usher storm, but to add color to my sunset sky."
+      - "You can't cross the sea merely by standing and staring at the water."
+
+  - name: "Rabindranath Tagore"
+    book: "The Religion of Man"
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Rabindranath_Tagore_in_1909.jpg/600px-Rabindranath_Tagore_in_1909.jpg"
+    quotes:
+      - "The infinite seeks its own expression in the finite."
+      - "Love is the only reality and it is not a mere sentiment. It is the ultimate truth that lies at the heart of creation."
+
+  - name: "Leo Tolstoy"
+    book: "War and Peace"
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/L.N.Tolstoy_Prokudin-Gorsky.jpg/600px-L.N.Tolstoy_Prokudin-Gorsky.jpg"
+    quotes:
+      - "The two most powerful warriors are patience and time."
+      - "Everyone thinks of changing the world, but no one thinks of changing himself."
+
+  - name: "Erich Fromm"
+    book: "The Art of Loving"
+    image: "https://upload.wikimedia.org/wikipedia/commons/0/03/Erich_Fromm_1974.jpg"
+    quotes:
+      - "Love isn't something natural. Rather it requires discipline, concentration, patience, faith, and the overcoming of narcissism."
+      - "Immature love says: 'I love you because I need you.' Mature love says: 'I need you because I love you.'"
+
+  - name: "Vyasa"
+    book: "Bhagavad Gita"
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Bhagavad_Gita_-_World_Record.jpg/800px-Bhagavad_Gita_-_World_Record.jpg"
+    quotes:
+      - "You have the right to work, but for the work's sake only. You have no right to the fruits of work."
+      - "Yoga is the journey of the self, through the self, to the self."
+      - "Man is made by his belief. As he believes, so he is."
+
+  - name: "Brene Brown"
+    book: "Strong Ground"
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Brene_Brown_at_SXSW_2010.jpg/640px-Brene_Brown_at_SXSW_2010.jpg"
+    quotes:
+      - "Vulnerability is the birthplace of innovation, creativity and change."
+      - "Courage starts with showing up and letting ourselves be seen."
+      - "We cannot selectively numb emotions, when we numb the painful emotions, we also numb the positive emotions."

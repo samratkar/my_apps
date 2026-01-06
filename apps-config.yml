@@ -10,6 +10,10 @@ categories:
   - name: Personal & Journaling
     emoji: 📝
     apps:
+      - name: Lavender Morning
+        emoji: 🌅
+        url: lavender-morning/
+        description: Literary greetings for a beautiful start to your day
       - name: Enamor Manager
         emoji: 💖
         url: enamor-manager/
