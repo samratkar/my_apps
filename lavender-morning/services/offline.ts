@@ -1,7 +1,7 @@
 import yaml from 'js-yaml';
 import { YamlData, YamlAuthor } from '../types';
 
-const YAML_PATH = './quotes.yaml';
+const YAML_PATH = './data/quotes.yaml';
 
 // Fallback data if file fetch fails
 const FALLBACK_YAML = `
