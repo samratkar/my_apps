@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { GeneratedContent } from '../types';
-import { DownloadIcon } from './Icons';
+import { DownloadIcon, CopyIcon, SaveIcon, CheckIcon } from './Icons';
+import { copyToClipboard, saveSession } from '../services/sessionStorage';
 
 interface ResultCanvasProps {
   content: GeneratedContent;
@@ -9,6 +10,8 @@ interface ResultCanvasProps {
 const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isReady, setIsReady] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -161,6 +164,27 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
     link.click();
   };
 
+  const handleCopyQuote = async () => {
+    const quoteText = `"${content.quote}"\n— ${content.author}${content.book ? ` (${content.book})` : ''}`;
+    const success = await copyToClipboard(quoteText);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleSaveSession = async () => {
+    if (!canvasRef.current) return;
+    try {
+      const thumbnailUrl = canvasRef.current.toDataURL('image/jpeg', 0.3); // Lower quality for thumbnail
+      await saveSession(content, thumbnailUrl);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (error) {
+      console.error('Failed to save session:', error);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-6 animate-in fade-in duration-700">
       <div className="relative rounded-xl overflow-hidden shadow-2xl border-4 border-white bg-white">
@@ -171,14 +195,34 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
         />
       </div>
       
-      <button
-        onClick={handleDownload}
-        disabled={!isReady}
-        className="flex items-center gap-2 px-8 py-3 bg-lavender-600 hover:bg-lavender-700 text-white rounded-full font-bold shadow-lg transform transition hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <DownloadIcon className="w-5 h-5" />
-        Export as JPG
-      </button>
+      <div className="flex flex-wrap gap-3 justify-center">
+        <button
+          onClick={handleCopyQuote}
+          disabled={!isReady}
+          className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-lavender-50 text-lavender-700 border-2 border-lavender-200 rounded-full font-bold shadow-md transform transition hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {copied ? <CheckIcon className="w-5 h-5 text-green-600" /> : <CopyIcon className="w-5 h-5" />}
+          {copied ? 'Copied!' : 'Copy Quote'}
+        </button>
+
+        <button
+          onClick={handleSaveSession}
+          disabled={!isReady}
+          className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-lavender-50 text-lavender-700 border-2 border-lavender-200 rounded-full font-bold shadow-md transform transition hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saved ? <CheckIcon className="w-5 h-5 text-green-600" /> : <SaveIcon className="w-5 h-5" />}
+          {saved ? 'Saved!' : 'Save Session'}
+        </button>
+
+        <button
+          onClick={handleDownload}
+          disabled={!isReady}
+          className="flex items-center gap-2 px-6 py-3 bg-lavender-600 hover:bg-lavender-700 text-white rounded-full font-bold shadow-lg transform transition hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <DownloadIcon className="w-5 h-5" />
+          Export as JPG
+        </button>
+      </div>
     </div>
   );
 };

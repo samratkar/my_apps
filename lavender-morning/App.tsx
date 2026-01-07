@@ -3,8 +3,9 @@ import ApiKeyModal from './components/ApiKeyModal';
 import { AppState, GeneratedContent } from './types';
 import { generateMorningContent } from './services/genai';
 import { getOfflineContent, getHinduDateOffline, getLibraryCatalog } from './services/offline';
-import { BookIcon, SparklesIcon, LoadingSpinner } from './components/Icons';
+import { BookIcon, SparklesIcon, LoadingSpinner, HistoryIcon } from './components/Icons';
 import ResultCanvas from './components/ResultCanvas';
+import SessionHistory from './components/SessionHistory';
 
 const App = () => {
   const [state, setState] = useState<AppState>({
@@ -18,6 +19,7 @@ const App = () => {
   const [bookInput, setBookInput] = useState('');
   const [authorInput, setAuthorInput] = useState('');
   const [library, setLibrary] = useState<{name: string, book: string}[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   // Load Library Catalog on mount
   useEffect(() => {
@@ -125,6 +127,15 @@ const App = () => {
     // to "remember the book and author names as was entered" per user request.
   };
 
+  const handleLoadSession = (content: GeneratedContent) => {
+    setState(prev => ({ 
+      ...prev, 
+      generatedContent: content,
+      error: null 
+    }));
+    setShowHistory(false);
+  };
+
   // Only require API Key if not in Offline mode
   if (!state.apiKey && !state.isOffline) {
     return (
@@ -144,7 +155,15 @@ const App = () => {
       
       {/* Header */}
       <header className="p-6 text-center border-b border-lavender-200 bg-white/50 backdrop-blur-sm sticky top-0 z-10 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex-1 md:text-left"></div>
+        <div className="flex-1 md:text-left">
+          <button
+            onClick={() => setShowHistory(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-lavender-600 hover:bg-lavender-700 text-white rounded-full transition-all font-bold shadow-md hover:shadow-lg transform hover:scale-105"
+          >
+            <HistoryIcon className="w-5 h-5" />
+            View Saved Sessions
+          </button>
+        </div>
         <div className="flex-1 text-center">
           <h1 className="font-serif text-3xl md:text-4xl text-lavender-900 font-bold flex items-center justify-center gap-3">
             <SparklesIcon className="w-8 h-8 text-lavender-500" />
@@ -288,6 +307,14 @@ const App = () => {
         )}
 
       </main>
+
+      {/* Session History Modal */}
+      {showHistory && (
+        <SessionHistory 
+          onClose={() => setShowHistory(false)} 
+          onLoadSession={handleLoadSession}
+        />
+      )}
     </div>
   );
 };

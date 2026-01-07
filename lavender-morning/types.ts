@@ -35,3 +35,10 @@ export interface YamlAuthor {
 export interface YamlData {
   authors: YamlAuthor[];
 }
+
+export interface SavedSession {
+  id: string;
+  timestamp: number;
+  content: GeneratedContent;
+  thumbnailUrl?: string;
+}
