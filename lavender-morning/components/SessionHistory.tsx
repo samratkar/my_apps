@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SavedSession } from '../types';
-import { getAllSessions, deleteSession, copyToClipboard } from '../services/sessionStorage';
-import { HistoryIcon, TrashIcon, CopyIcon, DownloadIcon, CheckIcon, EyeIcon } from './Icons';
+import { getAllSessions, deleteSession, copyToClipboard, exportAllSessionsAsJSON, importSessionsFromJSON } from '../services/sessionStorage';
+import { HistoryIcon, TrashIcon, CopyIcon, DownloadIcon, CheckIcon, EyeIcon, DocumentArrowDownIcon, DocumentArrowUpIcon } from './Icons';
 import { GeneratedContent } from '../types';
 
 interface SessionHistoryProps {
@@ -13,6 +13,8 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ onClose, onLoadSession 
   const [sessions, setSessions] = useState<SavedSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadSessions();
@@ -53,6 +55,51 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ onClose, onLoadSession 
     if (onLoadSession) {
       onLoadSession(session.content);
       onClose();
+    }
+  };
+
+  const handleExportAll = async () => {
+    try {
+      await exportAllSessionsAsJSON();
+    } catch (error) {
+      console.error('Failed to export sessions:', error);
+      alert('Failed to export sessions. Please try again.');
+    }
+  };
+
+  const handleImport = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setImporting(true);
+    try {
+      const result = await importSessionsFromJSON(file);
+      
+      let message = `Import completed!\n\nImported: ${result.imported}\nSkipped (duplicates): ${result.skipped}`;
+      if (result.errors.length > 0) {
+        message += `\n\nErrors:\n${result.errors.slice(0, 5).join('\n')}`;
+        if (result.errors.length > 5) {
+          message += `\n...and ${result.errors.length - 5} more errors`;
+        }
+      }
+      
+      alert(message);
+      
+      // Reload sessions
+      await loadSessions();
+    } catch (error: any) {
+      console.error('Failed to import sessions:', error);
+      alert(`Failed to import sessions: ${error.message}`);
+    } finally {
+      setImporting(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -207,13 +254,44 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ onClose, onLoadSession 
           <div className="flex items-center gap-3">
             <HistoryIcon className="w-7 h-7 text-lavender-600" />
             <h2 className="text-2xl font-serif font-bold text-lavender-900">Saved Sessions</h2>
+            {sessions.length > 0 && (
+              <span className="ml-2 px-2.5 py-1 bg-lavender-100 text-lavender-700 text-sm font-semibold rounded-full">
+                {sessions.length}
+              </span>
+            )}
           </div>
-          <button 
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none px-2"
-          >
-            ×
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleImport}
+              disabled={importing}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <DocumentArrowUpIcon className="w-5 h-5" />
+              {importing ? 'Importing...' : 'Import ZIP'}
+            </button>
+            {sessions.length > 0 && (
+              <button
+                onClick={handleExportAll}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-sm transition-colors shadow-md"
+              >
+                <DocumentArrowDownIcon className="w-5 h-5" />
+                Export All
+              </button>
+            )}
+            <button 
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none px-2"
+            >
+              ×
+            </button>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".zip,.json"
+            onChange={handleFileChange}
+            className="hidden"
+          />
         </div>
 
         {/* Content */}
