@@ -69,11 +69,11 @@ export const getOfflineContent = async (bookFilter?: string, authorFilter?: stri
     quote: randomQuote,
     author: randomAuthor.name,
     book: randomAuthor.book,
-    image: randomAuthor.image
+    image: `./data/${randomAuthor.image}`
   };
 };
 
 export const getHinduDateOffline = (): string => {
   // Static placeholder as requested previously
-  return `Vikram Samvat 2081 (Approx)`; 
+  return `Vikram Samvat 2081`; 
 };

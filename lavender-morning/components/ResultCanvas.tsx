@@ -20,6 +20,14 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Wait for fonts to load
+    const loadFonts = async () => {
+      await document.fonts.load('700 100px "Cinzel"');
+      await document.fonts.load('48px "Telegraf"');
+      await document.fonts.load('300 35px "Lato"');
+      await document.fonts.load('bold 36px "Lato"');
+    };
+
     const img = new Image();
     img.crossOrigin = "anonymous";
     
@@ -31,22 +39,52 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
        img.src = `data:${mimeType};base64,${content.imageSource}`;
     }
     
-    img.onload = () => {
+    img.onload = async () => {
+      await loadFonts();
       const canvasWidth = 1080;
       const canvasHeight = 1680;
       
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
 
-      // 1. Draw Background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Extract dominant color from image
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCanvas.width = img.width;
+      tempCanvas.height = img.height;
+      if (tempCtx) {
+        tempCtx.drawImage(img, 0, 0);
+        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        const data = imageData.data;
+        let r = 0, g = 0, b = 0;
+        const step = 4 * 10; // Sample every 10th pixel for performance
+        let count = 0;
+        for (let i = 0; i < data.length; i += step) {
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          count++;
+        }
+        r = Math.floor(r / count);
+        g = Math.floor(g / count);
+        b = Math.floor(b / count);
+        
+        const dominantColor = `rgb(${r}, ${g}, ${b})`;
+        
+        // Calculate brightness to determine text color
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        const textColor = brightness > 128 ? '#000000' : '#ffffff';
+        const accentColor = brightness > 128 ? '#333333' : '#cccccc';
 
-      // Frame
-      const frameWidth = 20;
-      ctx.strokeStyle = '#f3e8ff'; // Lavender 100
-      ctx.lineWidth = frameWidth;
-      ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
+        // 1. Draw Background with dominant color
+        ctx.fillStyle = dominantColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Frame
+        const frameWidth = 20;
+        ctx.strokeStyle = brightness > 128 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = frameWidth;
+        ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
 
       // 2. Draw Image 
       const imgMargin = 40;
@@ -57,18 +95,25 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
       ctx.shadowColor = "rgba(0,0,0,0.15)";
       ctx.shadowBlur = 30;
       ctx.shadowOffsetY = 15;
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = brightness > 128 ? "#ffffff" : "rgba(255,255,255,0.1)";
       ctx.fillRect(imgMargin, imgMargin, imgSize, imgSize);
       ctx.restore();
 
-      // Draw the actual image (Scale to cover if aspect ratio differs)
+      // Draw the actual image (Contain - scale to fit entire image in panel)
       const sWidth = img.naturalWidth;
       const sHeight = img.naturalHeight;
-      const size = Math.min(sWidth, sHeight);
-      const sx = (sWidth - size) / 2;
-      const sy = (sHeight - size) / 2;
+      
+      // Calculate scale to fit entire image in panel
+      const scale = Math.min(imgSize / sWidth, imgSize / sHeight);
+      
+      const drawWidth = sWidth * scale;
+      const drawHeight = sHeight * scale;
+      
+      // Center the image in the panel
+      const drawX = imgMargin + (imgSize - drawWidth) / 2;
+      const drawY = imgMargin + (imgSize - drawHeight) / 2;
 
-      ctx.drawImage(img, sx, sy, size, size, imgMargin, imgMargin, imgSize, imgSize);
+      ctx.drawImage(img, 0, 0, sWidth, sHeight, drawX, drawY, drawWidth, drawHeight);
 
       // 3. Typography Section
       const textStartY = imgMargin + imgSize + 100;
@@ -76,8 +121,8 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
       // "Good Morning"
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = '700 100px "Cinzel"';
-      ctx.fillStyle = '#581c87'; 
+      ctx.font = '700 100px "Cinzel", serif';
+      ctx.fillStyle = textColor; 
       ctx.fillText('Good Morning', canvasWidth / 2, textStartY);
 
       // Quote
@@ -116,14 +161,14 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
         quoteY, 
         920, 
         70, 
-        '48px "Telegraf"', 
-        '#4a044e' 
+        '48px "Telegraf", sans-serif', 
+        accentColor
       );
 
       // Author & Book Name Combined on One Line
       const authorY = quoteY + quoteHeight + 50;
-      ctx.font = '300 35px "Lato"'; // Light weight
-      ctx.fillStyle = '#7e22ce';
+      ctx.font = '300 35px "Lato", sans-serif'; // Light weight
+      ctx.fillStyle = accentColor;
       
       let authorLine = `— ${content.author}`;
       if (content.book) {
@@ -136,15 +181,15 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
       ctx.beginPath();
       ctx.moveTo(300, dividerY);
       ctx.lineTo(canvasWidth - 300, dividerY);
-      ctx.strokeStyle = '#d8b4fe';
+      ctx.strokeStyle = brightness > 128 ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)';
       ctx.lineWidth = 3; 
       ctx.stroke();
 
       // Date
       const dateY = canvasHeight - 80;
       const dateText = `${content.englishDate}  •  ${content.hinduDate}`;
-      ctx.font = 'bold 36px "Lato"'; 
-      ctx.fillStyle = '#581c87'; 
+      ctx.font = 'bold 36px "Lato", sans-serif'; 
+      ctx.fillStyle = textColor; 
       ctx.fillText(dateText, canvasWidth / 2, dateY);
 
       setIsReady(true);
@@ -156,6 +201,7 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
           console.error('Auto-save failed:', err);
         });
       }, 100);
+      }
     };
 
     img.onerror = () => {

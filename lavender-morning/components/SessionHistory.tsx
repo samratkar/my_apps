@@ -103,7 +103,13 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ onClose, onLoadSession 
     }
   };
 
-  const handleExportJpg = (session: SavedSession) => {
+  const handleExportJpg = async (session: SavedSession) => {
+    // Wait for fonts to load
+    await document.fonts.load('700 100px "Cinzel"');
+    await document.fonts.load('48px "Telegraf"');
+    await document.fonts.load('300 35px "Lato"');
+    await document.fonts.load('bold 36px "Lato"');
+
     // Create a temporary canvas to regenerate the full-quality image
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -126,13 +132,46 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ onClose, onLoadSession 
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
 
+      // Extract dominant color from image
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCanvas.width = img.width;
+      tempCanvas.height = img.height;
+      let dominantColor = '#ffffff';
+      let brightness = 255;
+      let textColor = '#000000';
+      let accentColor = '#333333';
+      
+      if (tempCtx) {
+        tempCtx.drawImage(img, 0, 0);
+        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        const data = imageData.data;
+        let r = 0, g = 0, b = 0;
+        const step = 4 * 10;
+        let count = 0;
+        for (let i = 0; i < data.length; i += step) {
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          count++;
+        }
+        r = Math.floor(r / count);
+        g = Math.floor(g / count);
+        b = Math.floor(b / count);
+        
+        dominantColor = `rgb(${r}, ${g}, ${b})`;
+        brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        textColor = brightness > 128 ? '#000000' : '#ffffff';
+        accentColor = brightness > 128 ? '#333333' : '#cccccc';
+      }
+
       // 1. Draw Background
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = dominantColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Frame
       const frameWidth = 20;
-      ctx.strokeStyle = '#f3e8ff';
+      ctx.strokeStyle = brightness > 128 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
       ctx.lineWidth = frameWidth;
       ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
 
@@ -144,25 +183,32 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ onClose, onLoadSession 
       ctx.shadowColor = "rgba(0,0,0,0.15)";
       ctx.shadowBlur = 30;
       ctx.shadowOffsetY = 15;
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = brightness > 128 ? "#ffffff" : "rgba(255,255,255,0.1)";
       ctx.fillRect(imgMargin, imgMargin, imgSize, imgSize);
       ctx.restore();
 
       const sWidth = img.naturalWidth;
       const sHeight = img.naturalHeight;
-      const size = Math.min(sWidth, sHeight);
-      const sx = (sWidth - size) / 2;
-      const sy = (sHeight - size) / 2;
+      
+      // Calculate scale to fit entire image in panel
+      const scale = Math.min(imgSize / sWidth, imgSize / sHeight);
+      
+      const drawWidth = sWidth * scale;
+      const drawHeight = sHeight * scale;
+      
+      // Center the image in the panel
+      const drawX = imgMargin + (imgSize - drawWidth) / 2;
+      const drawY = imgMargin + (imgSize - drawHeight) / 2;
 
-      ctx.drawImage(img, sx, sy, size, size, imgMargin, imgMargin, imgSize, imgSize);
+      ctx.drawImage(img, 0, 0, sWidth, sHeight, drawX, drawY, drawWidth, drawHeight);
 
       // 3. Typography Section
       const textStartY = imgMargin + imgSize + 100;
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = '700 100px "Cinzel"';
-      ctx.fillStyle = '#581c87'; 
+      ctx.font = '700 100px "Cinzel", serif';
+      ctx.fillStyle = textColor; 
       ctx.fillText('Good Morning', canvasWidth / 2, textStartY);
 
       const quoteY = textStartY + 100;
@@ -199,13 +245,13 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ onClose, onLoadSession 
         quoteY, 
         920, 
         70, 
-        '48px "Telegraf"',
-        '#4a044e' 
+        '48px "Telegraf", sans-serif',
+        accentColor
       );
 
       const authorY = quoteY + quoteHeight + 50;
-      ctx.font = '300 35px "Lato"';
-      ctx.fillStyle = '#7e22ce';
+      ctx.font = '300 35px "Lato", sans-serif';
+      ctx.fillStyle = accentColor;
       
       let authorLine = `— ${session.content.author}`;
       if (session.content.book) {
@@ -217,14 +263,14 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ onClose, onLoadSession 
       ctx.beginPath();
       ctx.moveTo(300, dividerY);
       ctx.lineTo(canvasWidth - 300, dividerY);
-      ctx.strokeStyle = '#d8b4fe';
+      ctx.strokeStyle = brightness > 128 ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)';
       ctx.lineWidth = 3; 
       ctx.stroke();
 
       const dateY = canvasHeight - 80;
       const dateText = `${session.content.englishDate}  •  ${session.content.hinduDate}`;
-      ctx.font = 'bold 36px "Lato"'; 
-      ctx.fillStyle = '#581c87'; 
+      ctx.font = 'bold 36px "Lato", sans-serif'; 
+      ctx.fillStyle = textColor; 
       ctx.fillText(dateText, canvasWidth / 2, dateY);
 
       // Download
