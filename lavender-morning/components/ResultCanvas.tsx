@@ -148,6 +148,14 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
       ctx.fillText(dateText, canvasWidth / 2, dateY);
 
       setIsReady(true);
+      
+      // Auto-save session after canvas is ready
+      setTimeout(() => {
+        const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.3);
+        saveSession(content, thumbnailUrl).catch(err => {
+          console.error('Auto-save failed:', err);
+        });
+      }, 100);
     };
 
     img.onerror = () => {
