@@ -199,7 +199,7 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ onClose, onLoadSession 
         quoteY, 
         920, 
         70, 
-        'italic 600 48px "Crimson Text"', 
+        '48px "Telegraf"',
         '#4a044e' 
       );
 

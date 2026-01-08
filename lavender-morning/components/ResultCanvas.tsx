@@ -116,7 +116,7 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
         quoteY, 
         920, 
         70, 
-        'italic 600 48px "Crimson Text"', 
+        '48px "Telegraf"', 
         '#4a044e' 
       );
 
