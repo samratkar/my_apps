@@ -23,7 +23,7 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
     // Wait for fonts to load
     const loadFonts = async () => {
       await document.fonts.load('700 100px "Cinzel"');
-      await document.fonts.load('48px "Telegraf"');
+      await document.fonts.load('48px "Lora"');
       await document.fonts.load('300 35px "Lato"');
       await document.fonts.load('bold 36px "Lato"');
     };
@@ -73,31 +73,22 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
         
         // Calculate brightness to determine text color
         const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-        const textColor = brightness > 128 ? '#000000' : '#ffffff';
-        const accentColor = brightness > 128 ? '#333333' : '#cccccc';
+        const textColor = '#000000';
+        const accentColor = '#333333';
 
-        // 1. Draw Background with dominant color
-        ctx.fillStyle = dominantColor;
+        // 1. Draw Background - white
+        ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // Frame
         const frameWidth = 20;
-        ctx.strokeStyle = brightness > 128 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+        ctx.strokeStyle = '#e9d5ff'; // light lavender
         ctx.lineWidth = frameWidth;
         ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
 
       // 2. Draw Image 
       const imgMargin = 40;
-      const imgSize = 1000; 
-      
-      // Shadow
-      ctx.save();
-      ctx.shadowColor = "rgba(0,0,0,0.15)";
-      ctx.shadowBlur = 30;
-      ctx.shadowOffsetY = 15;
-      ctx.fillStyle = brightness > 128 ? "#ffffff" : "rgba(255,255,255,0.1)";
-      ctx.fillRect(imgMargin, imgMargin, imgSize, imgSize);
-      ctx.restore();
+      const imgSize = 1000;
 
       // Draw the actual image (Contain - scale to fit entire image in panel)
       const sWidth = img.naturalWidth;
@@ -118,15 +109,21 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
       // 3. Typography Section
       const textStartY = imgMargin + imgSize + 100;
 
-      // "Good Morning"
+      // "Good Morning" - dark lavender
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = '700 100px "Cinzel", serif';
-      ctx.fillStyle = textColor; 
+      ctx.fillStyle = '#7e22ce'; // lavender-700 (dark lavender)
       ctx.fillText('Good Morning', canvasWidth / 2, textStartY);
 
       // Quote
       const quoteY = textStartY + 100;
+      const dividerY = canvasHeight - 150;
+      const authorHeight = 50; // Space for author line
+      const padding = 50; // Padding between author and divider
+      
+      // Available space for quote and author
+      const availableSpace = dividerY - quoteY - authorHeight - padding;
       
       const drawWrappedText = (text: string, x: number, y: number, maxWidth: number, lineHeight: number, font: string, color: string) => {
         ctx.font = font;
@@ -153,22 +150,62 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
         }
         return lines.length * lineHeight;
       };
+      
+      // Dynamically determine font size based on quote length and available space
+      const calculateOptimalFontSize = (text: string, maxWidth: number, availableHeight: number) => {
+        let fontSize = 48; // Start with default
+        let lineHeight = 70;
+        let testHeight = 0;
+        
+        // Test font sizes from 48px down to 28px
+        for (let size = 48; size >= 28; size -= 2) {
+          lineHeight = size * 1.45; // Proportional line height
+          ctx.font = `italic ${size}px "Lora", serif`;
+          
+          const words = text.split(' ');
+          let line = '';
+          let lineCount = 0;
 
-      // Quote: Elegant italic (reverted to lighter weight as requested)
+          for (let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > maxWidth && n > 0) {
+              lineCount++;
+              line = words[n] + ' ';
+            } else {
+              line = testLine;
+            }
+          }
+          lineCount++; // Add last line
+          
+          testHeight = lineCount * lineHeight;
+          
+          if (testHeight <= availableHeight) {
+            fontSize = size;
+            break;
+          }
+        }
+        
+        return { fontSize, lineHeight };
+      };
+      
+      const { fontSize, lineHeight } = calculateOptimalFontSize(`"${content.quote}"`, 920, availableSpace);
+
+      // Quote: Elegant italic Lora font with dynamic size
       const quoteHeight = drawWrappedText(
         `"${content.quote}"`, 
         canvasWidth / 2, 
         quoteY, 
         920, 
-        70, 
-        '48px "Telegraf", sans-serif', 
-        accentColor
+        lineHeight, 
+        `italic ${fontSize}px "Lora", serif`, 
+        '#7D8F69'
       );
 
       // Author & Book Name Combined on One Line
       const authorY = quoteY + quoteHeight + 50;
       ctx.font = '300 35px "Lato", sans-serif'; // Light weight
-      ctx.fillStyle = accentColor;
+      ctx.fillStyle = '#a855f7'; // lavender
       
       let authorLine = `— ${content.author}`;
       if (content.book) {
@@ -177,19 +214,18 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
       ctx.fillText(authorLine, canvasWidth / 2, authorY);
 
       // Divider Line
-      const dividerY = canvasHeight - 150;
       ctx.beginPath();
       ctx.moveTo(300, dividerY);
       ctx.lineTo(canvasWidth - 300, dividerY);
-      ctx.strokeStyle = brightness > 128 ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)';
+      ctx.strokeStyle = 'rgba(0,0,0,0.2)';
       ctx.lineWidth = 3; 
       ctx.stroke();
 
       // Date
       const dateY = canvasHeight - 80;
       const dateText = `${content.englishDate}  •  ${content.hinduDate}`;
-      ctx.font = 'bold 36px "Lato", sans-serif'; 
-      ctx.fillStyle = textColor; 
+      ctx.font = '28px "Lato", sans-serif'; 
+      ctx.fillStyle = '#BBBBBB'; // lighter grey 
       ctx.fillText(dateText, canvasWidth / 2, dateY);
 
       setIsReady(true);
