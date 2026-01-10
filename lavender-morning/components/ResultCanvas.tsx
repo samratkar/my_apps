@@ -198,7 +198,7 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
         quoteY, 
         920, 
         lineHeight, 
-        `${fontSize}px "Lora", serif`, 
+        `italic ${fontSize}px "Lora", serif`, 
         '#7D8F69'
       );
 
