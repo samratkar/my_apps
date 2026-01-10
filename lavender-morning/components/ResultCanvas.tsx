@@ -189,11 +189,11 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
         return { fontSize, lineHeight };
       };
       
-      const { fontSize, lineHeight } = calculateOptimalFontSize(`"${content.quote}"`, 920, availableSpace);
+      const { fontSize, lineHeight } = calculateOptimalFontSize(`${content.quote}`, 920, availableSpace);
 
       // Quote: Elegant italic Lora font with dynamic size
       const quoteHeight = drawWrappedText(
-        `"${content.quote}"`, 
+        `${content.quote}`, 
         canvasWidth / 2, 
         quoteY, 
         920, 
