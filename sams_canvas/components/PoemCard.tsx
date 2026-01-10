@@ -138,10 +138,10 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({
       )}
 
       {/* Decorative Elements */}
-      <div className="absolute top-4 left-4 opacity-20 pointer-events-none z-[2]">
+      <div className="absolute top-4 left-4 opacity-20 pointer-events-none z-[20]">
         <Quote size={48} className="rotate-180" />
       </div>
-      <div className="absolute bottom-4 right-4 opacity-20 pointer-events-none z-[2]">
+      <div className="absolute bottom-4 right-4 opacity-20 pointer-events-none z-[20]">
         <Quote size={48} />
       </div>
 
@@ -149,8 +149,8 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({
       {/* We render this conditionally but it occupies the top flow */}
       {title && (
         <div 
-          className="w-full relative py-4 px-8 mb-4 flex justify-center items-center z-10 text-center shadow-sm"
-          style={{ backgroundColor: headingRibbonColor }}
+          className="w-full relative py-4 px-8 mb-4 flex justify-center items-center z-10 text-center shadow-sm backdrop-blur-sm"
+          style={{ backgroundColor: `${headingRibbonColor}33` }}
         >
             <h1 
                 className="relative leading-tight z-20 drop-shadow-sm" 
@@ -198,7 +198,7 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({
           
           {/* Person / Dedication */}
           {personName && (
-              <div className="mb-8 font-serif text-xl md:text-2xl italic opacity-80 text-center tracking-wide font-bold">
+              <div className="mb-8 text-xl md:text-2xl opacity-80 text-center tracking-wide" style={{ color: '#a855f7', fontFamily: '"Alex Brush", cursive' }}>
                   {personName}
               </div>
           )}
@@ -220,7 +220,7 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({
         
         <div className="flex flex-col items-center justify-center font-[Space_Mono] text-center px-4">
           {/* Line 1: Author */}
-          <div className="text-lg font-bold uppercase tracking-widest opacity-90 mb-2">
+          <div className="text-lg font-bold uppercase tracking-widest opacity-90 mb-2" style={{ color: '#a855f7' }}>
               {author}
           </div>
           
