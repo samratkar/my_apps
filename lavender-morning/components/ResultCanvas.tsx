@@ -109,11 +109,11 @@ const ResultCanvas: React.FC<ResultCanvasProps> = ({ content }) => {
       // 3. Typography Section
       const textStartY = imgMargin + imgSize + 100;
 
-      // "Good Morning" - dark lavender
+      // "Good Morning" - lighter lavender
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = '700 100px "Cinzel", serif';
-      ctx.fillStyle = '#7e22ce'; // lavender-700 (dark lavender)
+      ctx.fillStyle = '#c084fc'; // lavender-400 (lighter lavender)
       ctx.fillText('Good Morning', canvasWidth / 2, textStartY);
 
       // Quote
