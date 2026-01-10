@@ -1,5 +1,5 @@
 import React, { forwardRef, useState, useEffect, useCallback } from 'react';
-import { GradientTheme, UploadedImage } from '../types';
+import { GradientTheme, UploadedImage, FontFamily } from '../types';
 import { Quote } from 'lucide-react';
 
 interface PoemCardProps {
@@ -12,9 +12,25 @@ interface PoemCardProps {
   timestamp: string;
   personName: string;
   imageBgColor: string;
+  headingRibbonColor?: string;
+  headingTextColor?: string;
+  headingFont?: FontFamily;
 }
 
-const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, images, gradient, author, place, timestamp, personName, imageBgColor }, ref) => {
+const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ 
+  title, 
+  content, 
+  images, 
+  gradient, 
+  author, 
+  place, 
+  timestamp, 
+  personName, 
+  imageBgColor,
+  headingRibbonColor = '#a855f7',
+  headingTextColor = '#ffffff',
+  headingFont = 'Cinzel'
+}, ref) => {
   const [containerSize, setContainerSize] = useState({ width: 800, height: 800 });
   
   // Grid calculation based on image count
@@ -28,8 +44,10 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
 
   // Helper to force styles on the content if needed, but we mostly respect rich text now
   const cardStyle = {
-    fontFamily: '"Segoe UI", sans-serif', // Force Segoe UI for preview default
-    fontWeight: 'bold',
+    fontFamily: '"Lora", serif',
+    fontWeight: 'normal',
+    fontStyle: 'italic',
+    color: '#7e22ce', // lavender-700
   };
 
   // Update container size using ResizeObserver
@@ -130,12 +148,18 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
       {/* Title Banner - Full Width, Top Row */}
       {/* We render this conditionally but it occupies the top flow */}
       {title && (
-        <div className="w-full relative py-4 px-8 mb-4 flex justify-center items-center z-10 text-center shadow-sm">
-            {/* Banner Background: Uses current text color with low opacity for automatic theme matching */}
-            <div className="absolute inset-0 bg-current opacity-10 backdrop-blur-[2px]"></div>
+        <div 
+          className="w-full relative py-4 px-8 mb-4 flex justify-center items-center z-10 text-center shadow-sm"
+          style={{ backgroundColor: headingRibbonColor }}
+        >
             <h1 
                 className="relative leading-tight z-20 drop-shadow-sm" 
-                style={{ fontFamily: '"Cinzel", serif', fontWeight: '700', fontSize: '20px' }}
+                style={{ 
+                  fontFamily: `"${headingFont}", serif`, 
+                  fontWeight: '700', 
+                  fontSize: '20px',
+                  color: headingTextColor
+                }}
             >
                 {title}
             </h1>
@@ -180,14 +204,11 @@ const PoemCard = forwardRef<HTMLDivElement, PoemCardProps>(({ title, content, im
           )}
 
           {/* 
-             Removed strict font overrides so user-selected fonts from the editor appear correctly.
-             Added 'prose-headings:...' to ensure headers inside the poem look good.
-             Added 'font-bold' to make the poem body bold as requested.
+             Using Lora font with normal weight and lavender color.
           */}
           <div 
-            className="prose prose-lg max-w-none text-center editor-content [&_p]:m-0 font-bold"
+            className="prose prose-lg max-w-none text-center editor-content [&_p]:m-0"
             style={{ 
-              color: 'inherit',
               ...cardStyle
             }}
             dangerouslySetInnerHTML={{ __html: content }} 

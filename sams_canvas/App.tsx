@@ -87,6 +87,11 @@ const App: React.FC = () => {
   const [imageDominantColor, setImageDominantColor] = useState<string | null>(null);
   const [imageBgColor, setImageBgColor] = useState('#ffffff');
 
+  // Heading Ribbon Customization State
+  const [headingRibbonColor, setHeadingRibbonColor] = useState('#a855f7');
+  const [headingTextColor, setHeadingTextColor] = useState('#ffffff');
+  const [headingFont, setHeadingFont] = useState<FontFamily>('Cinzel');
+
   // Session State
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -516,22 +521,22 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-950">
+    <div className="flex flex-col h-screen w-full overflow-hidden" style={{ background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #e9d5ff 100%)' }}>
       
       {/* Header */}
-      <header className="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6 flex-shrink-0 z-20">
+      <header className="h-16 glass-effect flex items-center justify-between px-6 flex-shrink-0 z-20 shadow-sm">
         <div className="flex items-center gap-2">
-            <div className="bg-indigo-600 p-2 rounded-lg text-white">
+            <div className="p-2 rounded-lg text-white shadow-md" style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)' }}>
                 <Sparkles size={20} />
             </div>
-            <h1 className="text-xl font-serif font-bold text-slate-100 tracking-tight hidden sm:block">Sam's Canvas</h1>
+            <h1 className="text-xl font-bold text-purple-900 tracking-tight hidden sm:block" style={{ fontFamily: headingFont }}>Sam's Canvas</h1>
         </div>
         
         <div className="flex items-center gap-3">
           {/* Session Management Buttons */}
           <button
             onClick={handleNewSession}
-            className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-full text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-3 py-2 bg-white/70 hover:bg-white text-purple-700 rounded-full text-sm font-medium transition-colors shadow-sm border border-purple-200"
             title="New Session"
           >
             <Plus size={18} />
@@ -541,7 +546,7 @@ const App: React.FC = () => {
           <button
             onClick={handleSaveSession}
             disabled={isSaving}
-            className={`flex items-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-medium transition-colors ${isSaving ? 'opacity-70 cursor-wait' : ''}`}
+            className={`flex items-center gap-2 px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-sm font-medium transition-colors shadow-sm ${isSaving ? 'opacity-70 cursor-wait' : ''}`}
             title="Save Session"
           >
             {isSaving ? (
@@ -554,28 +559,28 @@ const App: React.FC = () => {
           
           <button
             onClick={() => setShowSessionPanel(!showSessionPanel)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors ${showSessionPanel ? 'bg-amber-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-200'}`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors shadow-sm ${showSessionPanel ? 'bg-amber-500 text-white' : 'bg-white/70 hover:bg-white text-purple-700 border border-purple-200'}`}
             title="Open Sessions"
           >
             <FolderOpen size={18} />
             <span className="hidden lg:inline">Sessions</span>
             {sessions.length > 0 && (
-              <span className="bg-slate-700 text-slate-300 text-xs px-1.5 py-0.5 rounded-full">{sessions.length}</span>
+              <span className="bg-purple-500 text-white text-xs px-1.5 py-0.5 rounded-full">{sessions.length}</span>
             )}
           </button>
 
-          <div className="w-px h-6 bg-slate-700 hidden sm:block" />
+          <div className="w-px h-6 bg-purple-300 hidden sm:block" />
 
           <button 
             onClick={() => setViewMode(viewMode === 'editor' ? 'preview' : 'editor')}
-            className="md:hidden p-2 text-slate-400 hover:bg-slate-800 rounded-full"
+            className="md:hidden p-2 text-purple-600 hover:bg-white/50 rounded-full"
           >
             {viewMode === 'editor' ? <Monitor size={20} /> : <Type size={20} />}
           </button>
           
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-full text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white/70 hover:bg-white text-purple-700 rounded-full text-sm font-medium transition-colors shadow-sm border border-purple-200"
           >
             <ImageIcon size={18} />
             <span className="hidden sm:inline">Add Photos</span>
@@ -592,7 +597,7 @@ const App: React.FC = () => {
           <button 
             onClick={downloadCard}
             disabled={isExporting}
-            className={`flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-sm font-medium transition-all shadow-lg shadow-indigo-900/50 ${isExporting ? 'opacity-70 cursor-wait' : ''}`}
+            className={`flex items-center gap-2 px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-sm font-medium transition-all shadow-md ${isExporting ? 'opacity-70 cursor-wait' : ''}`}
           >
             {isExporting ? (
                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -605,7 +610,7 @@ const App: React.FC = () => {
           <button 
             onClick={downloadForInstagram}
             disabled={isExporting}
-            className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white rounded-full text-sm font-medium transition-all shadow-lg shadow-pink-900/50 ${isExporting ? 'opacity-70 cursor-wait' : ''}`}
+            className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 hover:from-purple-600 hover:via-pink-600 hover:to-orange-500 text-white rounded-full text-sm font-medium transition-all shadow-md ${isExporting ? 'opacity-70 cursor-wait' : ''}`}
             title="Export for Instagram (1080x1350)"
           >
             {isExporting ? (
@@ -620,36 +625,36 @@ const App: React.FC = () => {
 
       {/* Sessions Panel - Slide out */}
       {showSessionPanel && (
-        <div className="absolute top-16 left-0 right-0 bg-slate-900 border-b border-slate-700 z-30 shadow-xl max-h-80 overflow-y-auto">
+        <div className="absolute top-16 left-0 right-0 glass-effect border-b border-purple-200 z-30 shadow-lg max-h-80 overflow-y-auto">
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-purple-900 flex items-center gap-2">
                 <Clock size={18} />
                 Saved Sessions
               </h2>
               <button 
                 onClick={() => setShowSessionPanel(false)}
-                className="p-1 hover:bg-slate-800 rounded"
+                className="p-1 hover:bg-purple-100 rounded"
               >
-                <X size={18} className="text-slate-400" />
+                <X size={18} className="text-purple-600" />
               </button>
             </div>
             
             {sessions.length === 0 ? (
-              <p className="text-slate-500 text-sm text-center py-8">No saved sessions yet. Click "Save" to save your current work.</p>
+              <p className="text-purple-500 text-sm text-center py-8">No saved sessions yet. Click "Save" to save your current work.</p>
             ) : (
               <div className="grid gap-2">
                 {sessions.map(session => (
                   <div 
                     key={session.id}
-                    className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${currentSessionId === session.id ? 'bg-indigo-600/20 border border-indigo-500' : 'bg-slate-800 hover:bg-slate-750 border border-transparent'}`}
+                    className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${currentSessionId === session.id ? 'bg-purple-200/50 border border-purple-400' : 'bg-white/60 hover:bg-white border border-transparent'}`}
                     onClick={() => handleLoadSession(session)}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <FileText size={16} className="text-slate-400 flex-shrink-0" />
+                      <FileText size={16} className="text-purple-600 flex-shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-slate-100 font-medium truncate">{session.title}</p>
-                        <p className="text-slate-500 text-xs">
+                        <p className="text-purple-900 font-medium truncate">{session.title}</p>
+                        <p className="text-purple-600 text-xs">
                           {new Date(session.updatedAt).toLocaleDateString()} • {new Date(session.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
@@ -659,7 +664,7 @@ const App: React.FC = () => {
                         e.stopPropagation();
                         handleDeleteSession(session.id);
                       }}
-                      className="p-2 hover:bg-red-600/20 rounded text-slate-500 hover:text-red-400 transition-colors flex-shrink-0"
+                      className="p-2 hover:bg-red-100 rounded text-purple-500 hover:text-red-500 transition-colors flex-shrink-0"
                       title="Delete session"
                     >
                       <Trash2 size={16} />
@@ -676,20 +681,20 @@ const App: React.FC = () => {
       <div className="flex-1 flex overflow-hidden relative">
         
         {/* Left Side: Editor & Configuration */}
-        <div className={`w-full md:w-1/2 flex flex-col bg-slate-900 border-r border-slate-800 transition-transform duration-300 absolute md:relative h-full z-10 ${viewMode === 'preview' ? '-translate-x-full md:translate-x-0' : 'translate-x-0'}`}>
+        <div className={`w-full md:w-1/2 flex flex-col glass-effect border-r border-purple-200 transition-transform duration-300 absolute md:relative h-full z-10 ${viewMode === 'preview' ? '-translate-x-full md:translate-x-0' : 'translate-x-0'}`}>
             
             {/* Toolbar */}
             <RichTextToolbar onCommand={handleCommand} activeFont={activeFont} />
 
             {/* Editable Area */}
-            <div className="flex-1 overflow-y-auto p-8 bg-slate-900 cursor-text" onClick={() => editorRef.current?.focus()}>
+            <div className="flex-1 overflow-y-auto p-8 cursor-text" onClick={() => editorRef.current?.focus()}>
               <input 
                 type="text" 
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 onClick={(e) => e.stopPropagation()} 
                 placeholder="Title of your poem..."
-                className="w-full font-bold text-slate-100 placeholder:text-slate-600 bg-transparent border-none focus:ring-0 outline-none mb-4 p-0"
+                className="w-full font-bold text-purple-900 placeholder:text-purple-400 bg-transparent border-none focus:ring-0 outline-none mb-4 p-0"
                 style={{ fontFamily: '"Cinzel", serif', fontSize: '20px' }}
               />
               <div 
@@ -697,34 +702,33 @@ const App: React.FC = () => {
                 contentEditable
                 suppressContentEditableWarning={true}
                 dir="ltr" 
-                // Changed prose-lg to prose-sm for smaller writing area font
-                className="outline-none min-h-[400px] prose prose-sm max-w-none prose-p:my-2 prose-headings:font-serif text-left prose-invert"
+                className="outline-none min-h-[400px] prose prose-sm max-w-none prose-p:my-2 prose-headings:font-serif text-left prose-purple"
                 onInput={(e) => setContent(e.currentTarget.innerHTML)}
-                style={{ fontFamily: 'Consolas, monospace', fontSize: '14px', textAlign: 'left' }}
+                style={{ fontFamily: 'Consolas, monospace', fontSize: '14px', textAlign: 'left', color: '#581c87' }}
               />
             </div>
 
             {/* Signature Settings (single line) */}
-            <div className="border-t border-slate-800 bg-slate-900 p-4 flex flex-nowrap gap-2 items-center overflow-x-auto flex-shrink-0">
+            <div className="border-t border-purple-200 p-4 flex flex-nowrap gap-2 items-center overflow-x-auto flex-shrink-0" style={{ background: 'rgba(255, 255, 255, 0.6)' }}>
               <div className="relative flex-shrink-0">
-                <PenTool size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <PenTool size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500" />
                 <input 
                   type="text" 
                   value={authorName}
                   onChange={(e) => setAuthorName(e.target.value)}
                   placeholder="Author"
-                  className="w-[9.5rem] pl-9 pr-3 py-2 text-xs border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                  className="w-[9.5rem] pl-9 pr-3 py-2 text-xs border border-purple-200 bg-white/80 text-purple-900 rounded-md focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none placeholder:text-purple-400"
                 />
               </div>
 
               <div className="relative flex-shrink-0">
-                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500" />
                 <input 
                   type="text" 
                   value={personName}
                   onChange={(e) => setPersonName(e.target.value)}
                   placeholder="Dedicate"
-                  className="w-[10.5rem] pl-9 pr-3 py-2 text-xs border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                  className="w-[10.5rem] pl-9 pr-3 py-2 text-xs border border-purple-200 bg-white/80 text-purple-900 rounded-md focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none placeholder:text-purple-400"
                 />
               </div>
 
@@ -752,7 +756,7 @@ const App: React.FC = () => {
                   setSignatureTimestamp(merged);
                 }}
                 onClick={(e) => e.stopPropagation()}
-                className="flex-shrink-0 w-[9.25rem] px-3 py-2 text-xs border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="flex-shrink-0 w-[9.25rem] px-3 py-2 text-xs border border-purple-200 bg-white/80 text-purple-900 rounded-md focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none"
                 title={isSignatureTimestampAuto ? 'Auto-filled (edits will switch to manual)' : 'Manual signature date'}
               />
 
@@ -779,32 +783,32 @@ const App: React.FC = () => {
                   setSignatureTimestamp(merged);
                 }}
                 onClick={(e) => e.stopPropagation()}
-                className="flex-shrink-0 w-[6.25rem] px-3 py-2 text-xs border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="flex-shrink-0 w-[6.25rem] px-3 py-2 text-xs border border-purple-200 bg-white/80 text-purple-900 rounded-md focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none"
                 title={isSignatureTimestampAuto ? 'Auto-filled (edits will switch to manual)' : 'Manual signature time'}
               />
 
               <div className="relative min-w-0 flex-1">
-                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500" />
                 <input
                   type="text"
                   value={place}
                   onChange={(e) => setPlace(e.target.value)}
                   placeholder="Place"
-                  className="w-full min-w-[8rem] pl-9 pr-3 py-2 text-xs border border-slate-700 bg-slate-800 text-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-500"
+                  className="w-full min-w-[8rem] pl-9 pr-3 py-2 text-xs border border-purple-200 bg-white/80 text-purple-900 rounded-md focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none placeholder:text-purple-400"
                 />
               </div>
             </div>
 
             {/* Image Manager (Mini) */}
             {images.length > 0 && (
-                <div className="h-32 border-t border-slate-800 bg-slate-900 p-4 overflow-x-auto flex gap-3 items-center flex-shrink-0">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-2">Collage<br/>Images</span>
+                <div className="h-32 border-t border-purple-200 p-4 overflow-x-auto flex gap-3 items-center flex-shrink-0" style={{ background: 'rgba(255, 255, 255, 0.6)' }}>
+                    <span className="text-xs font-bold text-purple-600 uppercase tracking-wider mr-2">Collage<br/>Images</span>
                     {images.map(img => (
-                        <div key={img.id} className="relative group w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border border-slate-700">
+                        <div key={img.id} className="relative group w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border border-purple-300 shadow-sm">
                             <img src={img.url} alt="thumbnail" className="w-full h-full object-cover" />
                             <button 
                                 onClick={() => removeImage(img.id)}
-                                className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                                className="absolute inset-0 bg-purple-900/70 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
                             >
                                 <Trash2 size={16} />
                             </button>
@@ -815,47 +819,83 @@ const App: React.FC = () => {
         </div>
 
         {/* Right Side: Preview & Theme */}
-        <div className={`w-full md:w-1/2 bg-slate-950 flex flex-col items-center justify-start overflow-y-auto absolute md:relative h-full transition-transform duration-300 ${viewMode === 'editor' ? 'translate-x-full md:translate-x-0' : 'translate-x-0'}`}>
+        <div className={`w-full md:w-1/2 flex flex-col items-center justify-start overflow-y-auto absolute md:relative h-full transition-transform duration-300 ${viewMode === 'editor' ? 'translate-x-full md:translate-x-0' : 'translate-x-0'}`} style={{ background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)' }}>
             
-            {/* Theme Selector */}
-            {/* Adjusted padding: pt-6 pushes it down, p-2 inside prevents ring clipping */}
-            <div className="w-full pt-6 pb-4 px-4 bg-slate-900/80 backdrop-blur-md sticky top-0 z-10 border-b border-slate-800">
-                <div className="max-w-md mx-auto">
-                    <div className="flex gap-2 overflow-x-auto p-2 scrollbar-hide justify-center items-center">
+            {/* Theme Selector - Combined on one line */}
+            <div className="w-full py-3 px-4 glass-effect sticky top-0 z-10 border-b border-purple-200">
+                <div className="max-w-5xl mx-auto flex flex-wrap gap-3 justify-center items-center">
+                    {/* Mood Palette */}
+                    <div className="flex gap-2 items-center">
                         {GRADIENTS.map(g => (
                             <button
                                 key={g.id}
                                 onClick={() => setActiveGradient(g)}
-                                className={`flex-shrink-0 w-8 h-8 rounded-full ring-2 ring-offset-2 transition-all ${g.classes} ${activeGradient.id === g.id ? 'ring-indigo-500 scale-110' : 'ring-transparent hover:scale-105'}`}
+                                className={`flex-shrink-0 w-7 h-7 rounded-full ring-2 ring-offset-1 ring-offset-lavender-50 transition-all ${g.classes} ${activeGradient.id === g.id ? 'ring-purple-500 scale-110' : 'ring-transparent hover:scale-105'}`}
                                 title={g.name}
                             />
                         ))}
                         
-                        {/* Separator */}
-                        <div className="w-px h-6 bg-slate-600 mx-1 flex-shrink-0" />
-                        
-                        {/* Image Dominant Color - Apply to Card Background */}
+                        {/* Image Dominant Color */}
                         <button
                             onClick={applyImageColorToBackground}
                             disabled={!imageDominantColor}
-                            className={`flex-shrink-0 w-8 h-8 rounded-full ring-2 ring-offset-2 ring-offset-slate-900 transition-all flex items-center justify-center ${
+                            className={`flex-shrink-0 w-7 h-7 rounded-full ring-2 ring-offset-1 ring-offset-lavender-50 transition-all flex items-center justify-center ${
                               imageDominantColor 
                                 ? `${activeGradient.id === 'image-color' ? 'ring-amber-500 scale-110' : 'ring-transparent hover:scale-105 hover:ring-amber-500/50'} cursor-pointer` 
                                 : 'ring-transparent opacity-40 cursor-not-allowed'
                             }`}
-                            style={{ backgroundColor: imageDominantColor || '#374151' }}
+                            style={{ backgroundColor: imageDominantColor || '#c084fc' }}
                             title={imageDominantColor ? 'Apply image color to card background' : 'Add an image to use its color'}
                         >
-                            <Palette size={14} className={imageDominantColor && !isLightColor(imageDominantColor) ? 'text-white/60' : 'text-slate-600/60'} />
+                            <Palette size={12} className={imageDominantColor && !isLightColor(imageDominantColor) ? 'text-white/60' : 'text-purple-600/60'} />
                         </button>
                     </div>
-                    <p className="text-center text-xs text-slate-400 mt-2 font-medium">Select a Mood {imageDominantColor && <span>• <span className="text-amber-400">Image Color</span></span>}</p>
+                    
+                    {/* Separator */}
+                    <div className="w-px h-8 bg-purple-300 flex-shrink-0" />
+                    
+                    {/* Heading Ribbon Customization */}
+                    <div className="flex gap-2 items-center">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[9px] text-purple-600 text-center">Ribbon</label>
+                        <input 
+                          type="color" 
+                          value={headingRibbonColor}
+                          onChange={(e) => setHeadingRibbonColor(e.target.value)}
+                          className="w-10 h-7 rounded cursor-pointer border border-purple-200"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[9px] text-purple-600 text-center">Text</label>
+                        <input 
+                          type="color" 
+                          value={headingTextColor}
+                          onChange={(e) => setHeadingTextColor(e.target.value)}
+                          className="w-10 h-7 rounded cursor-pointer border border-purple-200"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[9px] text-purple-600 text-center">Font</label>
+                        <select
+                          value={headingFont}
+                          onChange={(e) => setHeadingFont(e.target.value as FontFamily)}
+                          className="px-2 py-1 text-[11px] border border-purple-200 bg-white/80 text-purple-900 rounded focus:ring-2 focus:ring-purple-400 focus:outline-none h-7"
+                        >
+                          <option value="Cinzel">Cinzel</option>
+                          <option value="Playfair Display">Playfair</option>
+                          <option value="EB Garamond">Garamond</option>
+                          <option value="Crimson Text">Crimson</option>
+                          <option value="Merriweather">Merriweather</option>
+                          <option value="Inter">Inter</option>
+                        </select>
+                      </div>
+                    </div>
                 </div>
             </div>
 
             {/* Preview Canvas Container */}
-            <div className="p-8 pb-32 w-full flex justify-center items-start min-h-full">
-                <div className="scale-[0.6] md:scale-[0.65] lg:scale-[0.75] origin-top transform-gpu shadow-2xl shadow-black/50 rounded-sm">
+            <div className="p-4 pb-16 w-full flex justify-center items-start min-h-full">
+                <div className="scale-[0.7] md:scale-[0.8] lg:scale-[0.9] origin-top transform-gpu shadow-2xl shadow-black/50 rounded-sm">
                     {/* The Actual component to be exported */}
                     <PoemCard 
                         ref={cardRef}
@@ -868,6 +908,9 @@ const App: React.FC = () => {
                         place={place}
                         timestamp={formattedTimestamp}
                         imageBgColor={imageBgColor}
+                        headingRibbonColor={headingRibbonColor}
+                        headingTextColor={headingTextColor}
+                        headingFont={headingFont}
                     />
                 </div>
             </div>
@@ -879,7 +922,7 @@ const App: React.FC = () => {
       <div className="md:hidden fixed bottom-6 right-6 z-50">
         <button 
             onClick={() => setViewMode(viewMode === 'editor' ? 'preview' : 'editor')}
-            className="bg-indigo-600 text-white p-4 rounded-full shadow-xl shadow-indigo-900/50"
+            className="bg-purple-600 text-white p-4 rounded-full shadow-lg"
         >
             {viewMode === 'editor' ? <ImageIcon size={24} /> : <Type size={24} />}
         </button>
