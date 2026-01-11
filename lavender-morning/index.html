@@ -555,7 +555,7 @@
                     <div class="entry-card bg-white rounded-lg shadow-lg p-6 border-l-4 ${colors.text.replace('text-', 'border-')}">
                         <!-- Author Header -->
                         <div class="flex items-start gap-4 ${isCollapsed ? '' : 'mb-6 pb-4 border-b-2 border-gray-200'}">
-                            <img src="data/${authorBookData.image}" alt="${authorBookData.author}" 
+                            <img src="./data/${authorBookData.image}" alt="${authorBookData.author}" 
                                  class="w-20 h-20 rounded-full object-cover flex-shrink-0 ring-4 ring-white shadow-lg">
                             <div class="flex-1 min-w-0">
                                 <h2 class="text-2xl font-bold text-gray-900 mb-1">${authorBookData.author}</h2>
@@ -613,7 +613,7 @@
             document.getElementById('modalAuthor').textContent = quote.author;
             document.getElementById('modalBook').textContent = quote.book;
             document.getElementById('modalQuote').textContent = quote.quote;
-            document.getElementById('modalImage').src = `data/${quote.image}`;
+            document.getElementById('modalImage').src = `./data/${quote.image}`;
             
             isRandomMode = randomMode;
             const nextBtn = document.getElementById('nextRandomBtn');
@@ -648,7 +648,7 @@
             document.getElementById('modalAuthor').textContent = quote.author;
             document.getElementById('modalBook').textContent = quote.book;
             document.getElementById('modalQuote').textContent = quote.quote;
-            document.getElementById('modalImage').src = `data/${quote.image}`;
+            document.getElementById('modalImage').src = `./data/${quote.image}`;
         }
 
         function adjustModalLayout() {
