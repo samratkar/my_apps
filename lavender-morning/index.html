@@ -293,6 +293,11 @@
                 });
                 
                 filteredQuotes = [...allQuotes];
+                
+                // Collapse all author cards by default
+                const uniqueAuthors = [...new Set(allQuotes.map(q => q.author))];
+                collapsedAuthors = new Set(uniqueAuthors);
+                
                 initializeApp();
             } catch (error) {
                 console.error('Error loading YAML:', error);
