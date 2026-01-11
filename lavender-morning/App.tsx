@@ -36,7 +36,7 @@ const App = () => {
   }, []);
 
   const handleApiKeySubmit = (key: string) => {
-    setState(prev => ({ ...prev, apiKey: key }));
+    setState(prev => ({ ...prev, apiKey: key, error: null }));
   };
 
   const toggleMode = () => {
@@ -148,7 +148,7 @@ const App = () => {
   };
 
   // Show API key modal only when trying to use online mode without key
-  const needsApiKey = !state.apiKey && !state.isOffline && (state.isLoading || state.error);
+  const needsApiKey = !state.apiKey && !state.isOffline;
   
   if (needsApiKey) {
     return (
