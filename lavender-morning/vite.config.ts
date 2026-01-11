@@ -1,7 +1,7 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-import { copyFileSync, mkdirSync } from 'fs';
+import { copyFileSync, mkdirSync, readdirSync } from 'fs';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
@@ -17,8 +17,18 @@ export default defineConfig(({ mode }) => {
           name: 'copy-data',
           closeBundle() {
             try {
+              // Copy quotes.yaml from assets folder
               mkdirSync('dist/data', { recursive: true });
-              copyFileSync('data/quotes.yaml', 'dist/data/quotes.yaml');
+              copyFileSync('../assets/lavender-morning/quotes.yaml', 'dist/data/quotes.yaml');
+              
+              // Copy images from assets folder to data folder (alongside yaml)
+              const assetsDir = '../assets/lavender-morning';
+              const files = readdirSync(assetsDir);
+              files.forEach(file => {
+                if (file !== 'quotes.yaml') {
+                  copyFileSync(`${assetsDir}/${file}`, `dist/data/${file}`);
+                }
+              });
             } catch (e) {
               console.error('Failed to copy data folder:', e);
             }

@@ -91,6 +91,7 @@ jobs:
           mkdir -p _site/todo
           mkdir -p _site/jrnl
           mkdir -p _site/gita
+          mkdir -p _site/assets
           cp -r sams_canvas/dist/* _site/sams_canvas/
           cp -r journal-scout/dist/* _site/journal-scout/
           cp -r mediscribeai/dist/* _site/mediscribeai/
@@ -100,6 +101,7 @@ jobs:
           cp -r todo/* _site/todo/
           cp -r jrnl/* _site/jrnl/
           cp -r gita/* _site/gita/
+          cp -r assets/* _site/assets/
           cp index.html _site/
           cp apps-config.yml _site/
 

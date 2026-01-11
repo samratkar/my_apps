@@ -3,3 +3,5 @@
 include:
   - apps-config.yml
   - assets
+  - "*.yaml"
+  - "**/*.yaml"
