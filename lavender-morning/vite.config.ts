@@ -1,7 +1,7 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-import { copyFileSync, mkdirSync, readdirSync, readFileSync, existsSync } from 'fs';
+import { copyFileSync, mkdirSync, readdirSync, existsSync } from 'fs';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
@@ -14,35 +14,21 @@ export default defineConfig(({ mode }) => {
       plugins: [
         react(),
         {
-          name: 'serve-parent-assets',
-          configureServer(server) {
-            // Serve ../assets/ at /my_apps/assets/ during dev (same path as GitHub Pages)
-            server.middlewares.use('/my_apps/assets', (req, res, next) => {
-              const filePath = path.resolve(__dirname, '../assets', req.url?.slice(1) || '');
-              if (existsSync(filePath)) {
-                const content = readFileSync(filePath);
-                const ext = path.extname(filePath).toLowerCase();
-                const mimeTypes: Record<string, string> = {
-                  '.yaml': 'text/yaml',
-                  '.yml': 'text/yaml',
-                  '.jpg': 'image/jpeg',
-                  '.jpeg': 'image/jpeg',
-                  '.png': 'image/png',
-                  '.webp': 'image/webp',
-                  '.gif': 'image/gif',
-                };
-                res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
-                res.end(content);
-              } else {
-                next();
-              }
-            });
-          }
-        },
-        {
-          name: 'copy-assets-to-dist',
+          name: 'copy-data',
           closeBundle() {
-            // No need to copy - assets folder is deployed separately at ../assets/
+            try {
+              // Copy data folder (yaml + images) to dist
+              mkdirSync('dist/data', { recursive: true });
+              const dataDir = 'data';
+              if (existsSync(dataDir)) {
+                const files = readdirSync(dataDir);
+                files.forEach(file => {
+                  copyFileSync(`${dataDir}/${file}`, `dist/data/${file}`);
+                });
+              }
+            } catch (e) {
+              console.error('Failed to copy data folder:', e);
+            }
           }
         }
       ],
