@@ -124,11 +124,31 @@ const App = () => {
 
     } catch (err: any) {
       console.error(err);
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: err.message || "Something went wrong." 
-      }));
+      
+      // Check if it's an API key authentication error
+      const errorMessage = err.message || "Something went wrong.";
+      const isAuthError = errorMessage.toLowerCase().includes('api key') || 
+                          errorMessage.toLowerCase().includes('auth') ||
+                          errorMessage.toLowerCase().includes('unauthorized') ||
+                          errorMessage.toLowerCase().includes('invalid') ||
+                          err.status === 401 || 
+                          err.status === 403;
+      
+      if (isAuthError && !state.isOffline) {
+        // Clear the invalid API key and show modal again
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          apiKey: '',
+          error: "Invalid API key. Please enter a valid API key or switch to offline mode." 
+        }));
+      } else {
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false, 
+          error: errorMessage
+        }));
+      }
     }
   };
 
