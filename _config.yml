@@ -2,3 +2,4 @@
 # Include the apps-config.yml file in the build
 include:
   - apps-config.yml
+  - lavender-morning/data
