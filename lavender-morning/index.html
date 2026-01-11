@@ -559,6 +559,7 @@
                         <!-- Author Header -->
                         <div class="flex items-start gap-4 ${isCollapsed ? '' : 'mb-6 pb-4 border-b-2 border-gray-200'}">
                             <img src="${basePath}data/${authorBookData.image}" alt="${authorBookData.author}" 
+                                 onerror="console.error('Failed to load:', this.src);"
                                  class="w-20 h-20 rounded-full object-cover flex-shrink-0 ring-4 ring-white shadow-lg">
                             <div class="flex-1 min-w-0">
                                 <h2 class="text-2xl font-bold text-gray-900 mb-1">${authorBookData.author}</h2>
@@ -613,10 +614,12 @@
 
         function openQuoteModal(index, randomMode = false) {
             const quote = filteredQuotes[index];
+            const imgPath = basePath + 'data/' + quote.image;
+            console.log('Opening modal with image:', imgPath);
             document.getElementById('modalAuthor').textContent = quote.author;
             document.getElementById('modalBook').textContent = quote.book;
             document.getElementById('modalQuote').textContent = quote.quote;
-            document.getElementById('modalImage').src = basePath + 'data/' + quote.image;
+            document.getElementById('modalImage').src = imgPath;
             
             isRandomMode = randomMode;
             const nextBtn = document.getElementById('nextRandomBtn');
