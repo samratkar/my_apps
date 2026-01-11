@@ -275,10 +275,8 @@
     </div>
 
     <script>
-        // Determine base path for assets (works both locally and on GitHub Pages)
-        const basePath = window.location.pathname.includes('/lavender-morning/') 
-            ? window.location.pathname.split('/lavender-morning/')[0] + '/lavender-morning/'
-            : '';
+        // Use relative paths - simpler and more reliable
+        const basePath = './';
         
         let allQuotes = [];
         let filteredQuotes = [];
