@@ -11,6 +11,16 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
       },
+      build: {
+        rollupOptions: {
+          input: {
+            main: path.resolve(__dirname, 'index.html'),
+            generator: path.resolve(__dirname, 'generator.html'),
+            offline: path.resolve(__dirname, 'offline.html'),
+            home: path.resolve(__dirname, 'home.html'),
+          },
+        },
+      },
       plugins: [
         react(),
         {
@@ -26,14 +36,6 @@ export default defineConfig(({ mode }) => {
                   copyFileSync(`${dataDir}/${file}`, `dist/data/${file}`);
                 });
               }
-              
-              // Copy additional HTML files
-              const htmlFiles = ['generator.html', 'offline.html', 'home.html'];
-              htmlFiles.forEach(file => {
-                if (existsSync(file)) {
-                  copyFileSync(file, `dist/${file}`);
-                }
-              });
             } catch (e) {
               console.error('Failed to copy files:', e);
             }
