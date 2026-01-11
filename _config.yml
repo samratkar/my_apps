@@ -2,4 +2,8 @@
 # Include the apps-config.yml file in the build
 include:
   - apps-config.yml
-  - lavender-morning/data
+  - lavender-morning/assets
+  
+# Explicitly keep assets folders
+keep_files:
+  - lavender-morning/assets
