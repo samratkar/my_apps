@@ -3,64 +3,90 @@ authors:
     book: "Pride and Prejudice"
     image: "jane.webp"
     quotes:
-      - "I declare after all there is no enjoyment like reading!"
-      - "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife."
-      - "My courage always rises at every attempt to intimidate me."
+      - text: "I declare after all there is no enjoyment like reading!"
+        tags: ["reading", "joy", "literature"]
+      - text: "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife."
+        tags: ["marriage", "society", "wit"]
+      - text: "My courage always rises at every attempt to intimidate me."
+        tags: ["courage", "strength", "resilience"]
 
   - name: "Rumi"
     book: "The Masnavi"
     image: "rumi.webp"
     quotes:
-      - "Stop acting so small. You are the universe in ecstatic motion."
-      - "The wound is the place where the Light enters you."
-      - "Let the beauty of what you love be what you do."
+      - text: "Stop acting so small. You are the universe in ecstatic motion."
+        tags: ["self-worth", "universe", "expansion"]
+      - text: "The wound is the place where the Light enters you."
+        tags: ["healing", "growth", "wisdom"]
+      - text: "Let the beauty of what you love be what you do."
+        tags: ["passion", "purpose", "beauty"]
 
   - name: "Rabindranath Tagore"
     book: "Gitanjali"
     image: "tagore.webp"
     quotes:
-      - "Faith is the bird that feels the light when the dawn is still dark."
-      - "Clouds come floating into my life, no longer to carry rain or usher storm, but to add color to my sunset sky."
-      - "You can't cross the sea merely by standing and staring at the water."
-      - "Thou hast made me endless, such is thy pleasure. This frail vessel thou emptiest again and again, and fillest it ever with fresh life."
+      - text: "Faith is the bird that feels the light when the dawn is still dark."
+        tags: ["faith", "hope", "dawn"]
+      - text: "Clouds come floating into my life, no longer to carry rain or usher storm, but to add color to my sunset sky."
+        tags: ["perspective", "nature", "beauty"]
+      - text: "You can't cross the sea merely by standing and staring at the water."
+        tags: ["action", "courage", "journey"]
+      - text: "Thou hast made me endless, such is thy pleasure. This frail vessel thou emptiest again and again, and fillest it ever with fresh life."
+        tags: ["divine", "life", "renewal"]
 
   - name: "Rabindranath Tagore"
     book: "The Religion of Man"
     image: "tagore.webp"
     quotes:
-      - "The infinite seeks its own expression in the finite."
-      - "Love is the only reality and it is not a mere sentiment. It is the ultimate truth that lies at the heart of creation."
-      - "The light of the sun is for all, and yet it is for me alone. It is the joy of the meeting of the light and the sight."
-      - "Thou hast made me endless, such is thy pleasure. This frail vessel thou emptiest again and again, and fillest it ever with fresh life."
-      - "The human soul has its sunrise when it knows itself as the spirit."
+      - text: "The infinite seeks its own expression in the finite."
+        tags: ["philosophy", "divine", "expression"]
+      - text: "Love is the only reality and it is not a mere sentiment. It is the ultimate truth that lies at the heart of creation."
+        tags: ["love", "truth", "reality"]
+      - text: "The light of the sun is for all, and yet it is for me alone. It is the joy of the meeting of the light and the sight."
+        tags: ["light", "joy", "individual"]
+      - text: "Thou hast made me endless, such is thy pleasure. This frail vessel thou emptiest again and again, and fillest it ever with fresh life."
+        tags: ["divine", "life", "renewal"]
+      - text: "The human soul has its sunrise when it knows itself as the spirit."
+        tags: ["soul", "awakening", "spirit"]
 
   - name: "Leo Tolstoy"
     book: "War and Peace"
     image: "tolstoy.jpeg"
     quotes:
-      - "The two most powerful warriors are patience and time."
-      - "Everyone thinks of changing the world, but no one thinks of changing himself."
+      - text: "The two most powerful warriors are patience and time."
+        tags: ["patience", "time", "wisdom"]
+      - text: "Everyone thinks of changing the world, but no one thinks of changing himself."
+        tags: ["change", "self-improvement", "perspective"]
 
   - name: "Erich Fromm"
     book: "The Art of Loving"
     image: "fromm.jpeg"
     quotes:
-      - "Love isn't something natural. Rather it requires discipline, concentration, patience, faith, and the overcoming of narcissism."
-      - "Immature love says: 'I love you because I need you.' Mature love says: 'I need you because I love you.'"
-      - "Love is not primarily a relationship to a specific person; it is an orientation of character which determines the relatedness of a person to the world as a whole."
+      - text: "Love isn't something natural. Rather it requires discipline, concentration, patience, faith, and the overcoming of narcissism."
+        tags: ["love", "discipline", "growth"]
+      - text: "Immature love says: 'I love you because I need you.' Mature love says: 'I need you because I love you.'"
+        tags: ["love", "maturity", "relationships"]
+      - text: "Love is not primarily a relationship to a specific person; it is an orientation of character which determines the relatedness of a person to the world as a whole."
+        tags: ["love", "character", "philosophy"]
 
   - name: "Vyasa"
     book: "Bhagavad Gita"
     image: "krishna.jpg"
     quotes:
-      - "You have the right to work, but for the work's sake only. You have no right to the fruits of work."
-      - "Yoga is the journey of the self, through the self, to the self."
-      - "Man is made by his belief. As he believes, so he is."
+      - text: "You have the right to work, but for the work's sake only. You have no right to the fruits of work."
+        tags: ["karma", "duty", "detachment"]
+      - text: "Yoga is the journey of the self, through the self, to the self."
+        tags: ["yoga", "self", "journey"]
+      - text: "Man is made by his belief. As he believes, so he is."
+        tags: ["belief", "identity", "consciousness"]
 
   - name: "Brene Brown"
     book: "Strong Ground"
     image: "brene.jpg"
     quotes:
-      - "Vulnerability is the birthplace of innovation, creativity and change."
-      - "Courage starts with showing up and letting ourselves be seen."
-      - "We cannot selectively numb emotions, when we numb the painful emotions, we also numb the positive emotions."
+      - text: "Vulnerability is the birthplace of innovation, creativity and change."
+        tags: ["vulnerability", "creativity", "innovation"]
+      - text: "Courage starts with showing up and letting ourselves be seen."
+        tags: ["courage", "authenticity", "visibility"]
+      - text: "We cannot selectively numb emotions, when we numb the painful emotions, we also numb the positive emotions."
+        tags: ["emotions", "awareness", "psychology"]

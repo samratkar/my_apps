@@ -92,50 +92,56 @@
     <div class="container mx-auto px-4 py-8">
         <!-- Action Bar -->
         <div id="actionBar" class="glass-effect rounded-lg shadow-md p-4 mb-6">
-            <div class="flex flex-row items-center gap-2 flex-wrap">
+            <div class="flex flex-row items-center gap-2">
                 <!-- Search + Filters -->
                 <input 
                     type="text" 
                     id="searchInput" 
                     placeholder="Search quotes, authors, or books..." 
-                    class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent flex-1 min-w-[200px] text-sm"
+                    class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent flex-1 min-w-[180px] text-sm"
                     onkeyup="filterQuotes()"
                 >
                 
-                <select id="authorFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 w-48 text-sm" onchange="filterQuotes()">
+                <select id="authorFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 w-36 text-sm" onchange="filterQuotes()">
                     <option value="">All Authors</option>
                 </select>
                 
-                <select id="bookFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 w-48 text-sm" onchange="filterQuotes()">
+                <select id="bookFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 w-36 text-sm" onchange="filterQuotes()">
                     <option value="">All Books</option>
                 </select>
                 
-                <button onclick="showAll()" class="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
+                <input 
+                    type="text" 
+                    id="tagFilter" 
+                    list="tagsList"
+                    placeholder="All Tags"
+                    class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 w-36 text-sm"
+                    oninput="filterQuotes()"
+                >
+                <datalist id="tagsList"></datalist>
+                
+                <button onclick="showAll()" title="Show All" class="px-2 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition flex items-center text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
-                    Show All
                 </button>
 
-                <button onclick="generateRandomCard()" class="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-1 whitespace-nowrap text-sm">
+                <button onclick="generateRandomCard()" title="Random Quote" class="px-2 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
                     </svg>
-                    Random Quote
                 </button>
 
-                <a href="./generator.html?mode=offline" class="px-3 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition flex items-center gap-1 whitespace-nowrap text-sm shadow-lg">
+                <a href="./generator.html?mode=offline" title="Generate Offline Card" class="px-2 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition flex items-center text-sm shadow-lg">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
                     </svg>
-                    Generate Offline Card
                 </a>
 
-                <a href="./generator.html?mode=online" class="px-3 py-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-lg hover:from-pink-700 hover:to-purple-700 transition flex items-center gap-1 whitespace-nowrap text-sm shadow-lg">
+                <a href="./generator.html?mode=online" title="Generate Online Card (AI)" class="px-2 py-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-lg hover:from-pink-700 hover:to-purple-700 transition flex items-center text-sm shadow-lg">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
                     </svg>
-                    Generate Online Card (AI)
                 </a>
             </div>
         </div>
@@ -242,9 +248,9 @@
                         <span class="font-semibold">Book:</span> <span id="modalBook"></span>
                     </div>
                 </div>
-                <div class="border-t pt-4">
+                <div id="modalContent" class="border-t pt-4">
                     <div class="relative mb-4">
-                        <img id="modalImage" src="" alt="Author" class="w-full h-48 object-cover rounded-lg">
+                        <img id="modalImage" src="" alt="Author" class="w-full h-48 object-contain rounded-lg bg-gray-50" onload="adjustModalLayout()">
                     </div>
                     <div class="bg-purple-50 p-4 rounded-lg">
                         <svg class="w-8 h-8 text-purple-400 mb-2" fill="currentColor" viewBox="0 0 24 24">
@@ -254,6 +260,12 @@
                     </div>
                 </div>
                 <div class="mt-6 flex gap-3 justify-end">
+                    <button id="nextRandomBtn" onclick="showNextRandomQuote()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2" style="display: none;">
+                        <span>Next Random Quote</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
                     <button onclick="closeQuoteModal()" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                         Close
                     </button>
@@ -267,6 +279,7 @@
         let filteredQuotes = [];
         let quoteData = { authors: [] };
         let collapsedAuthors = new Set();
+        let isRandomMode = false;
 
         // Load YAML data on page load
         window.addEventListener('DOMContentLoaded', async () => {
@@ -282,9 +295,10 @@
                 // Transform data into flat structure for easier processing
                 allQuotes = [];
                 quoteData.authors.forEach(author => {
-                    author.quotes.forEach(quote => {
+                    author.quotes.forEach(quoteObj => {
                         allQuotes.push({
-                            quote: quote,
+                            quote: typeof quoteObj === 'string' ? quoteObj : quoteObj.text,
+                            tags: typeof quoteObj === 'string' ? [] : (quoteObj.tags || []),
                             author: author.name,
                             book: author.book,
                             image: author.image
@@ -294,9 +308,9 @@
                 
                 filteredQuotes = [...allQuotes];
                 
-                // Collapse all author cards by default
-                const uniqueAuthors = [...new Set(allQuotes.map(q => q.author))];
-                collapsedAuthors = new Set(uniqueAuthors);
+                // Collapse all author+book cards by default
+                const uniqueKeys = [...new Set(allQuotes.map(q => `${q.author}|||${q.book}`))];
+                collapsedAuthors = new Set(uniqueKeys);
                 
                 initializeApp();
             } catch (error) {
@@ -331,6 +345,18 @@
             const select = document.getElementById('bookFilter');
             select.innerHTML = '<option value="">All Books</option>' + 
                 books.map(book => `<option value="${book}">${book}</option>`).join('');
+        }
+
+        function populateTagFilter() {
+            const allTags = new Set();
+            allQuotes.forEach(q => {
+                if (q.tags && q.tags.length > 0) {
+                    q.tags.forEach(tag => allTags.add(tag));
+                }
+            });
+            const sortedTags = [...allTags].sort();
+            const datalist = document.getElementById('tagsList');
+            datalist.innerHTML = sortedTags.map(tag => `<option value="${tag}">`).join('');
         }
 
         function populateAuthorsSidePanel() {
@@ -431,17 +457,20 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const selectedAuthor = document.getElementById('authorFilter').value;
             const selectedBook = document.getElementById('bookFilter').value;
+            const tagFilter = document.getElementById('tagFilter').value.toLowerCase().trim();
 
             filteredQuotes = allQuotes.filter(quote => {
                 const matchesSearch = !searchTerm || 
                     quote.quote.toLowerCase().includes(searchTerm) ||
                     quote.author.toLowerCase().includes(searchTerm) ||
-                    quote.book.toLowerCase().includes(searchTerm);
+                    quote.book.toLowerCase().includes(searchTerm) ||
+                    (quote.tags && quote.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
                 
                 const matchesAuthor = !selectedAuthor || quote.author === selectedAuthor;
                 const matchesBook = !selectedBook || quote.book === selectedBook;
+                const matchesTag = !tagFilter || (quote.tags && quote.tags.some(tag => tag.toLowerCase().includes(tagFilter)));
 
-                return matchesSearch && matchesAuthor && matchesBook;
+                return matchesSearch && matchesAuthor && matchesBook && matchesTag;
             });
 
             updateStats();
@@ -452,6 +481,7 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('authorFilter').value = '';
             document.getElementById('bookFilter').value = '';
+            document.getElementById('tagFilter').value = '';
             filterQuotes();
         }
 
@@ -494,44 +524,49 @@
                 return;
             }
 
-            // Group quotes by author
-            const quotesByAuthor = {};
+            // Group quotes by author + book
+            const quotesByAuthorBook = {};
             filteredQuotes.forEach(quote => {
-                if (!quotesByAuthor[quote.author]) {
-                    quotesByAuthor[quote.author] = {
+                const key = `${quote.author}|||${quote.book}`;
+                if (!quotesByAuthorBook[key]) {
+                    quotesByAuthorBook[key] = {
                         author: quote.author,
                         image: quote.image,
                         book: quote.book,
                         quotes: []
                     };
                 }
-                quotesByAuthor[quote.author].quotes.push(quote.quote);
+                quotesByAuthorBook[key].quotes.push(quote);
             });
 
-            // Sort authors alphabetically
-            const sortedAuthors = Object.keys(quotesByAuthor).sort();
+            // Sort by author then book
+            const sortedKeys = Object.keys(quotesByAuthorBook).sort((a, b) => {
+                const [authorA, bookA] = a.split('|||');
+                const [authorB, bookB] = b.split('|||');
+                return authorA.localeCompare(authorB) || bookA.localeCompare(bookB);
+            });
 
-            container.innerHTML = sortedAuthors.map(authorName => {
-                const authorData = quotesByAuthor[authorName];
-                const colors = getAuthorColor(authorName);
-                const isCollapsed = collapsedAuthors.has(authorName);
+            container.innerHTML = sortedKeys.map(key => {
+                const authorBookData = quotesByAuthorBook[key];
+                const colors = getAuthorColor(authorBookData.author);
+                const isCollapsed = collapsedAuthors.has(key);
                 
                 return `
                     <div class="entry-card bg-white rounded-lg shadow-lg p-6 border-l-4 ${colors.text.replace('text-', 'border-')}">
                         <!-- Author Header -->
                         <div class="flex items-start gap-4 ${isCollapsed ? '' : 'mb-6 pb-4 border-b-2 border-gray-200'}">
-                            <img src="./data/${authorData.image}" alt="${authorName}" 
+                            <img src="data/${authorBookData.image}" alt="${authorBookData.author}" 
                                  class="w-20 h-20 rounded-full object-cover flex-shrink-0 ring-4 ring-white shadow-lg">
                             <div class="flex-1 min-w-0">
-                                <h2 class="text-2xl font-bold text-gray-900 mb-1">${authorName}</h2>
-                                <p class="text-base text-gray-600 mb-2">${authorData.book}</p>
+                                <h2 class="text-2xl font-bold text-gray-900 mb-1">${authorBookData.author}</h2>
+                                <p class="text-base text-gray-600 mb-2">${authorBookData.book}</p>
                                 <div class="flex items-center gap-2">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${colors.bg} ${colors.text}">
-                                        ${authorData.quotes.length} ${authorData.quotes.length === 1 ? 'Quote' : 'Quotes'}
+                                        ${authorBookData.quotes.length} ${authorBookData.quotes.length === 1 ? 'Quote' : 'Quotes'}
                                     </span>
                                 </div>
                             </div>
-                            <button onclick="toggleAuthorCard('${authorName.replace(/'/g, "\\'")}')"
+                            <button onclick="toggleAuthorCard('${key.replace(/'/g, "\\'")}')"
                                     class="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 transition-colors" 
                                     title="${isCollapsed ? 'Expand' : 'Collapse'}">
                                 <svg class="w-6 h-6 text-gray-600 transition-transform ${isCollapsed ? '' : 'rotate-180'}" 
@@ -544,8 +579,8 @@
                         
                         <!-- Quotes Grid -->
                         <div class="${isCollapsed ? 'hidden' : 'grid grid-cols-1 gap-3 max-h-96 overflow-y-auto pr-2 scrollbar-thin'}">
-                            ${authorData.quotes.map((quote, idx) => {
-                                const quoteIndex = filteredQuotes.findIndex(q => q.author === authorName && q.quote === quote);
+                            ${authorBookData.quotes.map((quoteObj, idx) => {
+                                const quoteIndex = filteredQuotes.findIndex(q => q.author === authorBookData.author && q.book === authorBookData.book && q.quote === quoteObj.quote);
                                 return `
                                     <div class="bg-gradient-to-br ${colors.bg} rounded-lg p-4 cursor-pointer hover:shadow-md transition-all hover:-translate-y-1"
                                          onclick="openQuoteModal(${quoteIndex})">
@@ -553,7 +588,16 @@
                                             <svg class="w-5 h-5 text-gray-400 absolute -top-1 -left-1" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                                             </svg>
-                                            <p class="text-gray-800 italic pl-6 text-sm leading-relaxed">${quote}</p>
+                                            <p class="text-gray-800 italic pl-6 text-sm leading-relaxed mb-2">${quoteObj.quote}</p>
+                                            ${quoteObj.tags && quoteObj.tags.length > 0 ? `
+                                                <div class="flex flex-wrap gap-1 pl-6 mt-2">
+                                                    ${quoteObj.tags.map(tag => `
+                                                        <span class="inline-block px-2 py-0.5 text-xs rounded-full bg-white bg-opacity-60 text-gray-700 font-medium">
+                                                            #${tag}
+                                                        </span>
+                                                    `).join('')}
+                                                </div>
+                                            ` : ''}
                                         </div>
                                     </div>
                                 `;
@@ -564,17 +608,23 @@
             }).join('');
         }
 
-        function openQuoteModal(index) {
+        function openQuoteModal(index, randomMode = false) {
             const quote = filteredQuotes[index];
             document.getElementById('modalAuthor').textContent = quote.author;
             document.getElementById('modalBook').textContent = quote.book;
             document.getElementById('modalQuote').textContent = quote.quote;
-            document.getElementById('modalImage').src = `./data/${quote.image}`;
+            document.getElementById('modalImage').src = `data/${quote.image}`;
+            
+            isRandomMode = randomMode;
+            const nextBtn = document.getElementById('nextRandomBtn');
+            nextBtn.style.display = randomMode ? 'flex' : 'none';
+            
             document.getElementById('quoteModal').classList.add('active');
         }
 
         function closeQuoteModal() {
             document.getElementById('quoteModal').classList.remove('active');
+            isRandomMode = false;
         }
 
         function generateRandomCard() {
@@ -584,14 +634,53 @@
             }
             
             const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
-            openQuoteModal(randomIndex);
+            openQuoteModal(randomIndex, true);
         }
 
-        function toggleAuthorCard(authorName) {
-            if (collapsedAuthors.has(authorName)) {
-                collapsedAuthors.delete(authorName);
+        function showNextRandomQuote() {
+            if (filteredQuotes.length === 0) {
+                alert('No quotes available');
+                return;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+            const quote = filteredQuotes[randomIndex];
+            document.getElementById('modalAuthor').textContent = quote.author;
+            document.getElementById('modalBook').textContent = quote.book;
+            document.getElementById('modalQuote').textContent = quote.quote;
+            document.getElementById('modalImage').src = `data/${quote.image}`;
+        }
+
+        function adjustModalLayout() {
+            const img = document.getElementById('modalImage');
+            const modalContent = document.getElementById('modalContent');
+            
+            if (img.naturalWidth === 0 || img.naturalHeight === 0) {
+                return; // Image not loaded yet
+            }
+            
+            const aspectRatio = img.naturalWidth / img.naturalHeight;
+            
+            if (aspectRatio < 1) {
+                // Vertical/Portrait image - side-by-side layout
+                modalContent.className = 'border-t pt-4 flex gap-4 items-start';
+                img.parentElement.className = 'relative flex-shrink-0 w-64';
+                img.className = 'w-full h-80 object-contain rounded-lg bg-gray-50';
+                img.nextElementSibling.className = 'bg-purple-50 p-4 rounded-lg flex-1';
             } else {
-                collapsedAuthors.add(authorName);
+                // Horizontal/Landscape image - stacked layout
+                modalContent.className = 'border-t pt-4';
+                img.parentElement.className = 'relative mb-4';
+                img.className = 'w-full h-48 object-contain rounded-lg bg-gray-50';
+                img.nextElementSibling.className = 'bg-purple-50 p-4 rounded-lg';
+            }
+        }
+
+        function toggleAuthorCard(key) {
+            if (collapsedAuthors.has(key)) {
+                collapsedAuthors.delete(key);
+            } else {
+                collapsedAuthors.add(key);
             }
             renderQuotes();
         }
