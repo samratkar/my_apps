@@ -8,10 +8,15 @@ import ResultCanvas from './components/ResultCanvas';
 import SessionHistory from './components/SessionHistory';
 
 const App = () => {
+  // Check URL parameter for mode
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlMode = urlParams.get('mode');
+  const initialOfflineMode = urlMode === 'offline' || urlMode === null;
+  
   const [state, setState] = useState<AppState>({
     apiKey: '',
     isLoading: false,
-    isOffline: false,
+    isOffline: initialOfflineMode,
     error: null,
     generatedContent: null,
   });
@@ -55,6 +60,12 @@ const App = () => {
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check for API key if trying to use online mode
+    if (!state.isOffline && !state.apiKey) {
+      setState(prev => ({ ...prev, error: "API key required for online mode. Please enter your API key or switch to offline mode." }));
+      return;
+    }
     
     // Validation only needed for Online mode if strict, but let's allow "empty" for offline random
     if (!state.isOffline && !bookInput && !authorInput) {
@@ -136,13 +147,15 @@ const App = () => {
     setShowHistory(false);
   };
 
-  // Only require API Key if not in Offline mode
-  if (!state.apiKey && !state.isOffline) {
+  // Show API key modal only when trying to use online mode without key
+  const needsApiKey = !state.apiKey && !state.isOffline && (state.isLoading || state.error);
+  
+  if (needsApiKey) {
     return (
        <>
          <ApiKeyModal onSubmit={handleApiKeySubmit} />
           <div className="fixed bottom-4 right-4 z-[60]">
-             <button onClick={() => setState(prev => ({...prev, isOffline: true}))} className="text-white underline text-sm opacity-80">
+             <button onClick={() => setState(prev => ({...prev, isOffline: true, error: null}))} className="text-white underline text-sm opacity-80">
                Use Offline Mode
              </button>
           </div>
@@ -155,7 +168,14 @@ const App = () => {
       
       {/* Header */}
       <header className="p-6 text-center border-b border-lavender-200 bg-white/50 backdrop-blur-sm sticky top-0 z-10 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex-1 md:text-left">
+        <div className="flex-1 md:text-left flex gap-2">
+          <a
+            href="./index.html"
+            className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-full transition-all font-bold shadow-md hover:shadow-lg transform hover:scale-105"
+          >
+            <BookIcon className="w-5 h-5" />
+            Back to Library
+          </a>
           <button
             onClick={() => setShowHistory(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-lavender-600 hover:bg-lavender-700 text-white rounded-full transition-all font-bold shadow-md hover:shadow-lg transform hover:scale-105"

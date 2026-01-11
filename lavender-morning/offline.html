@@ -54,21 +54,6 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        /* Custom scrollbar */
-        .scrollbar-thin::-webkit-scrollbar {
-            width: 8px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-            background: #9ca3af;
-            border-radius: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-            background: #6b7280;
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -124,18 +109,11 @@
                     Random Quote
                 </button>
 
-                <a href="./generator.html?mode=offline" class="px-3 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition flex items-center gap-1 whitespace-nowrap text-sm shadow-lg">
+                <a href="./index.html" class="px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition flex items-center gap-1 whitespace-nowrap text-sm shadow-lg">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    Generate Offline Card
-                </a>
-
-                <a href="./generator.html?mode=online" class="px-3 py-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-lg hover:from-pink-700 hover:to-purple-700 transition flex items-center gap-1 whitespace-nowrap text-sm shadow-lg">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                    </svg>
-                    Generate Online Card (AI)
+                    Generate New Quote
                 </a>
             </div>
         </div>
@@ -187,7 +165,7 @@
             <!-- Main Content -->
             <div class="flex-1 min-w-0 overflow-x-auto">
                 <!-- Quotes Grid -->
-                <div id="quotesContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div id="quotesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="col-span-full bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-12 text-center">
                         <svg class="w-20 h-20 text-purple-600 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
@@ -266,7 +244,6 @@
         let allQuotes = [];
         let filteredQuotes = [];
         let quoteData = { authors: [] };
-        let collapsedAuthors = new Set();
 
         // Load YAML data on page load
         window.addEventListener('DOMContentLoaded', async () => {
@@ -489,70 +466,24 @@
                 return;
             }
 
-            // Group quotes by author
-            const quotesByAuthor = {};
-            filteredQuotes.forEach(quote => {
-                if (!quotesByAuthor[quote.author]) {
-                    quotesByAuthor[quote.author] = {
-                        author: quote.author,
-                        image: quote.image,
-                        book: quote.book,
-                        quotes: []
-                    };
-                }
-                quotesByAuthor[quote.author].quotes.push(quote.quote);
-            });
-
-            // Sort authors alphabetically
-            const sortedAuthors = Object.keys(quotesByAuthor).sort();
-
-            container.innerHTML = sortedAuthors.map(authorName => {
-                const authorData = quotesByAuthor[authorName];
-                const colors = getAuthorColor(authorName);
-                const isCollapsed = collapsedAuthors.has(authorName);
-                
+            container.innerHTML = filteredQuotes.map((quote, index) => {
+                const colors = getAuthorColor(quote.author);
                 return `
-                    <div class="entry-card bg-white rounded-lg shadow-lg p-6 border-l-4 ${colors.text.replace('text-', 'border-')}">
-                        <!-- Author Header -->
-                        <div class="flex items-start gap-4 ${isCollapsed ? '' : 'mb-6 pb-4 border-b-2 border-gray-200'}">
-                            <img src="./data/${authorData.image}" alt="${authorName}" 
-                                 class="w-20 h-20 rounded-full object-cover flex-shrink-0 ring-4 ring-white shadow-lg">
+                    <div class="entry-card bg-white rounded-lg shadow-md p-6 cursor-pointer ${colors.bg} border-l-4 ${colors.text.replace('text-', 'border-')}"
+                         onclick="openQuoteModal(${index})">
+                        <div class="flex items-start gap-4 mb-3">
+                            <img src="./data/${quote.image}" alt="${quote.author}" 
+                                 class="w-12 h-12 rounded-full object-cover flex-shrink-0">
                             <div class="flex-1 min-w-0">
-                                <h2 class="text-2xl font-bold text-gray-900 mb-1">${authorName}</h2>
-                                <p class="text-base text-gray-600 mb-2">${authorData.book}</p>
-                                <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${colors.bg} ${colors.text}">
-                                        ${authorData.quotes.length} ${authorData.quotes.length === 1 ? 'Quote' : 'Quotes'}
-                                    </span>
-                                </div>
+                                <h3 class="font-bold text-gray-900 truncate">${quote.author}</h3>
+                                <p class="text-sm text-gray-600 truncate">${quote.book}</p>
                             </div>
-                            <button onclick="toggleAuthorCard('${authorName.replace(/'/g, "\\'")}')"
-                                    class="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 transition-colors" 
-                                    title="${isCollapsed ? 'Expand' : 'Collapse'}">
-                                <svg class="w-6 h-6 text-gray-600 transition-transform ${isCollapsed ? '' : 'rotate-180'}" 
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                          d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </button>
                         </div>
-                        
-                        <!-- Quotes Grid -->
-                        <div class="${isCollapsed ? 'hidden' : 'grid grid-cols-1 gap-3 max-h-96 overflow-y-auto pr-2 scrollbar-thin'}">
-                            ${authorData.quotes.map((quote, idx) => {
-                                const quoteIndex = filteredQuotes.findIndex(q => q.author === authorName && q.quote === quote);
-                                return `
-                                    <div class="bg-gradient-to-br ${colors.bg} rounded-lg p-4 cursor-pointer hover:shadow-md transition-all hover:-translate-y-1"
-                                         onclick="openQuoteModal(${quoteIndex})">
-                                        <div class="relative">
-                                            <svg class="w-5 h-5 text-gray-400 absolute -top-1 -left-1" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-                                            </svg>
-                                            <p class="text-gray-800 italic pl-6 text-sm leading-relaxed">${quote}</p>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
+                        <div class="relative">
+                            <svg class="w-6 h-6 text-gray-300 absolute -top-1 -left-1" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+                            </svg>
+                            <p class="text-gray-700 italic pl-8 line-clamp-4">${quote.quote}</p>
                         </div>
                     </div>
                 `;
@@ -580,15 +511,6 @@
             
             const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
             openQuoteModal(randomIndex);
-        }
-
-        function toggleAuthorCard(authorName) {
-            if (collapsedAuthors.has(authorName)) {
-                collapsedAuthors.delete(authorName);
-            } else {
-                collapsedAuthors.add(authorName);
-            }
-            renderQuotes();
         }
 
         // Close modal when clicking outside

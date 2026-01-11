@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lavender Morning</title>
+    <script>
+        // Redirect to offline.html as the default landing page
+        window.location.href = './offline.html';
+    </script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+        }
+        .loader {
+            text-align: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e9d5ff;
+            border-top-color: #a855f7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        h1 {
+            color: #7e22ce;
+            margin: 0;
+        }
+        p {
+            color: #6b21a8;
+            margin: 10px 0 0;
+        }
+        a {
+            color: #a855f7;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader">
+        <div class="spinner"></div>
+        <h1>Lavender Morning</h1>
+        <p>Redirecting to Quote Library...</p>
+        <p style="margin-top: 20px; font-size: 14px;">
+            If not redirected, <a href="./offline.html">click here</a>
+        </p>
+    </div>
+</body>
+</html>
