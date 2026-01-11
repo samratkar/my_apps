@@ -26,8 +26,16 @@ export default defineConfig(({ mode }) => {
                   copyFileSync(`${dataDir}/${file}`, `dist/data/${file}`);
                 });
               }
+              
+              // Copy additional HTML files
+              const htmlFiles = ['generator.html', 'offline.html', 'home.html'];
+              htmlFiles.forEach(file => {
+                if (existsSync(file)) {
+                  copyFileSync(file, `dist/${file}`);
+                }
+              });
             } catch (e) {
-              console.error('Failed to copy data folder:', e);
+              console.error('Failed to copy files:', e);
             }
           }
         }
