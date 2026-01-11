@@ -291,7 +291,7 @@
 
         async function loadYAMLData() {
             try {
-                const response = await fetch(basePath + 'data/quotes.yaml');
+                const response = await fetch(basePath + 'assets/quotes.yaml');
                 const yamlText = await response.text();
                 quoteData = jsyaml.load(yamlText);
                 
@@ -558,7 +558,7 @@
                     <div class="entry-card bg-white rounded-lg shadow-lg p-6 border-l-4 ${colors.text.replace('text-', 'border-')}">
                         <!-- Author Header -->
                         <div class="flex items-start gap-4 ${isCollapsed ? '' : 'mb-6 pb-4 border-b-2 border-gray-200'}">
-                            <img src="${basePath}data/${authorBookData.image}" alt="${authorBookData.author}" 
+                            <img src="${basePath}assets/${authorBookData.image}" alt="${authorBookData.author}" 
                                  onerror="console.error('Failed to load:', this.src);"
                                  class="w-20 h-20 rounded-full object-cover flex-shrink-0 ring-4 ring-white shadow-lg">
                             <div class="flex-1 min-w-0">
@@ -614,7 +614,7 @@
 
         function openQuoteModal(index, randomMode = false) {
             const quote = filteredQuotes[index];
-            const imgPath = basePath + 'data/' + quote.image;
+            const imgPath = basePath + 'assets/' + quote.image;
             console.log('Opening modal with image:', imgPath);
             document.getElementById('modalAuthor').textContent = quote.author;
             document.getElementById('modalBook').textContent = quote.book;
@@ -654,7 +654,7 @@
             document.getElementById('modalAuthor').textContent = quote.author;
             document.getElementById('modalBook').textContent = quote.book;
             document.getElementById('modalQuote').textContent = quote.quote;
-            document.getElementById('modalImage').src = basePath + 'data/' + quote.image;
+            document.getElementById('modalImage').src = basePath + 'assets/' + quote.image;
         }
 
         function adjustModalLayout() {
