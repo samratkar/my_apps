@@ -48,7 +48,8 @@ authors:
         tags: ["divine", "life", "renewal"]
       - text: "The human soul has its sunrise when it knows itself as the spirit."
         tags: ["soul", "awakening", "spirit"]
-
+      - text: "The manifestation of the Infinite in the finite is the purpose of the universe."
+        tags: ["universe", "purpose", "infinite"]
   - name: "Leo Tolstoy"
     book: "War and Peace"
     image: "tolstoy.jpeg"
