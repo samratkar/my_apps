@@ -1,7 +1,23 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-import { copyFileSync, mkdirSync, readdirSync, existsSync } from 'fs';
+import { copyFileSync, mkdirSync, readdirSync, existsSync, statSync } from 'fs';
+
+// Recursively copy directory contents
+function copyDirRecursive(src: string, dest: string) {
+  mkdirSync(dest, { recursive: true });
+  const entries = readdirSync(src);
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry);
+    const destPath = path.join(dest, entry);
+    const stat = statSync(srcPath);
+    if (stat.isDirectory()) {
+      copyDirRecursive(srcPath, destPath);
+    } else {
+      copyFileSync(srcPath, destPath);
+    }
+  }
+}
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
@@ -27,14 +43,10 @@ export default defineConfig(({ mode }) => {
           name: 'copy-data',
           closeBundle() {
             try {
-              // Copy data folder (yaml + images) to dist
-              mkdirSync('dist/data', { recursive: true });
+              // Copy data folder (yaml + images) to dist recursively
               const dataDir = 'data';
               if (existsSync(dataDir)) {
-                const files = readdirSync(dataDir);
-                files.forEach(file => {
-                  copyFileSync(`${dataDir}/${file}`, `dist/data/${file}`);
-                });
+                copyDirRecursive(dataDir, 'dist/data');
               }
             } catch (e) {
               console.error('Failed to copy files:', e);
