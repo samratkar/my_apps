@@ -25,11 +25,16 @@ export interface AppState {
   generatedContent: GeneratedContent | null;
 }
 
+export interface YamlQuote {
+  text: string;
+  tags?: string[];
+}
+
 export interface YamlAuthor {
   name: string;
   book: string;
   image: string;
-  quotes: string[];
+  quotes: (string | YamlQuote)[];
 }
 
 export interface YamlData {

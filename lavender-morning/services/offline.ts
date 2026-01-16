@@ -1,5 +1,5 @@
 import yaml from 'js-yaml';
-import { YamlData, YamlAuthor } from '../types';
+import { YamlData, YamlAuthor, YamlQuote } from '../types';
 
 const YAML_PATH = './data/quotes.yaml';
 
@@ -62,11 +62,12 @@ export const getOfflineContent = async (bookFilter?: string, authorFilter?: stri
   // Pick random author from candidates
   const randomAuthor = candidateAuthors[Math.floor(Math.random() * candidateAuthors.length)];
   
-  // Pick random quote
-  const randomQuote = randomAuthor.quotes[Math.floor(Math.random() * randomAuthor.quotes.length)];
+  // Pick random quote - handle both string and object format {text, tags}
+  const randomQuoteObj = randomAuthor.quotes[Math.floor(Math.random() * randomAuthor.quotes.length)];
+  const quoteText = typeof randomQuoteObj === 'string' ? randomQuoteObj : randomQuoteObj.text;
 
   return {
-    quote: randomQuote,
+    quote: quoteText,
     author: randomAuthor.name,
     book: randomAuthor.book,
     image: `./data/${randomAuthor.image}`

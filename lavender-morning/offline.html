@@ -259,9 +259,18 @@
                 // Transform data into flat structure for easier processing
                 allQuotes = [];
                 quoteData.authors.forEach(author => {
-                    author.quotes.forEach(quote => {
+                    author.quotes.forEach(q => {
+                        // Handle both object format {text, tags} and plain string quotes
+                        let quoteText = '';
+                        if (typeof q === 'string') {
+                            quoteText = q;
+                        } else if (q && typeof q === 'object' && q.text) {
+                            quoteText = q.text;
+                        } else {
+                            quoteText = String(q);
+                        }
                         allQuotes.push({
-                            quote: quote,
+                            quote: quoteText,
                             author: author.name,
                             book: author.book,
                             image: author.image
